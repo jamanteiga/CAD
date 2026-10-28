@@ -1,0 +1,32 @@
+//  menu-ejemplo.mnu — menú de pantalla y desplegable estilo AutoCAD R12
+//  Cargar con el comando MENU (o arrastrando el archivo).
+***POP1
+[Taller]
+[Brida...]^C^Cbrida
+[Capas tipo]^C^Ccapas
+[--]
+[->Cotas]
+  [Lineal]^C^C_dimlinear
+  [<-Radio]^C^C_dimradius
+[Longitud total]^C^Clong
+***SCREEN
+**S
+[TALLER]
+[* * * *]$S=OSNAP
+[]
+[BRIDA]^C^Cbrida
+[CAPAS]^C^Ccapas
+[LONG]^C^Clong
+[]
+[LINE:]^C^C_line
+[CIRCLE:]^C^C_circle
+[OFFSET:]^C^C_offset
+[TRIM:]^C^C_trim
+**OSNAP
+[-OSNAPS-]
+[ENDpoint]_endp
+[MIDpoint]_mid
+[CENter]_cen
+[INTersec]_int
+[]
+[  LAST  ]$S=

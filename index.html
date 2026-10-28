@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WebCAD Libre</title>
+<meta name="description" content="CAD 2D libre en el navegador: dibujo, edición, bloques dinámicos, AutoLISP, DXF/DWG y menús R12. En castellano, galego e English.">
+<meta name="theme-color" content="#0f7c76">
+<link rel="stylesheet" href="css/cad.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="img/logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="img/icon-180.png">
+</head>
+<body>
+<div id="app">
+  <header id="titlebar">
+    <button id="appbtn" title="Menú de aplicación"><svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><polyline class="ln" points="3,6 7.5,18 12,9 16.5,18 21,6"/><rect class="gp" x="1.6" y="4.6" width="2.8" height="2.8"/><rect class="gp" x="6.1" y="16.6" width="2.8" height="2.8"/><rect class="gp" x="10.6" y="7.6" width="2.8" height="2.8"/><rect class="gp" x="15.1" y="16.6" width="2.8" height="2.8"/><rect class="gp" x="19.6" y="4.6" width="2.8" height="2.8"/></svg><span>WebCAD<i>Libre</i></span></button>
+    <div class="qat" id="qat"></div>
+    <select id="wsSel" title="Espacio de trabajo">
+      <option value="ribbon">Dibujo y anotación</option>
+      <option value="classic">AutoCAD clásico (R12)</option>
+      <option value="both">Cinta + menús R12</option>
+    </select>
+    <div id="title"></div>
+    <select id="langSel" title="Idioma"><option value="es">ES</option><option value="gl">GL</option><option value="pt">PT</option><option value="ca">CA</option><option value="en">EN</option></select>
+    <input id="searchBox" type="text" placeholder="Escriba una palabra clave o frase" aria-label="Buscar comando">
+  </header>
+  <nav id="menubar" hidden></nav>
+  <section id="ribbon"><div id="rtabs"></div><div id="rpanels"></div></section>
+  <div id="filetabs"></div>
+  <main id="work">
+    <div id="host">
+      <div id="vptag"></div>
+      <div id="cmd">
+        <div id="cmdhist"></div>
+        <div id="cmdrow">
+          <button class="tbtn" id="cmdX" title="Cancelar (Esc)"></button>
+          <button class="tbtn" id="cmdCfg" title="Personalizar"></button>
+          <span id="cmdprompt"></span>
+          <input id="cmdin" type="text" autocomplete="off" spellcheck="false" placeholder="Escriba un comando" aria-label="Línea de comandos">
+        </div>
+        <div id="ac" hidden></div>
+      </div>
+      <div id="dyn" hidden></div>
+    </div>
+    <aside id="screen" hidden aria-label="Menú de pantalla R12"></aside>
+  </main>
+  <footer id="bottom">
+    <div id="ltabs"></div>
+    <div id="coords"></div>
+    <div id="status"></div>
+  </footer>
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
