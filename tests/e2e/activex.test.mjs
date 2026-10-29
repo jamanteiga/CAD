@@ -115,7 +115,7 @@ export default async (page, t) => {
   t.eq(await ev(`(vla-get-name (vla-get-block (vla-get-activelayout doc)))`), '"*Model_Space"', 'Layout.Block');
 
   // otras funciones
-  t.eq(await ev(`(list (vl-string-mismatch "VL-FUN" "VL-VAR") (snvalid "Capa 1") (snvalid "a<b") (xstrcase "abc") (layoutlist))`), '(3 T nil "ABC" ("Presentación1"))', 'vl-string-mismatch, snvalid, layoutlist');
+  t.eq(await ev(`(list (vl-string-mismatch "VL-FUN" "VL-VAR") (snvalid "Capa 1") (snvalid "a<b") (xstrcase "abc") (layoutlist))`), '(3 T nil "ABC" ("Lámina1"))', 'vl-string-mismatch, snvalid, layoutlist');
   t.eq(await ev(`(progn (vl-registry-write "HKEY_CURRENT_USER\\\\Software\\\\Prueba" "v" "1") (vl-registry-read "HKEY_CURRENT_USER\\\\Software\\\\Prueba" "v"))`), '"1"', 'vl-registry');
   t.eq(await ev(`(progn (layerstate-save "Base" nil nil) (vla-put-layeron lay :vlax-false) (layerstate-restore "Base" nil) (vla-get-layeron lay))`), ':VLAX-TRUE', 'layerstate-save/restore');
   t.eq(await ev(`(progn (vla-startundomark doc) (vla-addpoint ms (vlax-3d-point '(1 1 0))) (vla-addpoint ms (vlax-3d-point '(2 2 0))) (vla-endundomark doc) (length (vl-remove-if-not '(lambda (o) (= (vla-get-objectname o) "AcDbPoint")) (progn (setq l nil) (vlax-for o ms (setq l (cons o l))) l))))`), '2', 'Start/EndUndoMark agrupan');

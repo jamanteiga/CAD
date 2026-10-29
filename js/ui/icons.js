@@ -1,4 +1,4 @@
-// Iconos SVG (24x24) estilo AutoCAD, trazo claro + acentos
+// Iconos SVG (24x24) de WebCAD Libre: trazo claro + acentos
 const B = 'var(--ic-blue)', Y = 'var(--ic-yellow)', Rr = 'var(--ic-red)', Gn = 'var(--ic-green)';
 const s = (body) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
 const dot = (x, y, c = B) => `<rect x="${x - 1.6}" y="${y - 1.6}" width="3.2" height="3.2" fill="${c}" stroke="none"/>`;
@@ -187,6 +187,20 @@ export const ICONS = {
   lockOff: s(`<rect x="5" y="11" width="14" height="10" rx="1" fill="#f2c443" stroke="#a87e00"/><path d="M8 11V7.5a4 4 0 0 1 7.6-1.7" stroke="#a87e00"/>`),
   printOn: s(`<rect x="6" y="3" width="12" height="6"/><rect x="3" y="9" width="18" height="8"/><rect x="7" y="14" width="10" height="7" fill="var(--bg-panel)"/>`),
   printOff: s(`<rect x="6" y="3" width="12" height="6"/><rect x="3" y="9" width="18" height="8"/><path d="M3 3l18 18" stroke="${Rr}"/>`),
+  // ---- barra de estado y tema
+  stGrid: s(`<path d="M4 4h16v16H4zM9.3 4v16M14.7 4v16M4 9.3h16M4 14.7h16"/>`),
+  stSnap: s(`<path d="M4 4h16v16H4z" stroke-dasharray="1 4"/><circle cx="12" cy="12" r="2.5"/>`),
+  stOrtho: s(`<path d="M6 4v14h14"/><path d="M6 13h5v5"/>`),
+  stPolar: s(`<path d="M4 20h16M4 20l12-12"/><path d="M11 20a7 7 0 0 0-2-5"/>`),
+  stOsnap: s(`<rect x="7" y="7" width="10" height="10"/><path d="M3 3l6 6M21 21l-6-6"/>`),
+  stOtrack: s(`<path d="M3 12h7M14 12h7" stroke-dasharray="2 2.5"/><path d="M12 3v7M12 14v7" stroke-dasharray="2 2.5"/><path d="M10 10h4v4h-4z"/>`),
+  stLw: s(`<path d="M4 6h16" stroke-width="1"/><path d="M4 12h16" stroke-width="2.2"/><path d="M4 18h16" stroke-width="3.6"/>`),
+  stDyn: s(`<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 12h4M14 10l3 2-3 2"/>`),
+  stSpace: s(`<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/>`),
+  stMenu: s(`<path d="M5 7h14M5 12h14M5 17h14"/>`),
+  thLight: s(`<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/>`),
+  thMid: s(`<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/>`),
+  thDark: s(`<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>`),
   caret: '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>',
 };
 export const icon = (k) => ICONS[k] || ICONS.dot;

@@ -518,6 +518,32 @@ Pulse la combinación | Prima a combinação | Premeu la combinació
 COMANDO o macro | COMANDO ou macro | ORDRE o macro
 Alias de comandos (.pgp) | Alias de comandos (.pgp) | Àlies d'ordres (.pgp)
 Repetir {0} | Repetir {0} | Repetir {0}
+Papel | Papel | Paper
+Polar | Polar | Polar
+Orto | Orto | Orto
+Configuración | Configuração | Configuració
+Principal | Principal | Principal
+Impresión | Impressão | Impressió
+Restricciones | Restrições | Restriccions
+Lámina | Folha | Làmina
+Rejilla | Grelha | Reixeta
+Referencias | Referências | Referències
+Grosor | Espessura | Gruix
+Dinámica | Dinâmica | Dinàmica
+Forzado | Forçar | Forçat
+Tema claro | Tema claro | Tema clar
+Tema intermedio | Tema intermédio | Tema intermedi
+Tema oscuro | Tema escuro | Tema fosc
+Disposición | Disposição | Disposició
+Plano nuevo | Desenho novo | Plànol nou
+Barra lateral | Barra lateral | Barra lateral
+Menús clásicos | Menus clássicos | Menús clàssics
+Barra lateral + menús clásicos | Barra lateral + menus clássicos | Barra lateral + menús clàssics
+Barra lateral de herramientas | Barra lateral de ferramentas | Barra lateral d'eines
+Ocultar o mostrar el panel de herramientas | Ocultar ou mostrar o painel de ferramentas | Amagar o mostrar el tauler d'eines
+Forzado del cursor a la rejilla (F9) | Forçar o cursor à grelha (F9) | Forçat del cursor a la reixeta (F9)
+Modelo en ventana | Modelo na janela | Model a la finestra
+Espacio papel (primera lámina) | Espaço papel (primeira folha) | Espai paper (primera làmina)
 La capa "{0}" contiene objetos. Use {1} para borrarla con sus objetos. | A camada "{0}" contém objetos. Use {1} para a eliminar com os seus objetos. | La capa "{0}" conté objectes. Utilitzeu {1} per esborrar-la amb els seus objectes.
 Inglés | Inglês | Anglès
 Añadir | Adicionar | Afegir

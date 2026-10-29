@@ -411,19 +411,27 @@ export class View {
     const p = (req?.wantsPoint || eng.gripDrag) ? this.toScreen(this.snapped) : { x: this.mouse.x, y: this.mouse.y };
     const x = Math.round(p.x * r) + 0.5, y = Math.round(p.y * r) + 0.5;
     const size = this.app.settings.crosshair >= 100 ? 1e5 : (this.app.settings.crosshair / 100) * Math.max(this.W, this.H) / 2 * r;
-    c.strokeStyle = dark ? '#e8e8e8' : '#111'; c.lineWidth = 1; c.beginPath();
+    // cursor propio: cruz con hueco central en color de acento y marca de designación redondeada
+    c.strokeStyle = dark ? '#5fd3c6' : '#0e7f7a'; c.lineWidth = 1; c.beginPath();
     const showCross = !req || req.wantsPoint || eng.gripDrag;
-    const pb = (this.doc.vars.PICKBOX || 4) * r;
-    if (showCross) { c.moveTo(x - size, y); c.lineTo(x + size, y); c.moveTo(x, y - size); c.lineTo(x, y + size); }
-    if (!req || req.kind === 'select' || req.kind === 'entity') c.rect(x - pb, y - pb, 2 * pb, 2 * pb);
-    if (req?.wantsPoint) { const ap = 0; void ap; }
+    const pb = (this.doc.vars.PICKBOX || 4) * r, gap = pb + 3 * r;
+    if (showCross) { c.moveTo(x - size, y); c.lineTo(x - gap, y); c.moveTo(x + gap, y); c.lineTo(x + size, y); c.moveTo(x, y - size); c.lineTo(x, y - gap); c.moveTo(x, y + gap); c.lineTo(x, y + size); }
     c.stroke();
-    // icono SCU
+    c.beginPath();
+    if (!req || req.kind === 'select' || req.kind === 'entity') { if (c.roundRect) c.roundRect(x - pb, y - pb, 2 * pb, 2 * pb, 2 * r); else c.rect(x - pb, y - pb, 2 * pb, 2 * pb); }
+    else if (showCross) c.arc(x, y, 1.5 * r, 0, Math.PI * 2);
+    c.stroke();
+    // indicador de ejes (origen y direcciones X/Y)
     if (this.app.settings.ucsIcon) {
-      const o = { x: 40 * r, y: (this.H - 40) * r }, L = 30 * r;
-      c.strokeStyle = dark ? '#d33' : '#c00'; c.lineWidth = 2 * r; c.beginPath(); c.moveTo(o.x, o.y); c.lineTo(o.x + L, o.y); c.stroke();
-      c.strokeStyle = dark ? '#3c3' : '#090'; c.beginPath(); c.moveTo(o.x, o.y); c.lineTo(o.x, o.y - L); c.stroke();
-      c.fillStyle = dark ? '#ccc' : '#333'; c.font = `${10 * r}px system-ui`; c.fillText('X', o.x + L + 3 * r, o.y + 4 * r); c.fillText('Y', o.x - 3 * r, o.y - L - 4 * r);
+      const o = { x: 34 * r, y: (this.H - 30) * r }, L = 26 * r, ax = dark ? '#5fd3c6' : '#0e7f7a', ay = dark ? '#e9b949' : '#b88300';
+      const arrow = (dx, dy, col, lab) => {
+        c.strokeStyle = col; c.fillStyle = col; c.lineWidth = 1.6 * r; c.beginPath(); c.moveTo(o.x, o.y); c.lineTo(o.x + dx * L, o.y + dy * L); c.stroke();
+        const tx = o.x + dx * L, ty = o.y + dy * L, a = Math.atan2(dy, dx), k = 6 * r;
+        c.beginPath(); c.moveTo(tx + Math.cos(a) * 2 * r, ty + Math.sin(a) * 2 * r); c.lineTo(tx - Math.cos(a - .45) * k, ty - Math.sin(a - .45) * k); c.lineTo(tx - Math.cos(a + .45) * k, ty - Math.sin(a + .45) * k); c.closePath(); c.fill();
+        c.font = `600 ${10 * r}px system-ui`; c.fillText(lab, tx + (dx ? 5 * r : -3 * r), ty + (dy ? -5 * r : 4 * r));
+      };
+      arrow(1, 0, ax, 'X'); arrow(0, -1, ay, 'Y');
+      c.fillStyle = dark ? '#e2eaea' : '#172225'; c.beginPath(); c.arc(o.x, o.y, 3 * r, 0, Math.PI * 2); c.fill();
     }
   }
 

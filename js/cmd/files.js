@@ -11,7 +11,7 @@ export function register(eng, app) {
   const dlg = () => app.ui.dlg;
 
   // ---- nuevo dibujo desde plantilla
-  const nextName = () => { const n = (app.io._newN = (app.io._newN || 1) + 1); return `${docBase()}${n}.dwg`; };
+  const nextName = () => { const n = (app.io._newN = (app.io._newN || 1) + 1); return `${docBase()}${n}`; };
   app.io.newFromTemplate = async (id) => {
     const s = app.settings;
     id = id || s.template || 'iso-a3';

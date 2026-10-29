@@ -18,7 +18,7 @@ export default async (page, t) => {
     await type('_LINE', '0,200', '10,200', '_U', '');
     t.eq((await model(page)).length, 3, `${lang}: prefijo _ en comando y opción`);
     const ribbon = await page.evaluate(() => document.querySelector('#rtabs .rt').textContent);
-    t.eq(ribbon, { es: 'Inicio', gl: 'Inicio', pt: 'Início', ca: 'Inici', en: 'Home' }[lang], `${lang}: cinta traducida`);
+    t.eq(ribbon, { es: 'Principal', gl: 'Principal', pt: 'Principal', ca: 'Principal', en: 'Main' }[lang], `${lang}: barra lateral traducida`);
   }
   await ready(page, 'es'); const type = typer(page);
   await type('POL'); t.eq(await page.evaluate(() => webcad.cmd.active), 'PLINE', 'POL = POLILINEA en castellano'); await page.keyboard.press('Escape'); await page.keyboard.press('Escape');

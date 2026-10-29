@@ -19,7 +19,11 @@ export const ACI = (() => {
 export const COLOR_NAMES = { 1: 'Rojo', 2: 'Amarillo', 3: 'Verde', 4: 'Cian', 5: 'Azul', 6: 'Magenta', 7: 'Blanco', 256: 'PorCapa', 0: 'PorBloque' };
 export function aciCss(i, bgDark = true) {
   if (i === 7 || i === 255 && !bgDark) return bgDark ? '#ffffff' : '#000000';
-  const c = ACI[i] || ACI[7];
+  let c = ACI[i] || ACI[7];
+  if (!bgDark) { // sobre fondo claro, los colores muy luminosos (amarillo, cian, verde…) se oscurecen para que se lean
+    const lum = (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255;
+    if (lum > 0.55) { const k = 0.55 / lum * 0.82; c = c.map((x) => Math.round(x * k)); }
+  }
   return `rgb(${c[0]},${c[1]},${c[2]})`;
 }
 export function colorName(c) {

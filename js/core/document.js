@@ -29,7 +29,7 @@ export class Doc {
   on(ev, fn) { (this.listeners[ev] ||= []).push(fn); }
   emit(ev, a) { if (ev === 'change' || ev === 'reset' || ev === 'layers') this.rev = (this.rev || 0) + 1; for (const f of this.listeners[ev] || []) f(a); }
 
-  reset(name = docBase() + '1.dwg') {
+  reset(name = docBase() + '1') {
     this.name = name;
     this.path = '';
     this.layers = { '0': newLayer('0'), Defpoints: newLayer('Defpoints', { plot: false }) };
@@ -242,7 +242,7 @@ export class Doc {
   }
   serialize() { return JSON.stringify(this.toJSON(), (k, v) => (k[0] === '_' ? undefined : v)); }
   load(o) {
-    this.reset(o.name || 'Dibujo.dwg');
+    this.reset(o.name || 'Plano');
     Object.assign(this.layers, o.layers || {});
     this.clayer = o.clayer && this.layers[o.clayer] ? o.clayer : '0';
     this.blocks = o.blocks || {};

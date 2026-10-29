@@ -1,84 +1,58 @@
 @echo off
 setlocal EnableExtensions
 REM ==========================================================================
-REM  subir-a-github.bat
-REM  Sube TODO el contenido de la carpeta del proyecto al repositorio GitHub.
+REM  subir.bat - Sube TODO C:\Users\jaman\Documents\PROYECTOS\CAD a GitHub
+REM  (carpetas, subcarpetas e incluso ficheros ignorados) y SOBRESCRIBE lo
+REM  que haya en el repositorio: GitHub queda identico a la carpeta local.
 REM  Requisito: Git para Windows (https://git-scm.com/download/win)
-REM  La primera vez Git abre el navegador para iniciar sesion en GitHub.
 REM ==========================================================================
 
 set "CARPETA=C:\Users\jaman\Documents\PROYECTOS\CAD"
 set "REPO=https://github.com/jamanteiga/CAD.git"
 set "RAMA=main"
-set "NOMBRE=jamanteiga"
-set "CORREO=jamanteiga@gmail.com"
 
-where git >nul 2>nul
-if errorlevel 1 (
-  echo [ERROR] Git no esta instalado. Descargalo de https://git-scm.com/download/win
-  pause & exit /b 1
-)
-
-if not exist "%CARPETA%\" (
-  echo [ERROR] No existe la carpeta %CARPETA%
-  pause & exit /b 1
-)
+where git >nul 2>nul || (echo [ERROR] Falta Git: https://git-scm.com/download/win & pause & exit /b 1)
+if not exist "%CARPETA%\" (echo [ERROR] No existe %CARPETA% & pause & exit /b 1)
 cd /d "%CARPETA%"
 
-REM --- primera vez: crear el repositorio local --------------------------------
-if not exist ".git\" (
-  echo Creando repositorio local...
-  git init
-  git branch -M %RAMA%
-)
+REM --- repositorio local -------------------------------------------------------
+if not exist ".git\" git init
+REM limpia operaciones a medias de ejecuciones anteriores
+git merge --abort >nul 2>nul
+git rebase --abort >nul 2>nul
 
-git config user.name  "%NOMBRE%"
-git config user.email "%CORREO%"
+git config user.name  "jamanteiga"
+git config user.email "jamanteiga@gmail.com"
 git config core.longpaths true
-git config core.autocrlf true
+git config core.autocrlf false
+git config http.postBuffer 524288000
 
-REM --- remoto ------------------------------------------------------------------
-git remote get-url origin >nul 2>nul
-if errorlevel 1 (
-  git remote add origin %REPO%
-) else (
-  git remote set-url origin %REPO%
-)
+git remote remove origin >nul 2>nul
+git remote add origin %REPO%
 
-REM --- anadir absolutamente todo (carpetas, subcarpetas, borrados) ----------------
-echo Anadiendo ficheros...
-git add -A
+REM --- absolutamente todo (tambien lo que excluya un .gitignore) -----------------
+echo Anadiendo todos los ficheros...
+git add -A -f .
 
-REM --- commit con fecha y hora (solo si hay cambios) ------------------------------
 git diff --cached --quiet
 if errorlevel 1 (
-  git commit -m "Actualizacion %date% %time%"
+  git commit -q -m "Subida completa %date% %time%"
 ) else (
-  echo No hay cambios locales nuevos.
+  git rev-parse --verify HEAD >nul 2>nul || git commit -q --allow-empty -m "Subida inicial"
 )
+git branch -M %RAMA%
 
-REM --- integrar lo que ya hubiera en GitHub (gana la version local) -------------
-git fetch origin >nul 2>nul
-git ls-remote --exit-code --heads origin %RAMA% >nul 2>nul
-if not errorlevel 1 (
-  echo Integrando cambios remotos...
-  git pull --no-rebase --no-edit -X ours --allow-unrelated-histories origin %RAMA%
-  if errorlevel 1 (
-    echo [ERROR] No se pudo integrar el contenido remoto. Revisa los mensajes.
-    pause & exit /b 1
-  )
-)
-
-REM --- subir -------------------------------------------------------------------
-echo Subiendo a %REPO% ...
-git push -u origin %RAMA%
+REM --- subir sobrescribiendo GitHub --------------------------------------------
+echo Subiendo y sobrescribiendo %REPO% ...
+git push --force -u origin %RAMA%
 if errorlevel 1 (
-  echo [ERROR] Fallo la subida. Comprueba el inicio de sesion en GitHub y vuelve a ejecutar.
+  echo.
+  echo [ERROR] No se pudo subir. Revisa el inicio de sesion en GitHub
+  echo         o si hay algun fichero de mas de 100 MB (GitHub no los admite).
   pause & exit /b 1
 )
 
 echo.
-echo [OK] Proyecto subido a %REPO%
-echo Publicacion web: GitHub ^> Settings ^> Pages ^> Deploy from a branch ^> main / (root)
+echo [OK] GitHub queda igual que %CARPETA%
 pause
 endlocal

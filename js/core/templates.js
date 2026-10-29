@@ -71,7 +71,7 @@ export function titleBlock() {
 
 export function buildTemplate(id, opts = {}) {
   const t = TEMPLATES.find((x) => x.id === id) || TEMPLATES[0];
-  const d = new Doc(); d.reset(opts.name || `${docBase()}1.dwg`);
+  const d = new Doc(); d.reset(opts.name || `${docBase()}1`);
   for (const k of ['CENTER', 'HIDDEN', 'DASHED', 'PHANTOM', 'DASHDOT']) if (LINETYPES[k]) d.ltypes[k] = LINETYPES[k];
   for (const grp of t.layers) for (const [n, c, lt, lw, plot] of LAYERS[grp]) d.layers[n] = newLayer(n, { color: c, ltype: lt, lw, plot: plot !== false });
   d.styles.ISO = { name: 'ISO', font: 'isocp.shx', h: 0, wf: 1 };

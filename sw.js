@@ -1,15 +1,14 @@
 // Service worker de WebCAD Libre (generado por tools/build-sw.mjs): funciona sin conexión.
-const CACHE = 'webcad-d4f8a411c0';
+const CACHE = 'webcad-d01122ef10';
 const ASSETS = ["./","css/cad.css","img/icon-180.png","img/icon-192.png","img/icon-512.png","img/logo.svg","index.html","js/app.js","js/cmd/annot.js","js/cmd/blocks.js","js/cmd/boundary.js","js/cmd/collab.js","js/cmd/curves.js","js/cmd/draw.js","js/cmd/engine.js","js/cmd/files.js","js/cmd/hvac.js","js/cmd/misc.js","js/cmd/modify.js","js/cmd/output.js","js/cmd/param.js","js/cmd/prod.js","js/cmd/table.js","js/cmd/tools.js","js/core/constraints.js","js/core/document.js","js/core/duct.js","js/core/entities.js","js/core/fonts.js","js/core/geom.js","js/core/i18n-gl.js","js/core/i18n.js","js/core/lang-ca.js","js/core/lang-pt.js","js/core/libblocks.js","js/core/spatial.js","js/core/table.js","js/core/tables.js","js/core/templates.js","js/core/ui-ptca.js","js/core/ui-strings.js","js/io/cloud.js","js/io/dwg.js","js/io/dxf.js","js/io/dxfw.js","js/io/io.js","js/io/svgctx.js","js/lisp/activex.js","js/lisp/dcl.js","js/lisp/lisp.js","js/main.js","js/ui/cmdline.js","js/ui/dialogs.js","js/ui/dialogs2.js","js/ui/dom.js","js/ui/icons.js","js/ui/layers.js","js/ui/library.js","js/ui/menu12.js","js/ui/props.js","js/ui/ribbon.js","js/ui/start.js","js/ui/thumb.js","js/ui/ui.js","js/ui/vlide.js","js/view/renderer.js","js/view/snap.js","js/view/viewport.js","manifest.webmanifest","vendor/fonts/barlow-latin-400-normal.woff2","vendor/fonts/barlow-latin-500-normal.woff2","vendor/fonts/barlow-latin-600-normal.woff2","vendor/fonts/spline-sans-mono-latin-400-normal.woff2","vendor/fonts/spline-sans-mono-latin-500-normal.woff2","vendor/fonts/stroke/cursive.json","vendor/fonts/stroke/gothgbt.json","vendor/fonts/stroke/greeks.json","vendor/fonts/stroke/iso.json","vendor/fonts/stroke/iso3098.json","vendor/fonts/stroke/italicc.json","vendor/fonts/stroke/italict.json","vendor/fonts/stroke/romanc.json","vendor/fonts/stroke/romand.json","vendor/fonts/stroke/romans.json","vendor/fonts/stroke/romant.json","vendor/fonts/stroke/scriptc.json","vendor/fonts/stroke/scripts.json","vendor/fonts/stroke/simplex.json","vendor/fonts/stroke/standard.json","vendor/fonts/stroke/symath.json","vendor/jspdf/jspdf.umd.min.js","vendor/libredwg/dist/libredwg-web.js","vendor/libredwg/wasm/libredwg-web.js","vendor/libredwg/wasm/libredwg-web.wasm","vendor/supabase/591.supabase.js","vendor/supabase/supabase.min.js","vendor/xlsx/xlsx.full.min.js"];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k.startsWith('webcad-') && k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {
   const u = new URL(e.request.url);
   if (e.request.method !== 'GET' || u.origin !== location.origin) return;
-  // primero la caché; en segundo plano se actualiza desde la red
+  // primero la red (siempre la última versión publicada); sin conexión, la copia guardada
   e.respondWith(caches.open(CACHE).then(async (c) => {
-    const hit = await c.match(e.request, { ignoreSearch: true });
-    const net = fetch(e.request).then((r) => { if (r.ok) c.put(e.request, r.clone()); return r; }).catch(() => hit);
-    return hit || net;
+    try { const r = await fetch(e.request, { cache: 'no-cache' }); if (r.ok) c.put(e.request, r.clone()); return r; }
+    catch (_) { return (await c.match(e.request, { ignoreSearch: true })) || Response.error(); }
   }));
 });

@@ -15,11 +15,10 @@ self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) =
 self.addEventListener('fetch', (e) => {
   const u = new URL(e.request.url);
   if (e.request.method !== 'GET' || u.origin !== location.origin) return;
-  // primero la caché; en segundo plano se actualiza desde la red
+  // primero la red (siempre la última versión publicada); sin conexión, la copia guardada
   e.respondWith(caches.open(CACHE).then(async (c) => {
-    const hit = await c.match(e.request, { ignoreSearch: true });
-    const net = fetch(e.request).then((r) => { if (r.ok) c.put(e.request, r.clone()); return r; }).catch(() => hit);
-    return hit || net;
+    try { const r = await fetch(e.request, { cache: 'no-cache' }); if (r.ok) c.put(e.request, r.clone()); return r; }
+    catch (_) { return (await c.match(e.request, { ignoreSearch: true })) || Response.error(); }
   }));
 });
 `;

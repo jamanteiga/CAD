@@ -519,6 +519,32 @@ Pulse la combinación | Prema a combinación | Press the key combination
 COMANDO o macro | COMANDO ou macro | COMMAND or macro
 Alias de comandos (.pgp) | Alias de comandos (.pgp) | Command aliases (.pgp)
 Repetir {0} | Repetir {0} | Repeat {0}
+Papel | Papel | Paper
+Polar | Polar | Polar
+Orto | Orto | Ortho
+Configuración | Configuración | Settings
+Principal | Principal | Main
+Impresión | Impresión | Printing
+Restricciones | Restricións | Constraints
+Lámina | Lámina | Sheet
+Rejilla | Grella | Grid
+Referencias | Referencias | Object snap
+Grosor | Grosor | Lineweight
+Dinámica | Dinámica | Dynamic
+Forzado | Forzado | Snap
+Tema claro | Tema claro | Light theme
+Tema intermedio | Tema intermedio | Medium theme
+Tema oscuro | Tema escuro | Dark theme
+Disposición | Disposición | Layout
+Plano nuevo | Plano novo | New drawing
+Barra lateral | Barra lateral | Side toolbar
+Menús clásicos | Menús clásicos | Classic menus
+Barra lateral + menús clásicos | Barra lateral + menús clásicos | Side toolbar + classic menus
+Barra lateral de herramientas | Barra lateral de ferramentas | Side toolbar
+Ocultar o mostrar el panel de herramientas | Ocultar ou amosar o panel de ferramentas | Hide or show the tools panel
+Forzado del cursor a la rejilla (F9) | Forzado do cursor á grella (F9) | Snap cursor to grid (F9)
+Modelo en ventana | Modelo en xanela | Model in viewport
+Espacio papel (primera lámina) | Espazo papel (primeira lámina) | Paper space (first sheet)
 La capa "{0}" contiene objetos. Use {1} para borrarla con sus objetos. | A capa "{0}" contén obxectos. Use {1} para borrala cos seus obxectos. | Layer "{0}" contains objects. Use {1} to delete it with its objects.
 Inglés | Inglés | English
 Añadir | Engadir | Add

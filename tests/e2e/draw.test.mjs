@@ -1,6 +1,7 @@
 // Dibujo y edición básicos desde la línea de comandos
 import { ready, typer, model, last } from './helpers.mjs';
 export default async (page, t) => {
+  t.eq(await page.evaluate(() => document.documentElement.dataset.ui), 'light', 'arranca con el tema claro');
   await ready(page); const type = typer(page);
   await type('LINE', '0,0', '100,0', '@0,50', 'C');
   t.eq(await model(page), ['LINE', 'LINE', 'LINE'], 'triángulo con LINE + Cerrar');

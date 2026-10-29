@@ -162,7 +162,7 @@ export const ACAD12_MNU = String.raw`
 [--]
 [->Modelo/Papel]
   [Espacio modelo]^C^C_layout _s Model
-  [<-Espacio papel (Presentación1)]^C^C_layout _s "Presentación1"
+  [<-Espacio papel (primera lámina)]^C^C(command "_.layout" "_s" (car (layoutlist)))
 [->Ventanas múltiples]
   [Crear ventanas]^C^C_mview
   [Espacio modelo (en ventana)]^C^C_mspace
