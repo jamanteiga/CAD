@@ -22,8 +22,8 @@ Personalizar | Personalizar | Personalitzar
 Escriba un comando | Escreva um comando | Escriviu una ordre
 Línea de comandos | Linha de comandos | Línia d'ordres
 Dibujo y anotación | Desenho e anotação | Dibuix i anotació
-AutoCAD clásico | AutoCAD clássico | AutoCAD clàssic
-Cinta + menús R12 | Friso + menus R12 | Cinta + menús R12
+Clásico | Clássico | Clàssic
+Cinta + menús clásicos | Friso + menus clássicos | Cinta + menús clàssics
 Archivo | Ficheiro | Fitxer
 Ayuda | Ajuda | Ajuda
 Dibujo | Desenhar | Dibuix
@@ -39,8 +39,8 @@ Rastreo polar | Rastreamento polar | Rastreig polar
 Referencia a objetos (F3) — clic derecho: modos | Referência a objetos (F3) — clique direito: modos | Referència a objectes (F3) — clic dret: modes
 Mostrar/ocultar grosor de línea | Mostrar/ocultar espessura de linha | Mostrar/amagar gruix de línia
 Entrada dinámica | Entrada dinâmica | Entrada dinàmica
-Mostrar el menú de pantalla lateral de AutoCAD R12 | Mostrar o menu de ecrã lateral do AutoCAD R12 | Mostrar el menú de pantalla lateral d'AutoCAD R12
-Menú R12 | Menu R12 | Menú R12
+Mostrar el menú de pantalla lateral clásico | Mostrar o menu de ecrã lateral clássico | Mostrar el menú de pantalla lateral clàssic
+Menú clásico | Menu clássico | Menú clàssic
 Mostrar la barra de menús clásica | Mostrar a barra de menus clássica | Mostrar la barra de menús clàssica
 Barra menús | Barra de menus | Barra de menús
 Personalización | Personalização | Personalització
@@ -50,7 +50,7 @@ Anotar | Anotar | Anotar
 Vista | Vista | Vista
 Administrar | Gerir | Administrar
 Salida | Saída | Sortida
-Express Tools | Express Tools | Express Tools
+Herramientas extra | Ferramentas extra | Eines extra
 Minimizar cinta | Minimizar o friso | Minimitzar la cinta
 Línea | Linha | Línia
 Polilínea | Polilinha | Polilínia
@@ -221,8 +221,8 @@ Historial de comandos | Histórico de comandos | Historial d'ordres
 Interfaz | Interface | Interfície
 Fichas de archivo | Separadores de ficheiro | Pestanyes de fitxer
 Fichas de presentación | Separadores de layout | Pestanyes de presentació
-Barra de menús R12 | Barra de menus R12 | Barra de menús R12
-Menú de pantalla R12 | Menu de ecrã R12 | Menú de pantalla R12
+Barra de menús clásica | Barra de menus clássica | Barra de menús clàssica
+Menú de pantalla clásico | Menu de ecrã clássico | Menú de pantalla clàssic
 Claro/Oscuro | Tema | Tema
 Interfaz de usuario | Interface do utilizador | Interfície d'usuari
 Editar alias | Editar alias | Editar àlies
@@ -300,7 +300,7 @@ Salida PDF | Saída PDF | Sortida PDF
 Salida SVG | Saída SVG | Sortida SVG
 Salida PNG | Saída PNG | Sortida PNG
 Referencia externa | Referência externa | Referència externa
-Salir de AutoCAD | Sair | Sortir
+Salir | Sair | Sortir
 ¡Ayuda! | Ajuda! | Ajuda!
 Referencia a objetos | Referência a objetos | Referència a objectes
 Punto final | Ponto final | Punt final
@@ -454,12 +454,12 @@ Editor de texto | Editor de texto | Editor de text
 Bloque que desea crear o editar | Bloco a criar ou editar | Bloc que voleu crear o editar
 Editar definición de bloque | Editar definição de bloco | Editar definició de bloc
 Sombreado y degradado | Hachura e gradiente | Ombrejat i degradat
-AutoCAD R12/LT2 DXF (*.dxf) | AutoCAD R12/LT2 DXF (*.dxf) | AutoCAD R12/LT2 DXF (*.dxf)
+DXF versión 12 (*.dxf) | DXF versão 12 (*.dxf) | DXF versió 12 (*.dxf)
 WebCAD nativo — conserva bloques dinámicos (*.wcad) | WebCAD nativo — mantém blocos dinâmicos (*.wcad) | WebCAD natiu — conserva els blocs dinàmics (*.wcad)
 Nombre de archivo | Nome do ficheiro | Nom del fitxer
 Tipo de archivo | Tipo de ficheiro | Tipus de fitxer
-DXF 2000 conserva capas, grosores, sombreados, splines, presentaciones y grupos, y lo abre cualquier AutoCAD. El formato .wcad guarda además bloques dinámicos y restricciones (WebCAD también los recupera desde su propio DXF). | O DXF 2000 mantém camadas, espessuras, hachuras, splines, layouts e grupos, e abre em qualquer AutoCAD. O formato .wcad guarda também blocos dinâmicos e restrições (o WebCAD também os recupera do seu próprio DXF). | El DXF 2000 conserva capes, gruixos, ombrejats, splines, presentacions i grups, i l'obre qualsevol AutoCAD. El format .wcad desa també blocs dinàmics i restriccions (WebCAD també els recupera del seu propi DXF).
-AutoCAD 2000/LT2000 DXF (*.dxf) | AutoCAD 2000/LT2000 DXF (*.dxf) | AutoCAD 2000/LT2000 DXF (*.dxf)
+DXF 2000 conserva capas, grosores, sombreados, splines, presentaciones y grupos, y lo abre cualquier programa de CAD. El formato .wcad guarda además bloques dinámicos y restricciones (WebCAD también los recupera desde su propio DXF). | O DXF 2000 mantém camadas, espessuras, hachuras, splines, layouts e grupos, e abre em qualquer programa de CAD. O formato .wcad guarda também blocos dinâmicos e restrições (o WebCAD também os recupera do seu próprio DXF). | El DXF 2000 conserva capes, gruixos, ombrejats, splines, presentacions i grups, i l'obre qualsevol programa de CAD. El format .wcad desa també blocs dinàmics i restriccions (WebCAD també els recupera del seu propi DXF).
+DXF versión 2000 (*.dxf) | DXF versão 2000 (*.dxf) | DXF versió 2000 (*.dxf)
 Guardar dibujo como | Guardar desenho como | Desar el dibuix com
 Color de índice | Cor de índice | Color d'índex
 Estado de visibilidad | Estado de visibilidade | Estat de visibilitat
@@ -508,14 +508,18 @@ Apertura de AutoSnap | Abertura do AutoSnap | Obertura d'AutoSnap
 Mostrar cinta de opciones | Mostrar o friso | Mostrar la cinta d'opcions
 Mostrar barra de menús clásica | Mostrar a barra de menus clássica | Mostrar la barra de menús clàssica
 Mostrar menú de pantalla lateral | Mostrar o menu de ecrã lateral | Mostrar el menú de pantalla lateral
+Mostrar menú de pantalla lateral clásico | Mostrar o menu de ecrã lateral clássico | Mostrar el menú de pantalla lateral clàssic
 Fichas Modelo/Presentación | Separadores Modelo/Layout | Pestanyes Model/Presentació
 Autocompletar en la línea de comandos | Completar automaticamente na linha de comandos | Autocompletar a la línia d'ordres
-Restaurar menú R12 | Restaurar o menu R12 | Restaurar el menú R12
+Restaurar menú clásico | Restaurar o menu clássico | Restaurar el menú clàssic
 Eliminar | Remover | Eliminar
 Alias | Alias | Àlies
 Pulse la combinación | Prima a combinação | Premeu la combinació
 COMANDO o macro | COMANDO ou macro | ORDRE o macro
-Alias de comandos (acad.pgp) | Alias de comandos (acad.pgp) | Àlies d'ordres (acad.pgp)
+Alias de comandos (.pgp) | Alias de comandos (.pgp) | Àlies d'ordres (.pgp)
+Repetir {0} | Repetir {0} | Repetir {0}
+La capa "{0}" contiene objetos. Use {1} para borrarla con sus objetos. | A camada "{0}" contém objetos. Use {1} para a eliminar com os seus objetos. | La capa "{0}" conté objectes. Utilitzeu {1} per esborrar-la amb els seus objectes.
+Inglés | Inglês | Anglès
 Añadir | Adicionar | Afegir
 Filtrar | Filtrar | Filtrar
 Comando | Comando | Ordre
@@ -531,7 +535,7 @@ Visualización | Visualização | Visualització
 Selección | Seleção | Selecció
 Atajos y alias | Atalhos e alias | Dreceres i àlies
 Archivos / LISP | Ficheiros / LISP | Fitxers / LISP
-WebCAD Libre — dibujo técnico 2D. Escriba los comandos en su idioma o en inglés (p. ej. LINEA, LIÑA, LINHA, LÍNIA, LINE o L). F1: ayuda. | WebCAD Libre — desenho técnico 2D. Escreva os comandos no seu idioma ou em inglês (p. ex. LINEA, LIÑA, LINHA, LÍNIA, LINE ou L). F1: ajuda. | WebCAD Libre — dibuix tècnic 2D. Escriviu les ordres en el vostre idioma o en anglès (p. ex. LINEA, LIÑA, LINHA, LÍNIA, LINE o L). F1: ajuda.
+WebCAD Libre — dibujo técnico 2D. Escriba los comandos en castellano o en inglés (p. ej. LINEA, LINE o L). F1: ayuda. | WebCAD Libre — desenho técnico 2D. Escreva os comandos em português, castelhano ou inglês (p. ex. LINHA, LINEA, LINE ou L). F1: ajuda. | WebCAD Libre — dibuix tècnic 2D. Escriviu les ordres en català, castellà o anglès (p. ex. LÍNIA, LINEA, LINE o L). F1: ajuda.
 Doble clic para ejecutar. Escriba el comando en cualquiera de los idiomas o su alias en la línea de comandos (el prefijo _ fuerza el inglés); Intro/Espacio repite el último. Las expresiones (…) se evalúan como AutoLISP. | Duplo clique para executar. Escreva o comando em qualquer dos idiomas, ou o seu alias, na linha de comandos (o prefixo _ força o inglês); Enter/Espaço repete o último. As expressões (…) são avaliadas como AutoLISP. | Doble clic per executar. Escriviu l'ordre en qualsevol dels idiomes, o el seu àlies, a la línia d'ordres (el prefix _ força l'anglès); Intro/Espai repeteix l'última. Les expressions (…) s'avaluen com a AutoLISP.
 Ayuda — Referencia de comandos | Ajuda — Referência de comandos | Ajuda — Referència d'ordres
 Buscar comando… | Procurar comando… | Cercar ordre…
@@ -631,14 +635,14 @@ Editor de atributos mejorado — {0} | Editor de atributos avançado — {0} | E
 Puntos | Pontos | Punts
 Escala Y | Escala Y | Escala Y
 Clic derecho | Clique direito | Clic dret
-Interfaz clásica (R12): barra de menús + menú de pantalla. | Interface clássica (R12): barra de menus + menu de ecrã. | Interfície clàssica (R12): barra de menús + menú de pantalla.
-Menú AutoCAD R12 restaurado. | Menu AutoCAD R12 restaurado. | Menú AutoCAD R12 restaurat.
+Interfaz clásica: barra de menús + menú de pantalla. | Interface clássica: barra de menus + menu de ecrã. | Interfície clàssica: barra de menús + menú de pantalla.
+Menú clásico restaurado. | Menu clássico restaurado. | Menú clàssic restaurat.
 No se puede borrar la capa 0, Defpoints, la actual o una capa con objetos. | Não é possível eliminar a camada 0, Defpoints, a atual nem uma camada com objetos. | No es pot esborrar la capa 0, Defpoints, l'actual ni una capa amb objectes.
 No se puede borrar un tipo de línea en uso. | Não é possível eliminar um tipo de linha em uso. | No es pot esborrar un tipus de línia en ús.
 No se puede inutilizar la capa actual. | Não é possível congelar a camada atual. | No es pot inutilitzar la capa actual.
 Cargando lector DWG (LibreDWG/WebAssembly) | A carregar o leitor DWG (LibreDWG/WebAssembly) | S'està carregant el lector DWG (LibreDWG/WebAssembly)
 Comandos | Comandos | Ordres
-WebCAD Libre (compatible con AutoCAD)\\nCAD 2D en el navegador: dibujo, edición, bloques dinámicos, restricciones, AutoLISP con DCL, lectura y escritura DXF (R12 y 2000) y lectura DWG mediante LibreDWG (WebAssembly).\\n\\nSoftware libre. Funciona sin conexión y sin servidor. | WebCAD Libre (compatível com AutoCAD)\\nCAD 2D no navegador: desenho, edição, blocos dinâmicos, restrições, AutoLISP com DCL, leitura e escrita DXF (R12 e 2000) e leitura DWG através do LibreDWG (WebAssembly).\\n\\nSoftware livre. Funciona sem ligação e sem servidor. | WebCAD Libre (compatible amb AutoCAD)\\nCAD 2D al navegador: dibuix, edició, blocs dinàmics, restriccions, AutoLISP amb DCL, lectura i escriptura DXF (R12 i 2000) i lectura DWG mitjançant LibreDWG (WebAssembly).\\n\\nProgramari lliure. Funciona sense connexió i sense servidor.
+WebCAD Libre\\nCAD 2D en el navegador: dibujo, edición, bloques dinámicos, restricciones, AutoLISP con DCL, lectura y escritura DXF (versiones 12 y 2000) y lectura DWG mediante LibreDWG (WebAssembly).\\n\\nSoftware libre. Funciona sin conexión y sin servidor. | WebCAD Libre\\nCAD 2D no navegador: desenho, edição, blocos dinâmicos, restrições, AutoLISP com DCL, leitura e escrita DXF (versões 12 e 2000) e leitura DWG através do LibreDWG (WebAssembly).\\n\\nSoftware livre. Funciona sem ligação e sem servidor. | WebCAD Libre\\nCAD 2D al navegador: dibuix, edició, blocs dinàmics, restriccions, AutoLISP amb DCL, lectura i escriptura DXF (versions 12 i 2000) i lectura DWG mitjançant LibreDWG (WebAssembly).\\n\\nProgramari lliure. Funciona sense connexió i sense servidor.
 Aplicar | Aplicar | Aplicar
 Restablecer | Repor | Restablir
 Examinar... | Procurar... | Examinar...

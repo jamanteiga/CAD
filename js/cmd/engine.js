@@ -1,7 +1,7 @@
 // Motor de comandos: registro, alias, solicitudes de entrada, selección, pinzamientos
 import * as G from '../core/geom.js';
 import * as E from '../core/entities.js';
-import { tKnown, trPrompt, kwInfo, kwInfos, norm, CMD_ES, ALIAS_ES, CMD_GL, ALIAS_GL, CMD_PT, CMD_CA, locName, locOsnap, locCmd } from '../core/i18n.js';
+import { tKnown, trPrompt, kwInfo, kwInfos, norm, CMD_ES, ALIAS_ES, CMD_GL, ALIAS_GL, CMD_PT, CMD_CA, locOsnap, locCmd, dispCmd } from '../core/i18n.js';
 
 export class Cancel extends Error { constructor() { super('*Cancel*'); } }
 export const PAUSE = Symbol('PAUSE');
@@ -96,18 +96,22 @@ export class Engine {
     }
     const cmd = this.commands[name];
     if (transparent || cmd.transparentOnly) return this.runTransparent(cmd);
-    if (this.active) { this.print(`** ${name} command not allowed while ${this.active} is active **`); return; }
+    if (this.active) { this.print(`** ${dispCmd(name)} command not allowed while ${dispCmd(this.active)} is active **`); return; }
     this.active = name; this.lastCmd = name.startsWith('-') ? name : raw;
     if (!cmd.noRepeat) this.lastCmd = name;
-    this.ui?.cmdline?.echoCommand?.(locName(name) || name);
+    this.ui?.cmdline?.echoCommand?.(dispCmd(name));
     this.doc.begin(name);
     this.pickfirst = cmd.pickfirst === false ? [] : this.sel.slice();
     if (!cmd.keepSel) this.clearSel(false);
+    const react = (ev) => { try { this.app.lisp?.fireCommandEvent?.(ev, name); } catch (_) { /* reactores */ } };
+    react('commandWillStart');
+    let outcome = 'commandEnded';
     try { await cmd.fn(this); }
     catch (e) {
-      if (e instanceof Cancel) this.print('*Cancel*');
-      else { console.error(e); this.print(`; error en ${name}: ${e.message || e}`); }
+      if (e instanceof Cancel) { this.print('*Cancel*'); outcome = 'commandCancelled'; }
+      else { console.error(e); this.print(`; error en ${name}: ${e.message || e}`); outcome = 'commandFailed'; }
     } finally {
+      react(outcome);
       this.doc.end();
       this.active = null; this.req = null; this.previewFn = null; this.osOverride = null; this.win = null; this.pickfirst = [];
       this.afterCommand();
@@ -126,7 +130,7 @@ export class Engine {
     this.print(`>>${cmd.name}`);
     try { await cmd.fn(this); } catch (e) { if (!(e instanceof Cancel)) this.print('; error: ' + e.message); }
     this.req = saved; this.previewFn = savedPrev;
-    if (saved) { this.print('Resuming ' + (locName(this.active) || this.active || '') + ' command.'); this.ui?.cmdline?.setPrompt?.(saved.display ?? saved.prompt, saved.kws); }
+    if (saved) { this.print('Resuming ' + dispCmd(this.active || '') + ' command.'); this.ui?.cmdline?.setPrompt?.(saved.display ?? saved.prompt, saved.kws); }
     this.view.redrawOverlay();
   }
   cancel() {

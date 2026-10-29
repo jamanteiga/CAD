@@ -1,4 +1,4 @@
-// Cuadros de diálogo (estilo AutoCAD)
+// Cuadros de diálogo
 import { h, draggable } from './dom.js';
 import { ACI, aciCss, LINETYPES, LWEIGHTS, lwName, HATCHES, PAPER, colorName } from '../core/tables.js';
 import { drawThumb, hatchSwatch } from './thumb.js';
@@ -7,7 +7,7 @@ import * as E from '../core/entities.js';
 import { OS } from '../view/snap.js';
 import { DEFAULT_ALIASES } from '../cmd/engine.js';
 import { saveSettings } from '../app.js';
-import { ES_NAME, GL_NAME, PT_NAME, CA_NAME, norm, LANGS, t } from '../core/i18n.js';
+import { ES_NAME, GL_NAME, PT_NAME, CA_NAME, norm, LANGS, t, dispCmd } from '../core/i18n.js';
 
 export function createDialogs(app) {
   const dlg = {};
@@ -184,17 +184,18 @@ export function createDialogs(app) {
     const pick = h('input', { type: 'range', min: 1, max: 15, value: v.PICKBOX }), grip = h('input', { type: 'range', min: 3, max: 15, value: s.gripSize }), ap = h('input', { type: 'range', min: 3, max: 30, value: v.APERTURE });
     pages.selection = h('div', { class: 'frm' }, h('label', { text: 'Tamaño de la mira' }), pick, h('label', { text: 'Tamaño de pinzamiento' }), grip, h('label', { text: 'Apertura de AutoSnap' }), ap);
     const ck = (k, label) => { const i = h('input', { type: 'checkbox', checked: !!s[k] }); i.dataset.k = k; return h('label', { class: 'row' }, i, label); };
-    pages.interface = h('div', { style: { display: 'grid', gap: '6px' } }, ck('ribbon', 'Mostrar cinta de opciones (Ribbon)'), ck('menuBar', 'Mostrar barra de menús clásica (R12)'), ck('screenMenu', 'Mostrar menú de pantalla lateral (AutoCAD R12)'), ck('fileTabs', 'Fichas de archivo'), ck('layoutTabs', 'Fichas Modelo/Presentación'), ck('ucsIcon', 'Icono SCP'), ck('autocomplete', 'Autocompletar en la línea de comandos'),
-      h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', onclick: async () => { const f = await app.io.pickFile('.mnu,.mns,.txt'); if (f) app.ui.menu12.loadMNU(await f.text(), f.name); } }, 'Cargar menú .MNU...'), h('button', { class: 'btn', type: 'button', onclick: () => app.ui.menu12.resetMenus() }, 'Restaurar menú R12')));
+    pages.interface = h('div', { style: { display: 'grid', gap: '6px' } }, ck('ribbon', 'Mostrar cinta de opciones (Ribbon)'), ck('menuBar', 'Mostrar barra de menús clásica'), ck('screenMenu', 'Mostrar menú de pantalla lateral clásico'), ck('fileTabs', 'Fichas de archivo'), ck('layoutTabs', 'Fichas Modelo/Presentación'), ck('ucsIcon', 'Icono SCP'), ck('autocomplete', 'Autocompletar en la línea de comandos'),
+      h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', onclick: async () => { const f = await app.io.pickFile('.mnu,.mns,.txt'); if (f) app.ui.menu12.loadMNU(await f.text(), f.name); } }, 'Cargar menú .MNU...'), h('button', { class: 'btn', type: 'button', onclick: () => app.ui.menu12.resetMenus() }, 'Restaurar menú clásico')));
     // alias y atajos
     const aliasRows = h('tbody');
     const userA = { ...(s.aliases || {}) };
     const allA = { ...DEFAULT_ALIASES, ...userA };
+    const toCmd = (v) => { v = String(v).trim().toUpperCase(); const r = app.cmd.resolveName(v); return r && !r.startsWith('C:') ? r : v; };
     const renderA = (filter = '') => {
       aliasRows.innerHTML = '';
       for (const [k, cmd] of Object.entries(allA).sort()) {
-        if (filter && !k.includes(filter) && !String(cmd).includes(filter)) continue;
-        const inp = h('input', { value: cmd, onchange: () => { allA[k] = inp.value.toUpperCase(); userA[k] = inp.value.toUpperCase(); } });
+        if (filter && !k.includes(filter) && !String(cmd).includes(filter) && !dispCmd(cmd).includes(filter)) continue;
+        const inp = h('input', { value: dispCmd(cmd), onchange: () => { const c = toCmd(inp.value); allA[k] = c; userA[k] = c; } });
         aliasRows.append(h('tr', {}, h('td', { class: 'kbd', text: k }), h('td', {}, inp), h('td', {}, h('button', { class: 'tbtn', title: 'Eliminar', html: icon('close'), onclick: () => { delete allA[k]; userA[k] = ''; renderA(filter); } }))));
       }
     };
@@ -205,14 +206,14 @@ export function createDialogs(app) {
     const renderK = () => { keyRows.innerHTML = ''; for (const [k, c] of Object.entries(keys)) keyRows.append(h('tr', {}, h('td', { class: 'kbd', text: k }), h('td', { text: c }), h('td', {}, h('button', { class: 'tbtn', html: icon('close'), onclick: () => { delete keys[k]; renderK(); } })))); };
     renderK();
     const kIn = h('input', { class: 'fld', placeholder: 'Pulse la combinación…', style: { width: '170px' }, readOnly: true, onkeydown: (e) => { e.preventDefault(); e.stopPropagation(); if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) return; kIn.value = keyName(e); } });
-    const kC = h('input', { class: 'fld', placeholder: 'COMANDO o macro (^C^CLINE)', style: { width: '200px' } });
+    const kC = h('input', { class: 'fld', placeholder: 'COMANDO o macro (^C^CLINEA)', style: { width: '200px' } });
     pages.keys = h('div', { style: { display: 'grid', gap: '10px', minWidth: 'min(560px, 82vw)' } },
-      h('fieldset', {}, h('legend', { text: 'Alias de comandos (acad.pgp)' }),
-        h('div', { class: 'row' }, newA, newC, h('button', { class: 'btn', type: 'button', onclick: () => { const a = newA.value.trim().toUpperCase(), c = newC.value.trim().toUpperCase(); if (a && c) { allA[a] = c; userA[a] = c; renderA(); newA.value = newC.value = ''; } } }, 'Añadir'),
+      h('fieldset', {}, h('legend', { text: 'Alias de comandos (.pgp)' }),
+        h('div', { class: 'row' }, newA, newC, h('button', { class: 'btn', type: 'button', onclick: () => { const a = newA.value.trim().toUpperCase(), c = toCmd(newC.value); if (a && c) { allA[a] = c; userA[a] = c; renderA(); newA.value = newC.value = ''; } } }, 'Añadir'),
           h('input', { class: 'fld', placeholder: 'Filtrar…', style: { width: '120px', marginLeft: 'auto' }, oninput: (e) => renderA(e.target.value.toUpperCase()) })),
         h('div', { style: { maxHeight: '200px', overflow: 'auto', marginTop: '6px' } }, h('table', { class: 'kv' }, h('thead', {}, h('tr', {}, h('th', { text: 'Alias' }), h('th', { text: 'Comando' }), h('th'))), aliasRows)),
         h('div', { class: 'row', style: { marginTop: '6px' } }, h('button', { class: 'btn', type: 'button', onclick: async () => { const f = await app.io.pickFile('.pgp,.txt'); if (!f) return; const t = await f.text(); let n = 0; for (const line of t.split(/\r?\n/)) { const m = /^\s*([^;,\s]+)\s*,\s*\*\s*(\S+)/.exec(line); if (m) { allA[m[1].toUpperCase()] = m[2].toUpperCase(); userA[m[1].toUpperCase()] = m[2].toUpperCase(); n++; } } renderA(); app.log(`${n} alias importados de ${f.name}`); } }, 'Importar acad.pgp...'),
-          h('button', { class: 'btn', type: 'button', onclick: () => app.io.deliver('acad.pgp.txt', Object.entries(allA).map(([a, c]) => `${a.padEnd(8)},*${c}`).join('\r\n'), 'text/plain') }, 'Exportar'))),
+          h('button', { class: 'btn', type: 'button', onclick: () => app.io.deliver('alias.pgp', Object.entries(allA).map(([a, c]) => `${a.padEnd(8)},*${c}`).join('\r\n'), 'text/plain') }, 'Exportar'))),
       h('fieldset', {}, h('legend', { text: 'Atajos de teclado' }),
         h('div', { class: 'row' }, kIn, kC, h('button', { class: 'btn', type: 'button', onclick: () => { if (kIn.value && kC.value) { keys[kIn.value] = kC.value; renderK(); kIn.value = kC.value = ''; } } }, 'Asignar')),
         h('div', { style: { maxHeight: '140px', overflow: 'auto', marginTop: '6px' } }, h('table', { class: 'kv' }, h('thead', {}, h('tr', {}, h('th', { text: 'Tecla' }), h('th', { text: 'Comando / macro' }), h('th'))), keyRows)),
@@ -256,16 +257,17 @@ export function createDialogs(app) {
     const eng = app.cmd;
     const q = h('input', { class: 'fld', placeholder: 'Buscar comando…', autofocus: true });
     const tb = h('tbody');
+    const nm = (M, n, d) => M[n] || (n.startsWith('-') && M[n.slice(1)] ? '-' + M[n.slice(1)] : d);
     const rev = {}; for (const [a, c] of Object.entries({ ...eng.aliases, ...(app.settings.aliases || {}) })) if (c) (rev[c] ||= []).push(a);
-    const render = () => { tb.innerHTML = ''; const f = norm(q.value); for (const n of Object.keys(eng.commands).sort()) { const es = ES_NAME[n] || '', gl = GL_NAME[n] || es, pt = PT_NAME[n] || '', ca = CA_NAME[n] || ''; const names = [es, gl, pt, ca].map(norm); const al = (rev[n] || []).filter((a) => !names.includes(norm(a))); if (f && !n.includes(f) && !names.some((x) => x.includes(f)) && !al.some((a) => a.includes(f))) continue; tb.append(h('tr', { ondblclick: () => { box.querySelector('.btn.pri').click(); eng.run(n); } }, h('td', { class: 'kbd', text: n }), h('td', { class: 'kbd', text: es }), h('td', { class: 'kbd', text: gl }), h('td', { class: 'kbd', text: pt }), h('td', { class: 'kbd', text: ca }), h('td', { text: al.join(', ') }))); } };
+    const render = () => { tb.innerHTML = ''; const f = norm(q.value); for (const n of Object.keys(eng.commands).sort((a, b) => nm(ES_NAME, a, a).localeCompare(nm(ES_NAME, b, b)))) { const es = nm(ES_NAME, n, n), gl = nm(GL_NAME, n, es), pt = nm(PT_NAME, n, ''), ca = nm(CA_NAME, n, ''); const names = [es, gl, pt, ca].map(norm); const al = (rev[n] || []).filter((a) => !names.includes(norm(a))); if (f && !n.includes(f) && !names.some((x) => x.includes(f)) && !al.some((a) => a.includes(f))) continue; tb.append(h('tr', { ondblclick: () => { box.querySelector('.btn.pri').click(); eng.run(n); } }, h('td', { class: 'kbd', text: es }), h('td', { class: 'kbd', text: n }), h('td', { class: 'kbd', text: gl }), h('td', { class: 'kbd', text: pt }), h('td', { class: 'kbd', text: ca }), h('td', { text: al.join(', ') }))); } };
     q.oninput = render; render(); let box;
-    return open({ title: 'Ayuda — Referencia de comandos', init: (b) => (box = b), body: [h('p', { class: 'hint', text: 'Doble clic para ejecutar. Escriba el comando en cualquiera de los idiomas o su alias en la línea de comandos (el prefijo _ fuerza el inglés); Intro/Espacio repite el último. Las expresiones (…) se evalúan como AutoLISP.' }), q, h('div', { style: { maxHeight: '50vh', overflow: 'auto', minWidth: 'min(480px, 80vw)' } }, h('table', { class: 'kv' }, h('thead', {}, h('tr', {}, h('th', { text: 'English' }), h('th', { text: 'Castellano' }), h('th', { text: 'Galego' }), h('th', { text: 'Português' }), h('th', { text: 'Català' }), h('th', { text: 'Alias' }))), tb))], buttons: [{ t: 'Cerrar', v: true, pri: true }] });
+    return open({ title: 'Ayuda — Referencia de comandos', init: (b) => (box = b), body: [h('p', { class: 'hint', text: 'Doble clic para ejecutar. Escriba el comando en cualquiera de los idiomas o su alias en la línea de comandos (el prefijo _ fuerza el inglés); Intro/Espacio repite el último. Las expresiones (…) se evalúan como AutoLISP.' }), q, h('div', { style: { maxHeight: '50vh', overflow: 'auto', minWidth: 'min(480px, 80vw)' } }, h('table', { class: 'kv' }, h('thead', {}, h('tr', {}, h('th', { text: 'Castellano' }), h('th', { text: 'Inglés' }), h('th', { text: 'Galego' }), h('th', { text: 'Português' }), h('th', { text: 'Català' }), h('th', { text: 'Alias' }))), tb))], buttons: [{ t: 'Cerrar', v: true, pri: true }] });
   };
-  dlg.about = () => dlg.alert('WebCAD Libre (compatible con AutoCAD)\nCAD 2D en el navegador: dibujo, edición, bloques dinámicos, restricciones, AutoLISP con DCL, lectura y escritura DXF (R12 y 2000) y lectura DWG mediante LibreDWG (WebAssembly).\n\nSoftware libre. Funciona sin conexión y sin servidor.');
+  dlg.about = () => dlg.alert('WebCAD Libre\nCAD 2D en el navegador: dibujo, edición, bloques dinámicos, restricciones, AutoLISP con DCL, lectura y escritura DXF (versiones 12 y 2000) y lectura DWG mediante LibreDWG (WebAssembly).\n\nSoftware libre. Funciona sin conexión y sin servidor.');
 
   dlg.saveFormat = (cur) => {
-    const sel = h('select', { class: 'fld' }, h('option', { value: 'dxf', selected: cur === 'dxf' }, 'AutoCAD 2000/LT2000 DXF (*.dxf)'), h('option', { value: 'dxf12', selected: cur === 'dxf12' }, 'AutoCAD R12/LT2 DXF (*.dxf)'), h('option', { value: 'wcad', selected: cur === 'wcad' }, 'WebCAD nativo — conserva bloques dinámicos (*.wcad)'));
-    return open({ title: 'Guardar dibujo como', body: [h('div', { class: 'frm' }, h('label', { text: 'Nombre de archivo' }), h('input', { class: 'fld', type: 'text', value: doc().name.replace(/\.dwg$/i, ''), readOnly: true }), h('label', { text: 'Tipo de archivo' }), sel), h('p', { class: 'hint', text: 'DXF 2000 conserva capas, grosores, sombreados, splines, presentaciones y grupos, y lo abre cualquier AutoCAD. El formato .wcad guarda además bloques dinámicos y restricciones (WebCAD también los recupera desde su propio DXF).' })], onOk: () => sel.value });
+    const sel = h('select', { class: 'fld' }, h('option', { value: 'dxf', selected: cur === 'dxf' }, 'DXF versión 2000 (*.dxf)'), h('option', { value: 'dxf12', selected: cur === 'dxf12' }, 'DXF versión 12 (*.dxf)'), h('option', { value: 'wcad', selected: cur === 'wcad' }, 'WebCAD nativo — conserva bloques dinámicos (*.wcad)'));
+    return open({ title: 'Guardar dibujo como', body: [h('div', { class: 'frm' }, h('label', { text: 'Nombre de archivo' }), h('input', { class: 'fld', type: 'text', value: doc().name.replace(/\.dwg$/i, ''), readOnly: true }), h('label', { text: 'Tipo de archivo' }), sel), h('p', { class: 'hint', text: 'DXF 2000 conserva capas, grosores, sombreados, splines, presentaciones y grupos, y lo abre cualquier programa de CAD. El formato .wcad guarda además bloques dinámicos y restricciones (WebCAD también los recupera desde su propio DXF).' })], onOk: () => sel.value });
   };
 
   dlg.plot = (d) => {

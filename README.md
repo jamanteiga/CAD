@@ -1,6 +1,6 @@
 # WebCAD Libre
 
-CAD 2D en el navegador con el flujo de trabajo de AutoCAD e imagen propia: cinta de opciones, línea de comandos, referencias a objetos con rastreo, pinzamientos, bloques dinámicos, restricciones paramétricas, AutoLISP con DCL, herramientas de instalaciones (conductos, tuberías, P&ID) y los menús clásicos de AutoCAD R12. Funciona sin servidor y sin conexión, en cinco idiomas.
+CAD 2D en el navegador con flujo de trabajo clásico de CAD e imagen propia: cinta de opciones, línea de comandos, referencias a objetos con rastreo, pinzamientos, bloques dinámicos, restricciones paramétricas, AutoLISP con DCL, herramientas de instalaciones (conductos, tuberías, P&ID) y menús clásicos. Funciona sin servidor y sin conexión, en cinco idiomas.
 
 ## Puesta en marcha
 
@@ -20,7 +20,7 @@ npm start                 # servidor local en http://localhost:8080 (o: python -
 - **Tres temas**: oscuro (pizarra), intermedio (granito) y claro (papel vegetal). Se eligen en la pestaña Inicio, en *Vista › Interfaz › Tema* o en *OPCIONES › Visualización*.
 - **Cinco idiomas**: castellano, galego, português, català e English. Selector ES/GL/PT/CA/EN de la barra de título, pestaña Inicio u *OPCIONES*. Se traduce toda la interfaz y la línea de comandos, sin recargar.
 - **Línea de comandos multilingüe**:
-  - Comandos en cualquiera de los idiomas: `LINEA`, `LIÑA`, `LINHA`, `LÍNIA` o `LINE`; `DESPLAZA`, `DESPRAZA`, `MOVER`, `DESPLAÇA` o `MOVE`… Con o sin tildes. Los alias ingleses (`L`, `C`, `M`…) siguen funcionando. `POL` es polilínea, como en AutoCAD en castellano.
+  - Comandos en cualquiera de los idiomas: `LINEA`, `LIÑA`, `LINHA`, `LÍNIA` o `LINE`; `DESPLAZA`, `DESPRAZA`, `MOVER`, `DESPLAÇA` o `MOVE`… Con o sin tildes. Los alias ingleses (`L`, `C`, `M`…) siguen funcionando. `POL` es polilínea.
   - Opciones en el idioma activo (letra en mayúscula) o en inglés. Si dos opciones de un mensaje empiezan igual, la segunda se alarga (`EScala` frente a `Extensión`).
   - Referencias a objetos `FIN`, `MED`, `CEN`, `INT`, `PER`, `TAN`, `CER`… o `END`, `MID`….
   - El prefijo `_` fuerza el inglés (`_POL` = POLYGON, `_U` = Undo): los menús y rutinas LISP de la versión inglesa funcionan sin cambios.
@@ -43,13 +43,14 @@ npm start                 # servidor local en http://localhost:8080 (o: python -
 | Plantillas | NEW con plantillas incluidas (ISO A0–A4, climatización A1, naval A1, P&ID A3, vacía) o propias `.dwt/.dxf/.wcad`; capas normalizadas y **cajetín** con campos (TITLEBLOCK); DWGPROPS |
 | Capas y propiedades | Administrador de capas, -LAYER, LAYISO/LAYOFF/LAYFRZ…, paleta Propiedades con bloques dinámicos, matrices, tablas y conductos |
 | Salida | PLOT a PDF/PNG, SVG, **PUBLISH** (todas las presentaciones en un único PDF), **estilos de trazado CTB y STB** editables (STYLESMANAGER) |
-| Archivos | Abre DXF (R12–2018, incluidos MLINE, TABLE, TOLERANCE y MLEADER) y DWG (R13–2018 vía LibreDWG). Guarda **DXF 2000** (AC1015, por defecto), DXF R12 o `.wcad` nativo. WebCAD recupera de su propio DXF los bloques dinámicos, restricciones, grupos y propiedades |
+| Archivos | Abre DXF (versiones 12 a 2018, incluidos MLINE, TABLE, TOLERANCE y MLEADER) y DWG (R13–2018 vía LibreDWG). Guarda **DXF 2000** (AC1015, por defecto), DXF 12 o `.wcad` nativo. WebCAD recupera de su propio DXF los bloques dinámicos, restricciones, grupos y propiedades |
 | Colaboración | **Nube opcional con Supabase** (NUBE, GUARDARNUBE, ABRIRNUBE, VERSIONES): dibujos compartidos con el equipo e historial de versiones; **marcas de revisión** (MARCA, MARCAS) guardadas en el dibujo y en la nube. Esquema en `supabase/schema.sql` |
-| AutoLISP | Intérprete propio (`defun`, `command` con `pause`, `getpoint`…, `entget`/`entmod`, `ssget` con filtros, `vlax-curve-*`, ActiveX básico) y **cuadros DCL** (`load_dialog`, `new_dialog`, `action_tile`, `get_tile`, listas, botones de opción…). APPLOAD carga `.lsp`, `.scr` y `.dcl`; editor Visual LISP con consola |
-| Interfaz | Cinta con pestañas Inicio, Insertar, Anotar, Vista, Administrar, Salida, **Paramétrico**, **Instalaciones**, **Colaborar** y Express Tools; barra de menús y menú de pantalla R12; cargador `.MNU`; alias y atajos personalizables |
+| AutoLISP | Intérprete propio (`defun`, `command` con `pause`, `getpoint`…, `entget`/`entmod` con datos extendidos, `ssget` con filtros, diccionarios y `vlax-ldata-*`, reactores de comando `vlr-*`) y **cuadros DCL** (`load_dialog`, `new_dialog`, `action_tile`, `get_tile`, listas, botones de opción…). APPLOAD carga `.lsp`, `.scr` y `.dcl`; editor Visual LISP con consola |
+| ActiveX (`vla-*`, `vlax-*`) | Modelo de objetos compatible: Application, Document, ModelSpace/PaperSpace, colecciones (Layers, Blocks, Layouts, TextStyles, Linetypes, Groups, Dictionaries, SelectionSets…), Utility, SummaryInfo y AcCmColor. Propiedades y métodos de cada tipo de entidad (`AddLine`…`AddTable`, `InsertBlock`, `Offset`, `Mirror`, `IntersectWith`, `GetAttributes`, `GetDynamicBlockProperties`, `GetXData`…), variants y safearrays, `vlax-curve-*` con parámetros estándar, `SendCommand`, `vlax-dump-object` |
+| Interfaz | Cinta con pestañas Inicio, Insertar, Anotar, Vista, Administrar, Salida, **Paramétrico**, **Instalaciones**, **Colaborar** y Herramientas extra; barra de menús y menú de pantalla clásicos; cargador `.MNU`; alias y atajos personalizables |
 | Rendimiento | Índice espacial para designar, referenciar y dibujar; encuadre rápido con imagen en caché en dibujos grandes |
 
-Ejemplos en `samples/`: `rutinas-ejemplo.lsp` (BRIDA, CAPAS, LONG, CAMBIACAPA) y `menu-ejemplo.mnu`.
+Ejemplos en `samples/`: `rutinas-ejemplo.lsp` (BRIDA, CAPAS, LONG, CAMBIACAPA), `rutinas-activex.lsp` (LONGTOTAL, ALTURATEXTO, NUMERAR, INFOCAPAS) y `menu-ejemplo.mnu`.
 
 ## Nube (opcional)
 
@@ -66,7 +67,7 @@ npm test             # unitarias (Node) + extremo a extremo (Chromium)
 npm run test:unit    # solo unitarias
 ```
 
-Las pruebas están en `tests/unit` (idiomas, geometría, conductos, DXF) y `tests/e2e` (dibujo, idiomas, funciones avanzadas, LISP/DCL, interfaz, archivos).
+Las pruebas están en `tests/unit` (idiomas, geometría, conductos, DXF) y `tests/e2e` (dibujo, idiomas, funciones avanzadas, LISP/DCL, ActiveX, interfaz, archivos).
 
 ## Atajos
 
@@ -75,8 +76,8 @@ Las pruebas están en `tests/unit` (idiomas, geometría, conductos, DXF) y `test
 ## Limitaciones conocidas
 
 - Solo 2D. Sólidos 3D y regiones se omiten al importar (se informa en la línea de comandos).
-- DWG es de solo lectura: LibreDWG no ofrece escritura fiable de DWG. Para devolver el dibujo a AutoCAD se usa DXF 2000, que AutoCAD abre directamente.
-- ActiveX es parcial.
+- DWG es de solo lectura: LibreDWG no ofrece escritura fiable de DWG. Para intercambiar con otros programas se usa DXF 2000.
+- ActiveX: sin objetos 3D, regiones ni objetos COM externos (`vlax-create-object` devuelve nil). Los reactores que no son de comando se registran pero no se disparan.
 
 ## Estructura
 
@@ -86,9 +87,9 @@ css/cad.css           estilos (temas oscuro, intermedio y claro)
 js/core/              geometría, entidades, documento, restricciones, tablas, conductos, bibliotecas, plantillas, tipografías, idiomas
 js/view/              render en canvas, referencias, rastreo, índice espacial
 js/cmd/               motor de comandos y comandos (dibujo, edición, anotación, bloques, paramétrico, instalaciones, salida, nube…)
-js/lisp/              intérprete AutoLISP y cuadros DCL
-js/io/                DXF (lectura, R12 y 2000), DWG, SVG, PDF, nube
-js/ui/                cinta, menús R12, paletas, diálogos, biblioteca, línea de comandos
+js/lisp/              intérprete AutoLISP, modelo ActiveX (vla-/vlax-) y cuadros DCL
+js/io/                DXF (lectura, escritura 12 y 2000), DWG, SVG, PDF, nube
+js/ui/                cinta, menús clásicos, paletas, diálogos, biblioteca, línea de comandos
 tests/                pruebas unitarias y extremo a extremo (npm test)
 tools/build-sw.mjs    genera la lista del service worker
 supabase/schema.sql   esquema de la nube opcional
@@ -97,4 +98,4 @@ vendor/               LibreDWG, jsPDF, SheetJS, supabase-js y tipografías
 
 ## Licencia
 
-GPL-3.0-or-later (por incluir LibreDWG, GPL-3.0). jsPDF y supabase-js se distribuyen bajo MIT; SheetJS bajo Apache-2.0; las tipografías de trazo Hershey/LibreCAD bajo GPL-2.0+ o dominio público; Barlow y Spline Sans Mono bajo SIL Open Font License. AutoCAD es marca de Autodesk; este proyecto es independiente y no está afiliado a Autodesk.
+GPL-3.0-or-later (por incluir LibreDWG, GPL-3.0). jsPDF y supabase-js se distribuyen bajo MIT; SheetJS bajo Apache-2.0; las tipografías de trazo Hershey/LibreCAD bajo GPL-2.0+ o dominio público; Barlow y Spline Sans Mono bajo SIL Open Font License.

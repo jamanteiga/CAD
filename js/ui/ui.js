@@ -12,7 +12,7 @@ import { createVlide } from './vlide.js';
 import { createStart } from './start.js';
 import { createLibrary } from './library.js';
 import { saveSettings, THEMES } from '../app.js';
-import { setLang, t, tKnown, trPrompt, kwInfos, missing } from '../core/i18n.js';
+import { setLang, t, tKnown, trPrompt, kwInfos, missing, dispCmd } from '../core/i18n.js';
 import { fmt } from '../core/geom.js';
 import * as E from '../core/entities.js';
 
@@ -97,7 +97,7 @@ export function createUI(app) {
         sbtn('RASTREO', 'Rastreo de referencias a objetos (F11)', !!(v.AUTOSNAP & 16), () => { d.setvar('AUTOSNAP', v.AUTOSNAP ^ 16); ui.status.update(); }),
         sbtn('GLN', 'Mostrar/ocultar grosor de línea', v.LWDISPLAY, () => { d.setvar('LWDISPLAY', v.LWDISPLAY ? 0 : 1); ui.status.update(); app.view.redraw(); }),
         sbtn('DIN', 'Entrada dinámica (F12)', v.DYNMODE, tog('DYNMODE')),
-        chk('Menú R12', 'Mostrar el menú de pantalla lateral de AutoCAD R12', !!s.screenMenu, (on) => { s.screenMenu = on; saveSettings(); ui.applyLayout(); }),
+        chk('Menú clásico', 'Mostrar el menú de pantalla lateral clásico', !!s.screenMenu, (on) => { s.screenMenu = on; saveSettings(); ui.applyLayout(); }),
         chk('Barra menús', 'Mostrar la barra de menús clásica', !!s.menuBar, (on) => { s.menuBar = on; saveSettings(); ui.applyLayout(); }),
         h('button', { class: 'stb', title: 'Personalización', html: '≡', onclick: (e) => ui.popup(e.clientX - 200, e.clientY - 230, [['Opciones...', 'OPTIONS'], ['Parámetros de dibujo...', 'DSETTINGS'], ['Atajos y alias (CUI)...', 'CUI'], ['Cargar menú .MNU...', 'MENU'], null, ['Pantalla limpia (cinta sí/no)', () => { s.ribbon = !s.ribbon; saveSettings(); ui.applyLayout(); }], ['Historial de comandos (F2)', 'TEXTSCR']]) }),
       );
@@ -131,7 +131,7 @@ export function createUI(app) {
   ui.contextMenu = (info) => {
     const eng = app.cmd, x = info.ev.clientX, y = info.ev.clientY;
     const items = [];
-    if (eng.lastCmd) items.push([`Repeat ${String(eng.lastCmd).toUpperCase()}`, eng.lastCmd]);
+    if (eng.lastCmd) { const rn = eng.resolveName(eng.lastCmd); items.push([t('Repetir {0}', rn && !rn.startsWith('C:') ? dispCmd(rn) : String(eng.lastCmd).toUpperCase()), eng.lastCmd]); }
     items.push(null);
     if (eng.sel.length) items.push(['Borrar', 'ERASE', 'erase'], ['Desplazar', 'MOVE', 'move'], ['Copiar selección', 'COPY', 'copy'], ['Escala', 'SCALE', 'scale'], ['Girar', 'ROTATE', 'rotate'], null, ['Cortar', 'CUTCLIP', 'cutclip'], ['Copiar', 'COPYCLIP', 'copyclip'], ['Copiar con punto base', 'COPYBASE', 'copyclip']);
     items.push(['Pegar', 'PASTECLIP', 'paste'], ['Pegar como bloque', 'PASTEBLOCK', 'paste'], null);

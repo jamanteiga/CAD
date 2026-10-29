@@ -1,4 +1,4 @@
-//  menu-ejemplo.mnu — menú de pantalla y desplegable estilo AutoCAD R12
+//  menu-ejemplo.mnu — menú de pantalla y desplegable clásico
 //  Cargar con el comando MENU (o arrastrando el archivo).
 ***POP1
 [Taller]
@@ -18,15 +18,15 @@
 [CAPAS]^C^Ccapas
 [LONG]^C^Clong
 []
-[LINE:]^C^C_line
-[CIRCLE:]^C^C_circle
-[OFFSET:]^C^C_offset
-[TRIM:]^C^C_trim
+[LINEA:]^C^C_line
+[CIRCULO:]^C^C_circle
+[EQDIST:]^C^C_offset
+[RECORTA:]^C^C_trim
 **OSNAP
-[-OSNAPS-]
-[ENDpoint]_endp
-[MIDpoint]_mid
-[CENter]_cen
+[-REFENT-]
+[FINal]_endp
+[MEDio]_mid
+[CENtro]_cen
 [INTersec]_int
 []
-[  LAST  ]$S=
+[ ULTIMO ]$S=

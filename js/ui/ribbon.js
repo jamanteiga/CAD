@@ -4,6 +4,7 @@ import { icon } from './icons.js';
 import { aciCss, colorName, lwName, LWEIGHTS, HATCHES } from '../core/tables.js';
 import { hatchSwatch } from './thumb.js';
 import { saveSettings } from '../app.js';
+import { dispCmd } from '../core/i18n.js';
 
 const B = (cmd, label, ic, dd) => ({ big: cmd, label, icon: ic, dd });
 const S = (cmd, label, ic, dd) => ({ cmd, label, icon: ic, dd });
@@ -49,7 +50,7 @@ export const TABS = [
     { name: 'Navegar', items: [B('ZOOM _E', 'Extensión', 'zoomext'), B('ZOOM _W', 'Ventana', 'zoomwin'), B('ZOOM _P', 'Previo', 'zoomext'), B('PAN', 'Encuadre', 'pan')] },
     { name: 'Vistas guardadas', items: [B('VIEW', 'Administrador de vistas', 'view'), B('REGEN', 'Regenerar', 'regen')] },
     { name: 'Paletas', items: [B('PROPERTIES', 'Propiedades', 'properties'), B('LAYER', 'Capas', 'layers'), B('VLISP', 'Visual LISP', 'vlisp'), B('TEXTSCR', 'Historial de comandos', 'cmdline')] },
-    { name: 'Interfaz', items: [{ toggle: 'fileTabs', label: 'Fichas de archivo', icon: 'filetabs' }, { toggle: 'layoutTabs', label: 'Fichas de presentación', icon: 'layout' }, { toggle: 'menuBar', label: 'Barra de menús R12', icon: 'menubar' }, { toggle: 'screenMenu', label: 'Menú de pantalla R12', icon: 'screenmenu' }, { toggle: 'theme', label: 'Tema', icon: 'theme' }] },
+    { name: 'Interfaz', items: [{ toggle: 'fileTabs', label: 'Fichas de archivo', icon: 'filetabs' }, { toggle: 'layoutTabs', label: 'Fichas de presentación', icon: 'layout' }, { toggle: 'menuBar', label: 'Barra de menús clásica', icon: 'menubar' }, { toggle: 'screenMenu', label: 'Menú de pantalla clásico', icon: 'screenmenu' }, { toggle: 'theme', label: 'Tema', icon: 'theme' }] },
   ] },
   { id: 'manage', name: 'Administrar', panels: [
     { name: 'Dibujo', items: [B('NEW', 'Nuevo desde plantilla', 'template'), B('DWGPROPS', 'Propiedades del dibujo', 'dwgprops'), B('TITLEBLOCK', 'Cajetín', 'titleblk')] },
@@ -85,7 +86,7 @@ export const TABS = [
     { name: 'Nube', items: [B('CLOUD', 'Configurar nube', 'cloud'), B('CLOUDSAVE', 'Guardar en la nube', 'cloudsave'), B('CLOUDOPEN', 'Abrir de la nube', 'cloudopen'), B('CLOUDVERSIONS', 'Versiones', 'versions')] },
     { name: 'Revisión', items: [B('MARKUP', 'Marca de revisión', 'markup'), B('MARKUPS', 'Marcas', 'markups'), B('REVCLOUD', 'Nube de revisión', 'revcloud')] },
   ] },
-  { id: 'express', name: 'Express Tools', panels: [
+  { id: 'express', name: 'Herramientas extra', panels: [
     { name: 'Bloques', items: [B('EXPLODE', 'Descomponer atributos', 'explode'), B('COUNT', 'Contar', 'count')] },
     { name: 'Capas', items: [COL(S('LAYISO', 'Aislar', 'layiso'), S('LAYUNISO', 'Desaislar', 'layiso'), S('LAYOFF', 'Desactivar', 'layoff')), COL(S('LAYFRZ', 'Inutilizar', 'layfrz'), S('LAYTHW', 'Reutilizar todas', 'layfrz'), S('LAYON', 'Activar todas', 'layoff')), COL(S('LAYMRG', 'Fusionar', 'layers'), S('LAYDEL', 'Suprimir', 'purge'), S('LAYCUR', 'Cambiar a actual', 'laymcur'))] },
     { name: 'Modificar', items: [COL(S('ISOLATEOBJECTS', 'Aislar objetos', 'isolate'), S('HIDEOBJECTS', 'Ocultar objetos', 'isolate'), S('UNISOLATEOBJECTS', 'Terminar aislamiento', 'isolate'))] },
@@ -128,13 +129,13 @@ export function createRibbon(app) {
   panels.addEventListener('wheel', (e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { panels.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
 
   const bigBtn = (it) => {
-    const b = h('button', { class: 'big', type: 'button', title: it.label + (it.big ? ` (${it.big.replace(/\^C/g, '')})` : '') }, h('span', { class: 'ico', html: icon(it.icon) }), h('span', {}, it.label), it.dd ? h('span', { html: icon('caret'), style: { width: '10px', height: '10px', marginTop: '1px' } }) : '');
+    const b = h('button', { class: 'big', type: 'button', title: it.label + (it.big ? ` (${dispCmd(it.big)})` : '') }, h('span', { class: 'ico', html: icon(it.icon) }), h('span', {}, it.label), it.dd ? h('span', { html: icon('caret'), style: { width: '10px', height: '10px', marginTop: '1px' } }) : '');
     b.onclick = (e) => { if (it.dd && e.offsetY > b.clientHeight - 16) return showDrop(b, it.dd); if (it.big === '' && it.label.startsWith('Cerrar')) return app.cmd.submit(''); if (it.big === '' && it.label === 'Designar puntos') return; run(it.big); };
     if (it.dd) b.oncontextmenu = (e) => { e.preventDefault(); showDrop(b, it.dd); };
     return b;
   };
   const smBtn = (it) => {
-    const b = h('button', { class: 'sm' + (it.label ? '' : ' iconly'), type: 'button', title: (it.label || it.cmd).replace(/\^C/g, '') }, h('span', { class: 'ico', html: icon(it.icon) }), it.label || '', it.dd ? h('span', { html: icon('caret'), style: { width: '9px', height: '9px' } }) : '');
+    const b = h('button', { class: 'sm' + (it.label ? '' : ' iconly'), type: 'button', title: it.label || dispCmd(it.cmd) }, h('span', { class: 'ico', html: icon(it.icon) }), it.label || '', it.dd ? h('span', { html: icon('caret'), style: { width: '9px', height: '9px' } }) : '');
     b.onclick = (e) => { if (it.dd && (e.offsetX > b.clientWidth - 12 || !it.label)) { if (!it.label && e.offsetX < b.clientWidth - 12) return run(it.cmd); return showDrop(b, it.dd); } run(it.cmd); };
     return b;
   };

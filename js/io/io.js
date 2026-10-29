@@ -137,7 +137,7 @@ export function createIO(app) {
     const name = `${baseName()}.${extOf(fmt)}`;
     if (window.showSaveFilePicker && !io.inArtifact()) {
       try {
-        const h = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: fmt === 'dxf' ? 'AutoCAD 2000 DXF' : fmt === 'dxf12' ? 'AutoCAD R12 DXF' : 'Dibujo WebCAD', accept: { 'application/octet-stream': ['.' + extOf(fmt)] } }] });
+        const h = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: fmt === 'dxf' ? 'DXF 2000' : fmt === 'dxf12' ? 'DXF 12' : 'Dibujo WebCAD', accept: { 'application/octet-stream': ['.' + extOf(fmt)] } }] });
         const w = await h.createWritable(); await w.write(content(fmt)); await w.close(); app.doc._fh = h;
         app.doc.name = h.name.replace(/\.(dxf|wcad)$/i, '.dwg'); app.doc.modified = false; log(`Guardado ${h.name}`); app.ui?.setTitle?.(); io.addRecent(h.name, app.doc.serialize());
         return;

@@ -133,7 +133,7 @@ app.ui.loadSample = () => {
 setInterval(() => app.io.autosave(), 5 * 60 * 1000);
 window.addEventListener('beforeunload', (e) => { if (app.docs.some((d) => d.modified)) { e.preventDefault(); e.returnValue = ''; } });
 
-app.log('WebCAD Libre — dibujo técnico 2D. Escriba los comandos en su idioma o en inglés (p. ej. LINEA, LIÑA, LINHA, LÍNIA, LINE o L). F1: ayuda.');
+app.log('WebCAD Libre — dibujo técnico 2D. Escriba los comandos en castellano o en inglés (p. ej. LINEA, LINE o L). F1: ayuda.');
 app.log('Regenerating model.');
 app.view.setCur({ cx: 210, cy: 148, s: Math.min(app.view.W / 460, app.view.H / 330) || 2 });
 app.ui.refresh();

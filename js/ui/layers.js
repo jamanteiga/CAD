@@ -1,7 +1,7 @@
 // Administrador de propiedades de capas (paleta)
 import { h, draggable } from './dom.js';
 import { icon } from './icons.js';
-import { t } from '../core/i18n.js';
+import { t, dispCmd } from '../core/i18n.js';
 import { aciCss, colorName, lwName } from '../core/tables.js';
 
 export function createLayers(app) {
@@ -20,7 +20,7 @@ export function createLayers(app) {
       h('button', { class: 'sm', type: 'button', title: 'Nueva capa', onclick: () => edit((doc) => { const n = uniq('Capa'); doc.ensureLayer(n); selName = n; }) }, h('span', { class: 'ico', html: icon('layers') }), 'Nueva'),
       h('button', { class: 'sm', type: 'button', title: 'Suprimir capa', onclick: () => {
         const doc = d(); const n = selName; if (!n || n === '0' || n === 'Defpoints' || n === doc.clayer) { app.log('No se puede borrar la capa 0, Defpoints, la actual o una capa con objetos.'); return; }
-        if ([...doc.allEntsDeep()].some((e) => e.layer === n)) { app.log(`La capa "${n}" contiene objetos. Use LAYDEL para borrarla con sus objetos.`); return; }
+        if ([...doc.allEntsDeep()].some((e) => e.layer === n)) { app.log(t('La capa "{0}" contiene objetos. Use {1} para borrarla con sus objetos.', n, dispCmd('LAYDEL'))); return; }
         edit((dd) => { delete dd.layers[n]; selName = null; });
       } }, h('span', { class: 'ico', html: icon('erase') }), 'Suprimir'),
       h('button', { class: 'sm', type: 'button', title: 'Establecer como actual', onclick: () => { if (selName && d().layers[selName] && !d().layers[selName].frozen) { d().clayer = selName; app.ui.refresh(); } } }, h('span', { class: 'ico', html: icon('laymcur') }), 'Actual'),

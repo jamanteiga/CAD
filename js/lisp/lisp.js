@@ -3,6 +3,7 @@ import * as G from '../core/geom.js';
 import * as E from '../core/entities.js';
 import { Cancel, PAUSE } from '../cmd/engine.js';
 import { installDcl } from './dcl.js';
+import { installActiveX } from './activex.js';
 
 // ---------- tipos
 export class Sym { constructor(n) { this.name = n; } toString() { return this.name; } }
@@ -54,6 +55,7 @@ export function show(x, princ = false) {
   if (x instanceof Fn) return `#<USUBR @${x.name || 'lambda'}>`;
   if (typeof x === 'function') return `#<SUBR @${x.lname || 'builtin'}>`;
   if (x instanceof LFile) return `#<file "${x.name}">`;
+  if (x && typeof x.lispShow === 'function') return x.lispShow(show);
   if (x instanceof VlaObj) return `#<VLA-OBJECT ${x.kind}>`;
   if (x instanceof CatchErr) return `#<%catch-all-apply-error%>`;
   return String(x);
@@ -268,7 +270,7 @@ export class Lisp {
       if (!eng.active) {
         if (typeof tok !== 'string' || !tok) continue;
         const name = eng.resolveName(tok);
-        if (!name) { this.app.log(`Unknown command "${tok.toUpperCase()}".`); throw new LispError('invalid AutoCAD command: ' + tok); }
+        if (!name) { this.app.log(`Unknown command "${tok.toUpperCase()}".`); throw new LispError('invalid command: ' + tok); }
         eng.run(tok);
         await eng.waitSettled();
         continue;
@@ -420,81 +422,9 @@ export class Lisp {
     return group('AND');
   }
 
-  // ActiveX mínimo: vla-get-xxx / vla-put-xxx
-  dynamicVla(name) {
-    const m = /^VLA-(GET|PUT)-(.+)$/.exec(name);
-    if (!m) return null;
-    const prop = m[2];
-    const self = this;
-    const f = async function (args) { return m[1] === 'GET' ? self.vlaGet(args[0], prop) : self.vlaPut(args[0], prop, args[1]); };
-    f.lname = name.toLowerCase();
-    return f;
-  }
-  entOf(o) { if (o instanceof Ename) return o.e; if (o instanceof VlaObj && o.kind === 'ent') return o.ref; throw new LispError('bad argument type: VLA-OBJECT ' + show(o)); }
-  vlaGet(o, prop) {
-    prop = prop.toUpperCase();
-    if (o instanceof VlaObj && o.kind !== 'ent') {
-      if (prop === 'ACTIVEDOCUMENT') return new VlaObj('doc');
-      if (prop === 'MODELSPACE') return new VlaObj('ms');
-      if (prop === 'PAPERSPACE') return new VlaObj('ps');
-      if (prop === 'ACTIVELAYOUT') return new VlaObj('layout');
-      if (prop === 'NAME') return this.doc.name;
-      if (prop === 'COUNT' && o.kind === 'ms') return this.doc.model.length;
-      return null;
-    }
-    const e = this.entOf(o);
-    switch (prop) {
-      case 'LAYER': return e.layer;
-      case 'COLOR': return e.color ?? 256;
-      case 'LINETYPE': return e.ltype || 'ByLayer';
-      case 'OBJECTNAME': return 'AcDb' + ({ LWPOLYLINE: 'Polyline', INSERT: 'BlockReference', TEXT: 'Text', MTEXT: 'MText', LINE: 'Line', CIRCLE: 'Circle', ARC: 'Arc', HATCH: 'Hatch', DIMENSION: 'RotatedDimension', ELLIPSE: 'Ellipse', SPLINE: 'Spline', POINT: 'Point' }[e.type] || e.type);
-      case 'HANDLE': return e.hid;
-      case 'LENGTH': return R(E.entLength(e));
-      case 'AREA': return R(E.entArea(e));
-      case 'RADIUS': return R(e.r);
-      case 'DIAMETER': return R(e.r * 2);
-      case 'CENTER': return ptList(e.c);
-      case 'STARTPOINT': return ptList(e.type === 'LINE' ? e.p1 : e.type === 'ARC' ? G.polar(e.c, e.a1, e.r) : E.curvePoints(e)[0]);
-      case 'ENDPOINT': { if (e.type === 'LINE') return ptList(e.p2); if (e.type === 'ARC') return ptList(G.polar(e.c, e.a2, e.r)); const p = E.curvePoints(e); return ptList(p[p.length - 1]); }
-      case 'TEXTSTRING': return e.type === 'ATTRIB' ? e.text : e.text ?? '';
-      case 'HEIGHT': return R(e.h || 0);
-      case 'ROTATION': return R(e.rot || 0);
-      case 'INSERTIONPOINT': return ptList(e.p);
-      case 'NAME': case 'EFFECTIVENAME': return e.name;
-      case 'XSCALEFACTOR': return R(e.sx ?? 1);
-      case 'YSCALEFACTOR': return R(e.sy ?? 1);
-      case 'CLOSED': return e.closed ? T : null;
-      case 'COORDINATES': return (e.pts || []).flatMap((p) => [R(p.x), R(p.y)]);
-      case 'TAGSTRING': return e.tag;
-      case 'HASATTRIBUTES': return e.attribs?.length ? T : null;
-      case 'MEASUREMENT': return R(E.dimMeasure(e));
-    }
-    throw new LispError(`ActiveX: propiedad ${prop} no soportada`);
-  }
-  vlaPut(o, prop, v) {
-    const e = this.entOf(o); prop = prop.toUpperCase();
-    this.doc.touch(e);
-    switch (prop) {
-      case 'LAYER': e.layer = v; this.doc.ensureLayer(v); break;
-      case 'COLOR': e.color = num(v); break;
-      case 'LINETYPE': e.ltype = String(v).toUpperCase(); break;
-      case 'TEXTSTRING': e.text = v; break;
-      case 'HEIGHT': e.h = num(v); break;
-      case 'ROTATION': e.rot = num(v); break;
-      case 'RADIUS': e.r = num(v); break;
-      case 'INSERTIONPOINT': e.p = toPt(v); break;
-      case 'CENTER': e.c = toPt(v); break;
-      case 'STARTPOINT': e.p1 = toPt(v); break;
-      case 'ENDPOINT': e.p2 = toPt(v); break;
-      case 'CLOSED': e.closed = truthy(v) && v !== 0; break;
-      case 'XSCALEFACTOR': e.sx = num(v); break;
-      case 'YSCALEFACTOR': e.sy = num(v); break;
-      default: throw new LispError(`ActiveX: propiedad ${prop} no soportada`);
-    }
-    E.invalidate(e); this.app.view.redraw(); return null;
-  }
+  dynamicVla() { return null; } // sustituido por activex.js
 
-  installBuiltins() { installBuiltins(this); installDcl(this); }
+  installBuiltins() { installBuiltins(this); installDcl(this); installActiveX(this, { sym, T, Sym, Real, Pair, Ename, PickSet, VlaObj, LispError, show, read, toPt, wcmatch, fmtReal }); }
 }
 
 // ---------- formas especiales
@@ -526,8 +456,8 @@ const SPECIAL = {
   async UNTRACE(x) { void x; return null; },
   async 'VLAX-FOR'(x) {
     const v = x[1], coll = await this.ev(x[2]); let r = null;
-    const items = coll instanceof VlaObj && coll.kind === 'ms' ? this.doc.model.slice() : [];
-    for (const e of items) { this.set(v, new VlaObj('ent', e)); for (let i = 3; i < x.length; i++) r = await this.ev(x[i]); }
+    const items = this.vlaxForItems(coll);
+    for (const o of items) { this.set(v, o); for (let i = 3; i < x.length; i++) r = await this.ev(x[i]); }
     return r;
   },
 };
@@ -584,8 +514,9 @@ function installBuiltins(L_) {
   L_.g.set('PAUSE', '\\');
   // comparación
   const cmp = (f) => (a) => { for (let i = 0; i < a.length - 1; i++) { const x = a[i], y = a[i + 1]; const r = typeof x === 'string' && typeof y === 'string' ? f(x < y ? -1 : x > y ? 1 : 0, 0) : f(num(x), num(y)); if (!r) return null; } return T; };
-  def('=', (a) => { for (let i = 0; i < a.length - 1; i++) { const x = a[i], y = a[i + 1]; if (typeof x === 'string' || typeof y === 'string') { if (x !== y) return null; } else if (num(x) !== num(y)) return null; } return T; });
-  def('/=', (a) => { const x = a[0], y = a[1]; if (typeof x === 'string' || typeof y === 'string') return x !== y ? T : null; return num(x) !== num(y) ? T : null; });
+  const same = (x, y) => (isNum(x) && isNum(y) ? num(x) === num(y) : typeof x === 'string' || typeof y === 'string' || !isNum(x) || !isNum(y) ? x === y || (x instanceof Ename && y instanceof Ename && x.e === y.e) : num(x) === num(y));
+  def('=', (a) => { for (let i = 0; i < a.length - 1; i++) if (!same(a[i], a[i + 1])) return null; return T; });
+  def('/=', (a) => (same(a[0], a[1]) ? null : T));
   def('<', cmp((x, y) => x < y)); def('>', cmp((x, y) => x > y)); def('<=', cmp((x, y) => x <= y)); def('>=', cmp((x, y) => x >= y));
   const equal = (x, y, fuzz = 0) => {
     if (isNum(x) && isNum(y)) return Math.abs(num(x) - num(y)) <= fuzz;
@@ -605,7 +536,7 @@ function installBuiltins(L_) {
   def('vl-consp', (a) => (Array.isArray(a[0]) || a[0] instanceof Pair ? T : null));
   def('vl-symbolp', (a) => (a[0] instanceof Sym ? T : null));
   def('boundp', (a) => (a[0] instanceof Sym && L_.g.get(a[0].name) != null ? T : null));
-  def('type', (a) => { const x = a[0]; if (x == null) return null; if (typeof x === 'number') return sym('INT'); if (x instanceof Real) return sym('REAL'); if (typeof x === 'string') return sym('STR'); if (x instanceof Sym) return sym('SYM'); if (Array.isArray(x) || x instanceof Pair) return sym('LIST'); if (x instanceof Ename) return sym('ENAME'); if (x instanceof PickSet) return sym('PICKSET'); if (x instanceof Fn) return sym('USUBR'); if (typeof x === 'function') return sym('SUBR'); if (x instanceof LFile) return sym('FILE'); if (x instanceof VlaObj) return sym('VLA-OBJECT'); return sym('UNKNOWN'); });
+  def('type', (a) => { const x = a[0]; if (x == null) return null; if (x && typeof x.lispType === 'function') return sym(x.lispType()); if (typeof x === 'number') return sym('INT'); if (x instanceof Real) return sym('REAL'); if (typeof x === 'string') return sym('STR'); if (x instanceof Sym) return sym('SYM'); if (Array.isArray(x) || x instanceof Pair) return sym('LIST'); if (x instanceof Ename) return sym('ENAME'); if (x instanceof PickSet) return sym('PICKSET'); if (x instanceof Fn) return sym('USUBR'); if (typeof x === 'function') return sym('SUBR'); if (x instanceof LFile) return sym('FILE'); if (x instanceof VlaObj) return sym('VLA-OBJECT'); return sym('UNKNOWN'); });
   // listas
   const car = (x) => (x == null ? null : x instanceof Pair ? x.a : Array.isArray(x) ? x[0] : (() => { throw new LispError('bad argument type: consp ' + show(x)); })());
   const cdr = (x) => (x == null ? null : x instanceof Pair ? x.d : Array.isArray(x) ? L(x.slice(1)) : (() => { throw new LispError('bad argument type: consp ' + show(x)); })());
@@ -736,7 +667,7 @@ function installBuiltins(L_) {
   def('write-char', function (a) { const c = String.fromCharCode(num(a[0])); if (a[1] instanceof LFile) { const o = a[1].out; if (!o.length) o.push(''); o[o.length - 1] += c; } else this.write(c); return a[0]; });
   def('getfiled', async function (a) { const f = await this.app.io.pickFile(a[2] ? '.' + str(a[2]) : ''); if (!f) return null; this.addFile(f.name, await f.text()); return f.name.toLowerCase(); });
   // variables de sistema
-  def('getvar', function (a) { const v = this.doc.getvar(str(a[0])); if (v === undefined) return null; if (v && typeof v === 'object' && 'x' in v) return ptList(v); if (typeof v === 'number') return Number.isInteger(v) && !['LTSCALE', 'TEXTSIZE', 'FILLETRAD', 'PDSIZE', 'SNAPUNIT', 'GRIDUNIT', 'DIMSCALE', 'DIMTXT', 'DIMASZ', 'CELTSCALE', 'HPSCALE', 'OFFSETDIST', 'CHAMFERA', 'CHAMFERB', 'CIRCLERAD', 'PLINEWID', 'ELEVATION', 'THICKNESS', 'DATE', 'CDATE', 'USERR1', 'USERR2', 'USERR3', 'USERR4', 'USERR5'].includes(str(a[0]).toUpperCase()) ? v : R(v); return v; });
+  def('getvar', function (a) { const v = this.doc.getvar(str(a[0])); if (v === undefined) return null; if (v && typeof v === 'object' && 'x' in v) return ptList(v); if (typeof v === 'number') return Number.isInteger(v) && !['AREA', 'PERIMETER', 'LTSCALE', 'TEXTSIZE', 'FILLETRAD', 'PDSIZE', 'SNAPUNIT', 'GRIDUNIT', 'DIMSCALE', 'DIMTXT', 'DIMASZ', 'CELTSCALE', 'HPSCALE', 'OFFSETDIST', 'CHAMFERA', 'CHAMFERB', 'CIRCLERAD', 'PLINEWID', 'ELEVATION', 'THICKNESS', 'DATE', 'CDATE', 'USERR1', 'USERR2', 'USERR3', 'USERR4', 'USERR5'].includes(str(a[0]).toUpperCase()) ? v : R(v); return v; });
   def('setvar', function (a) { const n = str(a[0]); let v = a[1]; if (Array.isArray(v)) v = toPt(v); else if (isNum(v)) v = num(v); try { this.doc.setvar(n, v); } catch (e) { throw new LispError(e.message); } this.app.ui?.status?.update?.(); this.app.view.redraw(); return a[1]; });
   // entrada de usuario
   def('initget', function (a) { let bits = 0, kws = null; for (const x of a) { if (isNum(x)) bits = num(x); else if (typeof x === 'string') kws = x.trim().split(/\s+/).filter(Boolean); } this.initgetState = { bits, kws }; return null; });
@@ -866,43 +797,5 @@ function installBuiltins(L_) {
   def('acad_truecolordlg', async function () { const c = await this.app.ui.dlg.color(256); return c == null ? null : [new Pair(62, c)]; });
   // command
   def('command vl-cmdf command-s', async function (a) { return this.command(a); });
-  // vlax-curve
-  const cv = (o) => { const e = o instanceof Ename ? o.e : o instanceof VlaObj ? o.ref : null; if (!e) throw new LispError('bad argument type: curve'); return { e, pts: E.curvePoints(e), len: E.entLength(e) }; };
-  const distAt = (pts, q) => { let best = 0, bd = Infinity, acc = 0; for (let i = 1; i < pts.length; i++) { const n = G.primNearest({ k: 'L', a: pts[i - 1], b: pts[i] }, q); const d = G.dist(n, q); if (d < bd) { bd = d; best = acc + G.dist(pts[i - 1], n); } acc += G.dist(pts[i - 1], pts[i]); } return best; };
-  def('vlax-curve-getstartpoint', (a) => ptList(cv(a[0]).pts[0]));
-  def('vlax-curve-getendpoint', (a) => { const c = cv(a[0]); return ptList(c.pts[c.pts.length - 1]); });
-  def('vlax-curve-getdistatparam', (a) => R(Math.min(num(a[1]), cv(a[0]).len)));
-  def('vlax-curve-getparamatdist vlax-curve-getparamatpoint', (a) => { const c = cv(a[0]); return R(Array.isArray(a[1]) ? distAt(c.pts, toPt(a[1])) : num(a[1])); });
-  def('vlax-curve-getdistatpoint', (a) => R(distAt(cv(a[0]).pts, toPt(a[1]))));
-  def('vlax-curve-getpointatdist vlax-curve-getpointatparam', (a) => ptList(E.pointAtLength(cv(a[0]).pts, num(a[1])).p));
-  def('vlax-curve-getendparam', (a) => R(cv(a[0]).len));
-  def('vlax-curve-getstartparam', () => R(0));
-  def('vlax-curve-getclosestpointto', (a) => { const c = cv(a[0]); const q = toPt(a[1]); return ptList(E.pointAtLength(c.pts, distAt(c.pts, q)).p); });
-  def('vlax-curve-getfirstderiv', (a) => { const { a: an } = E.pointAtLength(cv(a[0]).pts, num(a[1])); return [R(Math.cos(an)), R(Math.sin(an)), R(0)]; });
-  def('vlax-curve-getarea', (a) => R(E.entArea(cv(a[0]).e)));
-  def('vlax-curve-isclosed', (a) => { const e = cv(a[0]).e; return e.type === 'CIRCLE' || e.closed ? T : null; });
-  // ActiveX mínimo
-  def('vlax-get-acad-object', () => new VlaObj('acad'));
-  def('vlax-ename->vla-object', (a) => new VlaObj('ent', a[0]?.e));
-  def('vlax-vla-object->ename', (a) => (a[0] instanceof VlaObj ? new Ename(a[0].ref) : null));
-  def('vlax-get-property vlax-get', function (a) { return this.vlaGet(a[0], a[1] instanceof Sym ? a[1].name : str(a[1])); });
-  def('vlax-put-property vlax-put', function (a) { return this.vlaPut(a[0], a[1] instanceof Sym ? a[1].name : str(a[1]), a[2]); });
-  def('vlax-variant-value vlax-safearray->list', (a) => a[0]);
-  def('vlax-3d-point', (a) => (Array.isArray(a[0]) ? a[0] : [a[0], a[1], a[2] ?? R(0)]));
-  def('vlax-make-safearray vlax-safearray-fill vlax-make-variant', (a) => a[1] ?? a[0]);
-  def('vlax-release-object vla-startundomark vla-endundomark vla-regen vla-update vla-zoomextents', () => null);
-  def('vlax-erased-p', function (a) { const e = a[0] instanceof VlaObj ? a[0].ref : a[0]?.e; return this.doc.ownerOf(e) ? null : T; });
-  def('vlax-property-available-p', function (a) { try { this.vlaGet(a[0], a[1] instanceof Sym ? a[1].name : str(a[1])); return T; } catch (_) { return null; } });
-  def('vla-delete', function (a) { this.doc.remove(this.entOf(a[0])); this.app.view.redraw(); return null; });
-  def('vla-addline', function (a) { const e = this.doc.add({ type: 'LINE', p1: toPt(a[1]), p2: toPt(a[2]) }); this.app.view.redraw(); return new VlaObj('ent', e); });
-  def('vla-addcircle', function (a) { const e = this.doc.add({ type: 'CIRCLE', c: toPt(a[1]), r: num(a[2]) }); this.app.view.redraw(); return new VlaObj('ent', e); });
-  def('vla-addtext', function (a) { const e = this.doc.add({ type: 'TEXT', text: str(a[1]), p: toPt(a[2]), h: num(a[3]), rot: 0 }); this.app.view.redraw(); return new VlaObj('ent', e); });
-  def('vla-addlightweightpolyline', function (a) { const c = a[1] || []; const pts = []; for (let i = 0; i + 1 < c.length; i += 2) pts.push({ x: num(c[i]), y: num(c[i + 1]), b: 0 }); const e = this.doc.add({ type: 'LWPOLYLINE', pts, closed: false }); this.app.view.redraw(); return new VlaObj('ent', e); });
-  def('vla-move', function (a) { const e = this.entOf(a[0]); const p1 = toPt(a[1]), p2 = toPt(a[2]); this.doc.touch(e); E.transformEnt(e, G.M.tr(p2.x - p1.x, p2.y - p1.y)); this.app.view.redraw(); return null; });
-  def('vla-rotate', function (a) { const e = this.entOf(a[0]); this.doc.touch(e); E.transformEnt(e, G.M.rot(num(a[2]), toPt(a[1]))); this.app.view.redraw(); return null; });
-  def('vla-scaleentity', function (a) { const e = this.entOf(a[0]); this.doc.touch(e); E.transformEnt(e, G.M.scale(num(a[2]), toPt(a[1]))); this.app.view.redraw(); return null; });
-  def('vla-copy', function (a) { const e = this.entOf(a[0]); const c = E.cloneEnt(e); delete c.hid; this.doc.add(c, this.doc.ownerOf(e) || this.doc.space); return new VlaObj('ent', c); });
-  def('vla-getattributes', function (a) { const e = this.entOf(a[0]); return L((e.attribs || []).map((x) => new VlaObj('ent', x))); });
-  def('vla-getboundingbox', function (a) { const e = this.entOf(a[0]); const bb = E.entBBox(e, this.doc); this.set(a[1], ptList({ x: bb.x1, y: bb.y1 })); this.set(a[2], ptList({ x: bb.x2, y: bb.y2 })); return null; });
 }
 export { SILENT, VlaObj };

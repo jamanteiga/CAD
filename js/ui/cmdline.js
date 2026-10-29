@@ -2,7 +2,7 @@
 import { h } from './dom.js';
 import { icon } from './icons.js';
 import { fmt } from '../core/geom.js';
-import { trMsg, locName, norm, t as tr } from '../core/i18n.js';
+import { trMsg, norm, dispCmd, getLang, t as tr } from '../core/i18n.js';
 
 export function createCmdline(app) {
   const root = document.getElementById('cmd');
@@ -67,11 +67,16 @@ export function createCmdline(app) {
     if (!app.settings.autocomplete || app.cmd.req || !t || /[^A-Z0-9_\-.'ÁÉÍÓÚÑÜ]/.test(t)) { hideAC(); return; }
     const eng = app.cmd, out = [];
     const aliases = { ...eng.aliases, ...(app.settings.aliases || {}) };
-    if (eng.commands[t]) out.push({ n: t, d: locName(t) });
-    for (const [a, c] of Object.entries(aliases)) if (c && a === t) out.push({ n: a, d: c });
-    for (const n of Object.keys(eng.commands).sort()) if (n.startsWith(t)) out.push({ n, d: locName(n) });
+    // en pantalla, los comandos en el idioma activo; se encuentran tanto por su nombre traducido como por el inglés
+    const loc = getLang() !== 'en';
+    const names = Object.keys(eng.commands).map((n) => ({ en: n, d: loc ? dispCmd(n) : n }));
+    const exact = names.find((x) => norm(x.d) === t) || (eng.commands[t] && names.find((x) => x.en === t));
+    if (exact) out.push({ n: exact.d, d: '' });
+    for (const [a, c] of Object.entries(aliases)) if (c && a === t) out.push({ n: a, d: dispCmd(c) });
+    for (const x of names.filter((x) => norm(x.d).startsWith(t)).sort((p, q) => p.d.localeCompare(q.d))) out.push({ n: x.d, d: '' });
+    if (loc) for (const x of names.filter((x) => x.en.startsWith(t) && !norm(x.d).startsWith(t)).sort((p, q) => p.d.localeCompare(q.d))) out.push({ n: x.d, d: '' });
     if (app.lisp) for (const k of app.lisp.g.keys()) if (k.startsWith('C:') && k.slice(2).startsWith(t)) out.push({ n: k.slice(2), d: 'LISP' });
-    for (const [a, c] of Object.entries(aliases)) if (c && a.startsWith(t) && a !== t) out.push({ n: a, d: c });
+    for (const [a, c] of Object.entries(aliases)) if (c && a.startsWith(t) && a !== t) out.push({ n: a, d: dispCmd(c) });
     for (const k of Object.keys(app.doc.vars)) if (k.startsWith(t)) out.push({ n: k, d: 'variable' });
     acItems = out.filter((x, i) => out.findIndex((y) => y.n === x.n) === i).slice(0, 14);
     if (!acItems.length) { hideAC(); return; }

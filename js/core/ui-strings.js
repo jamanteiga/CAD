@@ -22,8 +22,8 @@ Personalizar | Personalizar | Customize
 Escriba un comando | Escriba un comando | Type a command
 Línea de comandos | Liña de comandos | Command line
 Dibujo y anotación | Debuxo e anotación | Drafting & annotation
-AutoCAD clásico | AutoCAD clásico | AutoCAD classic
-Cinta + menús R12 | Cinta + menús R12 | Ribbon + R12 menus
+Clásico | Clásico | Classic
+Cinta + menús clásicos | Cinta + menús clásicos | Ribbon + classic menus
 Archivo | Ficheiro | File
 Ayuda | Axuda | Help
 Dibujo | Debuxo | Draw
@@ -39,8 +39,8 @@ Rastreo polar | Rastrexo polar | Polar tracking
 Referencia a objetos (F3) — clic derecho: modos | Referencia a obxectos (F3) — clic dereito: modos | Object snap (F3) — right-click: modes
 Mostrar/ocultar grosor de línea | Amosar/ocultar grosor de liña | Show/hide lineweight
 Entrada dinámica | Entrada dinámica | Dynamic input
-Mostrar el menú de pantalla lateral de AutoCAD R12 | Amosar o menú de pantalla lateral de AutoCAD R12 | Show the AutoCAD R12 side screen menu
-Menú R12 | Menú R12 | R12 menu
+Mostrar el menú de pantalla lateral clásico | Amosar o menú de pantalla lateral clásico | Show the classic side screen menu
+Menú clásico | Menú clásico | Classic menu
 Mostrar la barra de menús clásica | Amosar a barra de menús clásica | Show the classic menu bar
 Barra menús | Barra de menús | Menu bar
 Personalización | Personalización | Customization
@@ -50,7 +50,7 @@ Anotar | Anotar | Annotate
 Vista | Vista | View
 Administrar | Administrar | Manage
 Salida | Saída | Output
-Express Tools | Express Tools | Express Tools
+Herramientas extra | Ferramentas extra | Extra tools
 Minimizar cinta | Minimizar a cinta | Minimize ribbon
 Línea | Liña | Line
 Polilínea | Poliliña | Polyline
@@ -221,8 +221,8 @@ Historial de comandos | Historial de comandos | Command history
 Interfaz | Interface | Interface
 Fichas de archivo | Lapelas de ficheiro | File tabs
 Fichas de presentación | Lapelas de presentación | Layout tabs
-Barra de menús R12 | Barra de menús R12 | R12 menu bar
-Menú de pantalla R12 | Menú de pantalla R12 | R12 screen menu
+Barra de menús clásica | Barra de menús clásica | Classic menu bar
+Menú de pantalla clásico | Menú de pantalla clásico | Classic screen menu
 Claro/Oscuro | Tema | Theme
 Interfaz de usuario | Interface de usuario | User interface
 Editar alias | Editar alias | Edit aliases
@@ -298,7 +298,7 @@ Salida PDF | Saída PDF | PDF out
 Salida SVG | Saída SVG | SVG out
 Salida PNG | Saída PNG | PNG out
 Referencia externa | Referencia externa | External reference
-Salir de AutoCAD | Saír | Exit
+Salir | Saír | Exit
 ¡Ayuda! | Axuda! | Help!
 Referencia a objetos | Referencia a obxectos | Object snap
 Punto final | Punto final | Endpoint
@@ -454,12 +454,12 @@ Editor de texto | Editor de texto | Text editor
 Bloque que desea crear o editar | Bloque que desexa crear ou editar | Block to create or edit
 Editar definición de bloque | Editar definición de bloque | Edit block definition
 Sombreado y degradado | Sombreado e degradado | Hatch and gradient
-AutoCAD R12/LT2 DXF (*.dxf) | AutoCAD R12/LT2 DXF (*.dxf) | AutoCAD R12/LT2 DXF (*.dxf)
+DXF versión 12 (*.dxf) | DXF versión 12 (*.dxf) | DXF version 12 (*.dxf)
 WebCAD nativo — conserva bloques dinámicos (*.wcad) | WebCAD nativo — conserva os bloques dinámicos (*.wcad) | Native WebCAD — keeps dynamic blocks (*.wcad)
 Nombre de archivo | Nome do ficheiro | File name
 Tipo de archivo | Tipo de ficheiro | File type
-DXF 2000 conserva capas, grosores, sombreados, splines, presentaciones y grupos, y lo abre cualquier AutoCAD. El formato .wcad guarda además bloques dinámicos y restricciones (WebCAD también los recupera desde su propio DXF). | DXF 2000 conserva capas, grosores, sombreados, splines, presentacións e grupos, e ábreo calquera AutoCAD. O formato .wcad garda ademais os bloques dinámicos e as restricións (WebCAD tamén os recupera desde o seu propio DXF). | DXF 2000 keeps layers, lineweights, hatches, splines, layouts and groups, and opens in any AutoCAD. The .wcad format also keeps dynamic blocks and constraints (WebCAD also recovers them from its own DXF).
-AutoCAD 2000/LT2000 DXF (*.dxf) | AutoCAD 2000/LT2000 DXF (*.dxf) | AutoCAD 2000/LT2000 DXF (*.dxf)
+DXF 2000 conserva capas, grosores, sombreados, splines, presentaciones y grupos, y lo abre cualquier programa de CAD. El formato .wcad guarda además bloques dinámicos y restricciones (WebCAD también los recupera desde su propio DXF). | DXF 2000 conserva capas, grosores, sombreados, splines, presentacións e grupos, e ábreo calquera programa de CAD. O formato .wcad garda ademais os bloques dinámicos e as restricións (WebCAD tamén os recupera desde o seu propio DXF). | DXF 2000 keeps layers, lineweights, hatches, splines, layouts and groups, and opens in any CAD program. The .wcad format also keeps dynamic blocks and constraints (WebCAD also recovers them from its own DXF).
+DXF versión 2000 (*.dxf) | DXF versión 2000 (*.dxf) | DXF version 2000 (*.dxf)
 Guardar dibujo como | Gardar debuxo como | Save drawing as
 Color de índice | Cor de índice | Index color
 Estado de visibilidad | Estado de visibilidade | Visibility state
@@ -509,14 +509,18 @@ Apertura de AutoSnap | Apertura de AutoSnap | AutoSnap aperture
 Mostrar cinta de opciones | Amosar a cinta de opcións | Show ribbon
 Mostrar barra de menús clásica | Amosar a barra de menús clásica | Show classic menu bar
 Mostrar menú de pantalla lateral | Amosar o menú de pantalla lateral | Show side screen menu
+Mostrar menú de pantalla lateral clásico | Amosar o menú de pantalla lateral clásico | Show classic side screen menu
 Fichas Modelo/Presentación | Lapelas Modelo/Presentación | Model/Layout tabs
 Autocompletar en la línea de comandos | Autocompletar na liña de comandos | Command line autocomplete
-Restaurar menú R12 | Restaurar o menú R12 | Restore R12 menu
+Restaurar menú clásico | Restaurar o menú clásico | Restore classic menu
 Eliminar | Eliminar | Remove
 Alias | Alias | Alias
 Pulse la combinación | Prema a combinación | Press the key combination
 COMANDO o macro | COMANDO ou macro | COMMAND or macro
-Alias de comandos (acad.pgp) | Alias de comandos (acad.pgp) | Command aliases (acad.pgp)
+Alias de comandos (.pgp) | Alias de comandos (.pgp) | Command aliases (.pgp)
+Repetir {0} | Repetir {0} | Repeat {0}
+La capa "{0}" contiene objetos. Use {1} para borrarla con sus objetos. | A capa "{0}" contén obxectos. Use {1} para borrala cos seus obxectos. | Layer "{0}" contains objects. Use {1} to delete it with its objects.
+Inglés | Inglés | English
 Añadir | Engadir | Add
 Filtrar | Filtrar | Filter
 Comando | Comando | Command
@@ -636,14 +640,14 @@ Puntos | Puntos | Points
 Insertar | Inserir | Insert
 Escala Y | Escala Y | Scale Y
 Clic derecho | Clic dereito | Right-click
-Interfaz clásica (R12): barra de menús + menú de pantalla. | Interface clásica (R12): barra de menús + menú de pantalla. | Classic interface (R12): menu bar + screen menu.
-Menú AutoCAD R12 restaurado. | Menú AutoCAD R12 restaurado. | AutoCAD R12 menu restored.
+Interfaz clásica: barra de menús + menú de pantalla. | Interface clásica: barra de menús + menú de pantalla. | Classic interface: menu bar + screen menu.
+Menú clásico restaurado. | Menú clásico restaurado. | Classic menu restored.
 No se puede borrar la capa 0, Defpoints, la actual o una capa con objetos. | Non se pode borrar a capa 0, Defpoints, a actual nin unha capa con obxectos. | Can't delete layer 0, Defpoints, the current layer or a layer with objects.
 No se puede borrar un tipo de línea en uso. | Non se pode borrar un tipo de liña en uso. | Can't delete a linetype in use.
 No se puede inutilizar la capa actual. | Non se pode inutilizar a capa actual. | Can't freeze the current layer.
-WebCAD Libre — dibujo técnico 2D. Escriba los comandos en su idioma o en inglés (p. ej. LINEA, LIÑA, LINHA, LÍNIA, LINE o L). F1: ayuda. | WebCAD Libre — debuxo técnico 2D. Escriba os comandos no seu idioma ou en inglés (p. ex. LINEA, LIÑA, LINHA, LÍNIA, LINE ou L). F1: axuda. | WebCAD Libre — 2D technical drawing. Type commands in your language or in English (e.g. LINEA, LIÑA, LINHA, LÍNIA, LINE or L). F1: help.
+WebCAD Libre — dibujo técnico 2D. Escriba los comandos en castellano o en inglés (p. ej. LINEA, LINE o L). F1: ayuda. | WebCAD Libre — debuxo técnico 2D. Escriba os comandos en galego, castelán ou inglés (p. ex. LIÑA, LINEA, LINE ou L). F1: axuda. | WebCAD Libre — 2D technical drawing. Type commands in English or Spanish (e.g. LINE, LINEA or L). F1: help.
 Cargando lector DWG (LibreDWG/WebAssembly) | Cargando o lector DWG (LibreDWG/WebAssembly) | Loading DWG reader (LibreDWG/WebAssembly)
-WebCAD Libre (compatible con AutoCAD)\\nCAD 2D en el navegador: dibujo, edición, bloques dinámicos, restricciones, AutoLISP con DCL, lectura y escritura DXF (R12 y 2000) y lectura DWG mediante LibreDWG (WebAssembly).\\n\\nSoftware libre. Funciona sin conexión y sin servidor. | WebCAD Libre (compatible con AutoCAD)\\nCAD 2D no navegador: debuxo, edición, bloques dinámicos, restricións, AutoLISP con DCL, lectura e escritura DXF (R12 e 2000) e lectura DWG mediante LibreDWG (WebAssembly).\\n\\nSoftware libre. Funciona sen conexión e sen servidor. | WebCAD Libre (AutoCAD compatible)\\n2D CAD in the browser: drawing, editing, dynamic blocks, constraints, AutoLISP with DCL, DXF read/write (R12 and 2000) and DWG reading via LibreDWG (WebAssembly).\\n\\nFree software. Works offline, no server needed.
+WebCAD Libre\\nCAD 2D en el navegador: dibujo, edición, bloques dinámicos, restricciones, AutoLISP con DCL, lectura y escritura DXF (versiones 12 y 2000) y lectura DWG mediante LibreDWG (WebAssembly).\\n\\nSoftware libre. Funciona sin conexión y sin servidor. | WebCAD Libre\\nCAD 2D no navegador: debuxo, edición, bloques dinámicos, restricións, AutoLISP con DCL, lectura e escritura DXF (versións 12 e 2000) e lectura DWG mediante LibreDWG (WebAssembly).\\n\\nSoftware libre. Funciona sen conexión e sen servidor. | WebCAD Libre\\n2D CAD in the browser: drawing, editing, dynamic blocks, constraints, AutoLISP with DCL, DXF read/write (versions 12 and 2000) and DWG reading via LibreDWG (WebAssembly).\\n\\nFree software. Works offline, no server needed.
 Comandos | Comandos | Commands
 Aplicar | Aplicar | Apply
 Restablecer | Restablecer | Reset

@@ -615,12 +615,14 @@ export function register(eng, app) {
     const p = need(await c.getPoint('Specify first corner point or [Object/Add area/Subtract area] <Object>:', { def: 'Object' }));
     if (p === 'Object') {
       const s = need(await c.entsel('Select objects:'));
-      c.print(`Area = ${F(E.entArea(s.e))}, ${s.e.type === 'CIRCLE' ? 'Circumference' : 'Perimeter'} = ${F(E.entLength(s.e))}`); return;
+      const ar = E.entArea(s.e), pe = E.entLength(s.e); doc().vars.AREA = ar; doc().vars.PERIMETER = pe;
+      c.print(`Area = ${F(ar)}, ${s.e.type === 'CIRCLE' ? 'Circumference' : 'Perimeter'} = ${F(pe)}`); return;
     }
     if (!isPt(p)) return;
     const pts = [p];
     for (;;) { const q = await c.getPoint('Specify next point or [Arc/Length/Undo/Total] <Total>:', { base: pts[pts.length - 1], preview: (x) => [{ type: 'LWPOLYLINE', pts: [...pts, x].map((v) => ({ ...v, b: 0 })), closed: true }] }); if (!isPt(q)) break; pts.push(q); }
     let per = 0; for (let i = 0; i < pts.length; i++) per += G.dist(pts[i], pts[(i + 1) % pts.length]);
+    doc().vars.AREA = Math.abs(G.polyArea(pts)); doc().vars.PERIMETER = per;
     c.print(`Area = ${F(Math.abs(G.polyArea(pts)))}, Perimeter = ${F(per)}`);
   }, { alias: ['AA'] });
   R('LIST', async (c) => {

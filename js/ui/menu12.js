@@ -27,7 +27,7 @@ export const ACAD12_MNU = String.raw`
 [Ejecutar script...]^C^C_script
 [Visual LISP...]^C^C_vlisp
 [--]
-[Salir de AutoCAD]^C^C_quit
+[Salir]^C^C_quit
 ***POP2
 [Ayuda]
 [¡Ayuda!]'_help
@@ -188,7 +188,7 @@ export const ACAD12_MNU = String.raw`
 
 ***SCREEN
 **S
-[AutoCAD]$S=S
+[WebCAD]$S=S
 [* * * *]$S=OSNAP
 []
 [BLOQUES]$S=BL
@@ -207,7 +207,7 @@ export const ACAD12_MNU = String.raw`
 []
 [GUARDAR:]^C^C_qsave
 **DR
-[AutoCAD]$S=S
+[WebCAD]$S=S
 [* * * *]$S=OSNAP
 [DIBUJO]
 [ARCO]$S=ARC
@@ -218,20 +218,20 @@ export const ACAD12_MNU = String.raw`
 [TEXTODIN:]^C^C_dtext
 [ELIPSE:]^C^C_ellipse
 [-SOMBCON:]^C^C_-hatch
-[INSERT:]^C^C_-insert
+[INSERTAR:]^C^C_-insert
 [LINEA:]^C^C_line
 [TEXTOM:]^C^C_mtext
 [POL:]^C^C_pline
 [PUNTO:]^C^C_point
 [POLIGONO:]^C^C_polygon
-[RECTANG:]^C^C_rectang
+[RECTANGULO:]^C^C_rectang
 [SPLINE:]^C^C_spline
 [LINEAX:]^C^C_xline
 []
 [ ULTIMO ]$S=
 [ EDITAR ]$S=ED
 **ARC
-[AutoCAD]$S=S
+[WebCAD]$S=S
 [* * * *]$S=OSNAP
 [ARCO]
 [3 puntos:]^C^C_arc
@@ -243,7 +243,7 @@ export const ACAD12_MNU = String.raw`
 [ ULTIMO ]$S=
 [ DIBUJO ]$S=DR
 **CIR
-[AutoCAD]$S=S
+[WebCAD]$S=S
 [* * * *]$S=OSNAP
 [CIRCULO]
 [CEN,RAD:]^C^C_circle
@@ -255,7 +255,7 @@ export const ACAD12_MNU = String.raw`
 [ ULTIMO ]$S=
 [ DIBUJO ]$S=DR
 **ED
-[AutoCAD]$S=S
+[WebCAD]$S=S
 [* * * *]$S=OSNAP
 [EDITAR]
 [MATRIZ:]^C^C_array
@@ -283,7 +283,7 @@ export const ACAD12_MNU = String.raw`
 [ ULTIMO ]$S=
 [ DIBUJO ]$S=DR
 **DS
-[AutoCAD]$S=S
+[WebCAD]$S=S
 [* * * *]$S=OSNAP
 [VISUALIZ]
 [ENCUADRE:]'_pan
@@ -299,20 +299,20 @@ export const ACAD12_MNU = String.raw`
 []
 [ ULTIMO ]$S=
 **INQ
-[AutoCAD]$S=S
+[WebCAD]$S=S
 [* * * *]$S=OSNAP
 [CONSULTA]
 [AREA:]^C^C_area
 [LISTBD:]^C^C_list
 [DIST:]'_dist
 [ID:]'_id
-[LIST:]^C^C_list
+[LISTA:]^C^C_list
 [ESTADO:]^C^C_status
 [HORA:]^C^C_time
 []
 [ ULTIMO ]$S=
 **BL
-[AutoCAD]$S=S
+[WebCAD]$S=S
 [* * * *]$S=OSNAP
 [BLOQUES]
 [ATRDEF:]^C^C_attdef
@@ -321,7 +321,7 @@ export const ACAD12_MNU = String.raw`
 [EDITBLOQ:]^C^C_bedit
 [BLOQUE:]^C^C_-block
 [DESCOMP:]^C^C_explode
-[INSERT:]^C^C_-insert
+[INSERTAR:]^C^C_-insert
 [LIMPIA:]^C^C_purge
 [BLOQDISC:]^C^C_wblock
 [REFX:]^C^C_xattach
@@ -332,7 +332,7 @@ export const ACAD12_MNU = String.raw`
 [CERRARBL:]^C^C_bclose
 [ ULTIMO ]$S=
 **DIM
-[AutoCAD]$S=S
+[WebCAD]$S=S
 [* * * *]$S=OSNAP
 [ACOTAR:]
 [LINEAL]^C^C_dimlinear
@@ -349,7 +349,7 @@ export const ACAD12_MNU = String.raw`
 []
 [ ULTIMO ]$S=
 **MV
-[AutoCAD]$S=S
+[WebCAD]$S=S
 [* * * *]$S=OSNAP
 [VMULT]
 [VMULT:]^C^C_mview
@@ -360,7 +360,7 @@ export const ACAD12_MNU = String.raw`
 []
 [ ULTIMO ]$S=
 **SET
-[AutoCAD]$S=S
+[WebCAD]$S=S
 [* * * *]$S=OSNAP
 [PARAMS]
 [AYUDAS]'_dsettings
@@ -379,7 +379,7 @@ export const ACAD12_MNU = String.raw`
 [OPCIONES]'_options
 [ ULTIMO ]$S=
 **UT
-[AutoCAD]$S=S
+[WebCAD]$S=S
 [* * * *]$S=OSNAP
 [UTILIDAD]
 [CARGAAP]^C^C_appload
@@ -396,7 +396,7 @@ export const ACAD12_MNU = String.raw`
 []
 [ ULTIMO ]$S=
 **LSP
-[AutoCAD]$S=S
+[WebCAD]$S=S
 [* * * *]$S=OSNAP
 [LISP]
 [CARGAAP]^C^C_appload
@@ -566,7 +566,7 @@ export function createMenu12(app) {
     m12.renderBar(); m12.renderScreen();
     app.log(`Menú "${name}" cargado: ${parsed.pops.length} menús desplegables, ${Object.keys(parsed.screen).length} páginas de pantalla.`);
   };
-  m12.resetMenus = () => { delete app.settings.customMenu; saveSettings(); menus = parseMNU(ACAD12_MNU); m12.page = 'S'; m12.renderBar(); m12.renderScreen(); app.log('Menú AutoCAD R12 restaurado.'); };
+  m12.resetMenus = () => { delete app.settings.customMenu; saveSettings(); menus = parseMNU(ACAD12_MNU); m12.page = 'S'; m12.renderBar(); m12.renderScreen(); app.log('Menú clásico restaurado.'); };
   m12.menus = () => menus;
   m12.renderBar(); m12.renderScreen();
   return m12;

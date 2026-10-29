@@ -308,7 +308,7 @@ export function register(eng, app) {
   R('SCREENMENU', async () => { app.settings.screenMenu = !app.settings.screenMenu; app.ui.applyLayout(); }, { transparent: true });
   R('RIBBON', async () => { app.settings.ribbon = true; app.ui.applyLayout(); });
   R('RIBBONCLOSE', async () => { app.settings.ribbon = false; app.ui.applyLayout(); });
-  R('CLASSIC', async () => { Object.assign(app.settings, { ribbon: false, menuBar: true, screenMenu: true }); app.ui.applyLayout(); app.log('Interfaz clásica (R12): barra de menús + menú de pantalla.'); });
+  R('CLASSIC', async () => { Object.assign(app.settings, { ribbon: false, menuBar: true, screenMenu: true }); app.ui.applyLayout(); app.log('Interfaz clásica: barra de menús + menú de pantalla.'); });
   R('MENU', async () => { const f = await app.io.pickFile('.mnu,.mns,.mnc,.txt'); if (!f) return; const t = await f.text(); app.ui.menu12.loadMNU(t, f.name); }, { alias: ['MENULOAD'] });
   R('TEXTSCR', async () => app.ui.cmdline.expand(), { transparent: true, keepSel: true });
   R('GRAPHSCR', async () => app.ui.cmdline.expand(false), { transparent: true, keepSel: true });

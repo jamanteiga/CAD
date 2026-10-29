@@ -22,4 +22,18 @@ export default async (page, t) => {
   }
   await type('LAYER', 'PROPERTIES');
   t.ok(await page.evaluate(() => !!document.querySelector('#layerpal') && !!document.querySelector('#propspal')), 'paletas de capas y propiedades');
+
+  // sin referencias a AutoCAD y con los comandos en castellano en pantalla
+  await page.evaluate(() => { webcad.ui.setLang('es'); webcad.settings.menuBar = true; webcad.settings.screenMenu = true; webcad.ui.applyLayout(); });
+  const vis = await page.evaluate(async () => {
+    const out = [];
+    const grab = () => { out.push(document.body.innerText); document.querySelectorAll('[title],[aria-label],option').forEach((e) => out.push(e.getAttribute('title') || '', e.getAttribute('aria-label') || '', e.textContent)); };
+    for (const tab of [...document.querySelectorAll('.rt')]) { tab.click(); await new Promise((r) => setTimeout(r, 30)); grab(); }
+    return out.join('\n');
+  });
+  t.ok(!/autocad|autodesk|\bR12\b/i.test(vis), 'ninguna referencia visual a AutoCAD');
+  t.ok(!/\((PLINE|CIRCLE|MTEXT|DIMLINEAR|LAYER|INSERT|MATCHPROP|EATTEDIT|BLOCK|PROPERTIES|PLOT|DUCT)\)/.test(vis) && /\(POL\)/.test(vis), 'la cinta muestra los comandos en castellano');
+  await page.click('#cmdin'); await type('_circle', '500,500', '2');
+  t.ok(await page.evaluate(() => /Comando: CIRCULO/.test(document.getElementById('cmdhist').textContent)), 'un comando escrito en inglés se muestra en castellano');
+  await page.evaluate(() => { webcad.settings.menuBar = false; webcad.settings.screenMenu = false; webcad.ui.applyLayout(); });
 };

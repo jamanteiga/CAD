@@ -346,7 +346,7 @@ const MSG = {
   'Cannot delete the only layout.': 'No se puede suprimir la única presentación.', '0 objects joined': '0 objetos unidos', 'Radius must be > 0 for arcs.': 'El radio debe ser > 0 para arcos.',
   'Unknown variable name.  Type SETVAR ? for a list of variables.': 'Nombre de variable desconocido. Escriba MODIVAR ? para ver la lista de variables.',
   'Current active settings:  Color Layer Ltype Ltscale Lineweight Transparency Thickness PlotStyle Dim Text Hatch Polyline Viewport Table Material Multileader Center object': 'Parámetros activos actuales:  Color Capa Tipolín Escalatl Grosorlín Transparencia Altura Estilotrazado Cota Texto Sombreado Polilínea Ventana Tabla Material Directrizm',
-  'Interfaz clásica (R12): barra de menús + menú de pantalla.': 'Interfaz clásica (R12): barra de menús + menú de pantalla.', 'Auditing Header': 'Auditando cabecera', 'Auditing Tables': 'Auditando tablas',
+  'Interfaz clásica: barra de menús + menú de pantalla.': 'Interfaz clásica: barra de menús + menú de pantalla.', 'Auditing Header': 'Auditando cabecera', 'Auditing Tables': 'Auditando tablas',
   'Auditing Entities Pass 1': 'Auditando entidades, paso 1', 'Total errors found 0 fixed 0': 'Total de errores encontrados 0 corregidos 0', 'of': 'de', '1 was on a locked layer.': '1 estaba en una capa bloqueada.',
   'Expects a point or Window/Last/Crossing/BOX/ALL/Fence/WPolygon/CPolygon/Add/Remove/Previous': 'Se espera un punto o Ventana/Último/Captura/Todo/Borde/PolígonoV/PolígonoC/Añadir/Suprimir/Previo',
   '*Invalid selection*': '*Designación no válida*', 'Linetype not found.': 'Tipo de línea no encontrado.',
@@ -435,6 +435,13 @@ export const CMD_ES = {
   CIRCULOISO: 'ISOCIRCLE', TUBERIA: 'PIPE', ADMESTILOS: 'STYLESMANAGER', PUBLICAR: 'PUBLISH', GUARDARNUBE: 'CLOUDSAVE', ABRIRNUBE: 'CLOUDOPEN', VERSIONES: 'CLOUDVERSIONS',
   MARCA: 'MARKUP', MARCAS: 'MARKUPS', REFX: 'XREF', PROPSDIB: 'DWGPROPS', CAMPO: 'FIELD', ACTCAMPO: 'UPDATEFIELD', NUEVORAPIDO: 'QNEW',
   PALETAPROPCERRAR: 'PROPERTIESCLOSE', ACERCADE: 'ABOUT', RESTAURA: 'RECOVER', ENVIARATRAS: 'HATCHTOBACK', TEXTODELANTE: 'TEXTTOFRONT',
+  EDITMATRIZ: 'ARRAYEDIT', CARGASHX: 'SHXLOAD', BTABLACONSULTA: 'BLOOKUPTABLE', BPARAMSUPR: 'BPARAMDEL', CAPACERRAR: 'LAYERCLOSE', SALIDAPNG: 'PNGOUT', SALIDASVG: 'SVGOUT',
+  CALCRAPIDA: 'QUICKCALC', ENLAZARX: 'XATTACH', CARGA: 'LOAD', RGCOINCIDENTE: 'GCCOINCIDENT', RGHORIZONTAL: 'GCHORIZONTAL', RGVERTICAL: 'GCVERTICAL', RGPARALELA: 'GCPARALLEL',
+  RGPERPENDICULAR: 'GCPERPENDICULAR', RGIGUAL: 'GCEQUAL', RGFIJA: 'GCFIX', RGCONCENTRICA: 'GCCONCENTRIC', RGCOLINEAL: 'GCCOLLINEAR', RGTANGENTE: 'GCTANGENT',
+  RCLINEAL: 'DCLINEAR', RCHORIZONTAL: 'DCHORIZONTAL', RCVERTICAL: 'DCVERTICAL', RCALINEADA: 'DCALIGNED', RCRADIO: 'DCRADIUS', RCDIAMETRO: 'DCDIAMETER', RCANGULAR: 'DCANGULAR',
+  // mismos nombres que en inglés (para que figuren en la lista en castellano)
+  SPLINE: 'SPLINE', ID: 'ID', U: 'U', BASE: 'BASE', ZOOM: 'ZOOM', REGEN: 'REGEN', COLOR: 'COLOR', MENU: 'MENU', VLISP: 'VLISP', SCRIPT: 'SCRIPT', BIBLIOTECA: 'BIBLIOTECA',
+  CELTSCALE: 'CELTSCALE', PDMODE: 'PDMODE',
 };
 // alias cortos en castellano (no pisan alias ingleses)
 export const ALIAS_ES = {
@@ -453,7 +460,17 @@ export const PT_NAME = revName(PT.CMD), CA_NAME = revName(CA.CMD);
 // comandos del idioma activo (tienen prioridad sobre los alias)
 export const locCmd = (u) => (LANG === 'gl' ? CMD_GL[u] : LANG === 'pt' ? CMD_PT[u] : LANG === 'ca' ? CMD_CA[u] : null) || null;
 // nombre del comando en el idioma activo ('' en inglés)
-export const locName = (n) => (LANG === 'es' ? ES_NAME[n] : LANG === 'gl' ? GL_NAME[n] || ES_NAME[n] : LANG === 'pt' ? PT_NAME[n] : LANG === 'ca' ? CA_NAME[n] : '') || '';
+const locName1 = (n) => (LANG === 'es' ? ES_NAME[n] : LANG === 'gl' ? GL_NAME[n] || ES_NAME[n] : LANG === 'pt' ? PT_NAME[n] || ES_NAME[n] : LANG === 'ca' ? CA_NAME[n] || ES_NAME[n] : '') || '';
+export const locName = (n) => { n = String(n || '').toUpperCase(); const r = locName1(n); if (r || !n.startsWith('-')) return r; const b = locName1(n.slice(1)); return b ? '-' + b : ''; };
+// nombre de comando para mostrar en pantalla: idioma activo (o el interno si no hay traducción)
+// admite macros de menú (^C^C_LINE, 'ZOOM _E…): solo se muestra el comando
+export const dispCmd = (m) => {
+  const tok = String(m || '').replace(/\^C/gi, '').trim().split(/[\s;]+/)[0].replace(/^'/, '').replace(/^[._]+/, '').replace(/^-[._]+/, '-').toUpperCase();
+  if (!tok) return '';
+  if (LANG === 'en') return tok;
+  const en = CMD_ES[tok] || tok; // ya puede venir en castellano
+  return locName(en) || tok;
+};
 // referencias a objetos del idioma activo
 export const locOsnap = (u) => (LANG === 'es' ? OSNAP_ES[u] : LANG === 'gl' ? (GL.OSNAP_GL[u] || OSNAP_ES[u]) : LANG === 'pt' ? (PT.OSNAP[u] || OSNAP_ES[u]) : LANG === 'ca' ? (CA.OSNAP[u] || OSNAP_ES[u]) : null);
 

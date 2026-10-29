@@ -14,7 +14,7 @@ export const SYSVARS = {
   BLIPMODE: 0, ERRNO: 0, FILEDIA: 1, PICKFIRST: 1, PICKADD: 1, GRIPS: 1, SELECTIONPREVIEW: 3, ZOOMFACTOR: 60,
   TRIMMODE: 1, HIGHLIGHT: 1, OSNAPCOORD: 2, POLYSIDES: 4, CIRCLERAD: 0, ELEVATION: 0, THICKNESS: 0,
   USERI1: 0, USERI2: 0, USERI3: 0, USERI4: 0, USERI5: 0, USERR1: 0, USERR2: 0, USERR3: 0, USERR4: 0, USERR5: 0,
-  USERS1: '', USERS2: '', USERS3: '', USERS4: '', USERS5: '', ACADVER: '24.2s (WebCAD)', PLATFORM: 'Web',
+  AREA: 0, PERIMETER: 0, USERS1: '', USERS2: '', USERS3: '', USERS4: '', USERS5: '', ACADVER: '24.2s (WebCAD)', PLATFORM: 'Web',
   SAVETIME: 10, ISAVEPERCENT: 50, MAXSORT: 1000, QTEXTMODE: 0, FILLMODE: 1, REGENMODE: 1, UCSICON: 1,
   CURSORSIZE: 5, MEASUREMENT: 1, NOMUTT: 0, QAFLAGS: 0, OSNAPZ: 0, DELOBJ: 1, EDGEMODE: 0, PEDITACCEPT: 1,
 };
@@ -51,6 +51,7 @@ export class Doc {
     this.groups = {};
     this.constraints = [];
     this.markups = [];
+    this.dicts = {}; this.regapps = {}; this.layerStates = {}; delete this._nod;
     this.prevSel = [];
     this.emit('reset');
   }
@@ -236,7 +237,7 @@ export class Doc {
       format: 'webcad', version: 1, name: this.name, layers: this.layers, clayer: this.clayer, blocks: this.blocks,
       model: this.model, layouts: this.layouts, ltypes: this.ltypes, styles: this.styles, vars: this.vars,
       dimstyle: this.dimstyle, handseed: this.handseed, views: this.views, props: this.props, groups: this.groups, constraints: this.constraints, markups: this.markups,
-      plotStyles: this.plotStyles, dataLinks: this.dataLinks,
+      plotStyles: this.plotStyles, dataLinks: this.dataLinks, dicts: this.dicts, regapps: this.regapps, layerStates: this.layerStates,
     };
   }
   serialize() { return JSON.stringify(this.toJSON(), (k, v) => (k[0] === '_' ? undefined : v)); }
@@ -257,6 +258,7 @@ export class Doc {
     this.groups = o.groups || {};
     this.constraints = o.constraints || [];
     this.markups = o.markups || [];
+    this.dicts = o.dicts || {}; this.regapps = o.regapps || {}; this.layerStates = o.layerStates || {};
     if (o.plotStyles) this.plotStyles = o.plotStyles;
     if (o.dataLinks) this.dataLinks = o.dataLinks;
     this.fixHandles();
