@@ -57,16 +57,16 @@ export function createUI(app) {
   ui.setTitle = () => {
     const d = app.doc;
     document.getElementById('title').innerHTML = '';
-    document.getElementById('title').append(h('b', { text: d.name + (d.modified ? '*' : '') }));
-    document.title = `${d.name.replace(/\.(dwg|dxf|wcad)$/i, '')} — WebCAD Libre`;
+    document.getElementById('title').append(h('b', { text: d.name + (d.modified ? '*' : '') }), ' — WebCAD Libre');
+    document.title = `${d.name.replace(/\.dwg$/i, '')} — WebCAD Libre`;
     ui.renderFileTabs();
   };
   ui.renderFileTabs = () => {
     const ft = document.getElementById('filetabs'); ft.innerHTML = '';
     const startOn = ui.start.visible?.();
-    ft.append(h('div', { class: 'ft home' + (startOn ? ' on' : ''), title: 'Inicio', html: icon('stSpace'), onclick: () => ui.start.show() }));
-    for (const d of app.docs) ft.append(h('div', { class: 'ft' + (!startOn && d === app.doc ? ' on' : ''), onclick: () => { ui.start.hide(); app.switchDoc(d); } }, d.name.replace(/\.(dwg|dxf|wcad)$/i, '') + (d.modified ? ' •' : ''), h('span', { class: 'x', text: '×', title: 'Cerrar', onclick: (e) => { e.stopPropagation(); app.closeDoc(d); } })));
-    ft.append(h('span', { class: 'plus', text: '+', title: 'Plano nuevo', onclick: () => { ui.start.hide(); app.io.newDrawing(true); } }));
+    ft.append(h('div', { class: 'ft' + (startOn ? ' on' : ''), text: 'Inicio', onclick: () => ui.start.show() }));
+    for (const d of app.docs) ft.append(h('div', { class: 'ft' + (!startOn && d === app.doc ? ' on' : ''), onclick: () => { ui.start.hide(); app.switchDoc(d); } }, d.name.replace(/\.dwg$/i, '') + (d.modified ? '*' : ''), h('span', { class: 'x', text: '×', title: 'Cerrar', onclick: (e) => { e.stopPropagation(); app.closeDoc(d); } })));
+    ft.append(h('span', { class: 'plus', text: '+', title: 'Dibujo nuevo', onclick: () => { ui.start.hide(); app.io.newDrawing(true); } }));
   };
   ui.renderLayoutTabs = () => {
     const lt = document.getElementById('ltabs'); lt.innerHTML = '';
@@ -82,26 +82,29 @@ export function createUI(app) {
 
   // ---- barra de estado
   const status = document.getElementById('status'), coords = document.getElementById('coords');
+  const sbtn = (label, title, on, fn, menu) => { const b = h('button', { class: 'stb' + (on ? ' on' : ''), title, text: label, onclick: fn }); if (menu) b.oncontextmenu = (e) => { e.preventDefault(); menu(e); }; return b; };
+  const chk = (label, title, on, fn) => h('label', { class: 'stchk', title }, h('input', { type: 'checkbox', checked: on, onchange: (e) => fn(e.target.checked) }), label);
   ui.status = {
     update() {
       const d = app.doc, v = d.vars, s = app.settings;
       status.innerHTML = '';
       const tog = (n) => () => { d.setvar(n, v[n] ? 0 : 1); ui.status.update(); app.view.redraw(); };
-      const ib = (ic, label, title, on, fn, menu) => { const b = h('button', { class: 'stb' + (on ? ' on' : ''), title, onclick: fn }, h('span', { class: 'ico', html: icon(ic) }), h('span', { text: label })); if (menu) b.oncontextmenu = (e) => { e.preventDefault(); menu(e); }; return b; };
       status.append(
-        ib('stSpace', d.active === 'Model' || d.mspace ? t('Modelo') : t('Papel'), 'Espacio modelo o papel', d.active !== 'Model' && !d.mspace, () => { if (d.active !== 'Model') app.cmd.run(d.mspace ? 'PSPACE' : 'MSPACE'); }),
-        ib('stGrid', t('Rejilla'), 'Mostrar rejilla del dibujo (F7)', v.GRIDMODE, tog('GRIDMODE')),
-        ib('stSnap', t('Forzado'), 'Forzado del cursor a la rejilla (F9)', v.SNAPMODE, tog('SNAPMODE')),
-        ib('stOrtho', t('Orto'), 'Modo orto (F8)', v.ORTHOMODE, () => { d.setvar('ORTHOMODE', v.ORTHOMODE ? 0 : 1); if (v.ORTHOMODE) d.setvar('POLARMODE', 0); ui.status.update(); }),
-        ib('stPolar', t('Polar'), 'Rastreo polar (F10)', v.POLARMODE, () => { d.setvar('POLARMODE', v.POLARMODE ? 0 : 1); if (v.POLARMODE) d.setvar('ORTHOMODE', 0); ui.status.update(); }, () => app.cmd.run('DSETTINGS')),
-        ib('stOsnap', t('Referencias'), 'Referencia a objetos (F3) — clic derecho: modos', !(v.OSMODE & 16384), () => { d.setvar('OSMODE', v.OSMODE ^ 16384); ui.status.update(); }, (e) => ui.osnapMenu(e)),
-        ib('stOtrack', t('Rastreo'), 'Rastreo de referencias a objetos (F11)', !!(v.AUTOSNAP & 16), () => { d.setvar('AUTOSNAP', v.AUTOSNAP ^ 16); ui.status.update(); }),
-        ib('stLw', t('Grosor'), 'Mostrar/ocultar grosor de línea', v.LWDISPLAY, () => { d.setvar('LWDISPLAY', v.LWDISPLAY ? 0 : 1); ui.status.update(); app.view.redraw(); }),
-        ib('stDyn', t('Dinámica'), 'Entrada dinámica (F12)', v.DYNMODE, tog('DYNMODE')),
-        h('button', { class: 'stb menu', title: 'Personalización', onclick: (e) => ui.popup(e.clientX - 220, e.clientY - 260, [['Opciones...', 'OPTIONS'], ['Parámetros de dibujo...', 'DSETTINGS'], ['Atajos y alias (CUI)...', 'CUI'], ['Cargar menú .MNU...', 'MENU'], null, ['Menú de pantalla clásico', () => { s.screenMenu = !s.screenMenu; saveSettings(); ui.applyLayout(); }, null, !!s.screenMenu], ['Barra de menús clásica', () => { s.menuBar = !s.menuBar; saveSettings(); ui.applyLayout(); }, null, !!s.menuBar], ['Barra lateral de herramientas', () => { s.ribbon = !s.ribbon; saveSettings(); ui.applyLayout(); }, null, !!s.ribbon], ['Historial de comandos (F2)', 'TEXTSCR']]) }, h('span', { class: 'ico', html: icon('stMenu') })),
+        sbtn(d.active === 'Model' ? 'MODELO' : d.mspace ? 'MODELO' : 'PAPEL', 'Espacio modelo o papel', d.active !== 'Model' && !d.mspace, () => { if (d.active !== 'Model') app.cmd.run(d.mspace ? 'PSPACE' : 'MSPACE'); }),
+        sbtn('REJILLA', 'Mostrar rejilla del dibujo (F7)', v.GRIDMODE, tog('GRIDMODE')),
+        sbtn('FORZC', 'Modo forzcursor (F9)', v.SNAPMODE, tog('SNAPMODE')),
+        sbtn('ORTO', 'Modo orto (F8)', v.ORTHOMODE, () => { d.setvar('ORTHOMODE', v.ORTHOMODE ? 0 : 1); if (v.ORTHOMODE) d.setvar('POLARMODE', 0); ui.status.update(); }),
+        sbtn('POLAR', 'Rastreo polar (F10)', v.POLARMODE, () => { d.setvar('POLARMODE', v.POLARMODE ? 0 : 1); if (v.POLARMODE) d.setvar('ORTHOMODE', 0); ui.status.update(); }, () => app.cmd.run('DSETTINGS')),
+        sbtn('REFENT', 'Referencia a objetos (F3) — clic derecho: modos', !(v.OSMODE & 16384), () => { d.setvar('OSMODE', v.OSMODE ^ 16384); ui.status.update(); }, (e) => ui.osnapMenu(e)),
+        sbtn('RASTREO', 'Rastreo de referencias a objetos (F11)', !!(v.AUTOSNAP & 16), () => { d.setvar('AUTOSNAP', v.AUTOSNAP ^ 16); ui.status.update(); }),
+        sbtn('GLN', 'Mostrar/ocultar grosor de línea', v.LWDISPLAY, () => { d.setvar('LWDISPLAY', v.LWDISPLAY ? 0 : 1); ui.status.update(); app.view.redraw(); }),
+        sbtn('DIN', 'Entrada dinámica (F12)', v.DYNMODE, tog('DYNMODE')),
+        chk('Menú clásico', 'Mostrar el menú de pantalla lateral clásico', !!s.screenMenu, (on) => { s.screenMenu = on; saveSettings(); ui.applyLayout(); }),
+        chk('Barra menús', 'Mostrar la barra de menús clásica', !!s.menuBar, (on) => { s.menuBar = on; saveSettings(); ui.applyLayout(); }),
+        h('button', { class: 'stb', title: 'Personalización', html: '≡', onclick: (e) => ui.popup(e.clientX - 200, e.clientY - 230, [['Opciones...', 'OPTIONS'], ['Parámetros de dibujo...', 'DSETTINGS'], ['Atajos y alias (CUI)...', 'CUI'], ['Cargar menú .MNU...', 'MENU'], null, ['Pantalla limpia (cinta sí/no)', () => { s.ribbon = !s.ribbon; saveSettings(); ui.applyLayout(); }], ['Historial de comandos (F2)', 'TEXTSCR']]) }),
       );
     },
-    coords(p) { coords.replaceChildren(h('span', {}, h('b', { text: 'X ' }), fmt(p.x, 4)), h('span', {}, h('b', { text: 'Y ' }), fmt(p.y, 4))); },
+    coords(p) { coords.textContent = `${fmt(p.x, 4)}, ${fmt(p.y, 4)}, 0.0000`; },
   };
   ui.osnapMenu = (e) => {
     const v = app.doc.vars;
@@ -153,7 +156,7 @@ export function createUI(app) {
   // ---- disposición
   // ---- tema (oscuro / intermedio / claro)
   ui.setTheme = (th) => {
-    const s = app.settings, old = THEMES[s.theme] || THEMES.dark, nu = THEMES[th] || THEMES.dark;
+    const s = app.settings, old = THEMES[s.theme] || THEMES.light, nu = THEMES[th] || THEMES.light;
     if (!s.bgModel || s.bgModel === old.model) s.bgModel = nu.model; // conserva un fondo elegido por el usuario
     if (!s.bgLayoutOut || s.bgLayoutOut === old.out) s.bgLayoutOut = nu.out;
     s.theme = THEMES[th] ? th : 'light';
@@ -204,7 +207,7 @@ export function createUI(app) {
       ui.ribbon.render(); ui.props.render(); ui.layers.render(); ui.status.update(); ui.renderLayoutTabs(); ui.setTitle();
       const d = app.doc, tag = document.getElementById('vptag');
       tag.innerHTML = '';
-      if (d.active !== 'Model') tag.append(h('span', { text: d.active + ' · ' + t(d.mspace ? 'Modelo en ventana' : 'Papel') }));
+      tag.append(t('[-][Superior][Estructura alámbrica 2D]'), d.blockEdit ? h('b', { text: `  Editor de bloques: ${d.blockEdit.name}` }) : '', d.active !== 'Model' ? '  ' + t(d.mspace ? 'MODELO (ventana)' : 'PAPEL') : '');
       const be = d.blockEdit;
       let bar = document.getElementById('bedbar');
       if (be) {

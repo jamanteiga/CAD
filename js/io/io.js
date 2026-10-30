@@ -65,7 +65,7 @@ export function createIO(app) {
   io.newDrawing = async (fromUI) => { if (fromUI || app.settings.template) return app.io.newFromTemplate?.(); return io.blankDrawing(); };
   io.blankDrawing = async () => {
     const n = (io._newN = (io._newN || 1) + 1);
-    const d = new Doc(); d.reset(`${docBase()}${n}`);
+    const d = new Doc(); d.reset(`${docBase()}${n}.dwg`);
     app.addDoc(d);
     app.view.setCur({ cx: 0, cy: 0, s: Math.min(app.view.W / 420, app.view.H / 297) || 2 });
   };

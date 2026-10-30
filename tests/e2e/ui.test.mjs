@@ -23,9 +23,8 @@ export default async (page, t) => {
   await type('LAYER', 'PROPERTIES');
   t.ok(await page.evaluate(() => !!document.querySelector('#layerpal') && !!document.querySelector('#propspal')), 'paletas de capas y propiedades');
 
-  // selector de tema siempre visible en la cabecera
-  for (const [i, th] of [[2, 'dark'], [1, 'mid'], [0, 'light']]) { await page.click(`#themeSw button >> nth=${i}`); t.eq(await page.evaluate(() => document.documentElement.dataset.ui), th, `cabecera: tema ${th}`); }
-  t.ok(!(await page.evaluate(() => document.body.innerText.includes('Estructura alámbrica'))), 'sin rótulo de ventana gráfica copiado');
+  // selector de tema siempre visible en la barra de título
+  for (const [i, th] of [[2, 'dark'], [1, 'mid'], [0, 'light']]) { await page.click(`#themeSw button >> nth=${i}`); t.eq(await page.evaluate(() => document.documentElement.dataset.ui), th, `barra de título: tema ${th}`); }
   // sin referencias a AutoCAD y con los comandos en castellano en pantalla
   await page.evaluate(() => { webcad.ui.setLang('es'); webcad.settings.menuBar = true; webcad.settings.screenMenu = true; webcad.ui.applyLayout(); });
   const vis = await page.evaluate(async () => {

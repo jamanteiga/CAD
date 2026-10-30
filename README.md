@@ -1,6 +1,6 @@
 # WebCAD Libre
 
-CAD 2D en el navegador con flujo de trabajo clásico de CAD e imagen propia: barra lateral de herramientas por categorías, consola de comandos, referencias a objetos con rastreo, pinzamientos, bloques dinámicos, restricciones paramétricas, AutoLISP con DCL, herramientas de instalaciones (conductos, tuberías, P&ID) y menús clásicos. Funciona sin servidor y sin conexión, en cinco idiomas.
+CAD 2D en el navegador con flujo de trabajo clásico de CAD e imagen propia: cinta de opciones, línea de comandos, referencias a objetos con rastreo, pinzamientos, bloques dinámicos, restricciones paramétricas, AutoLISP con DCL, herramientas de instalaciones (conductos, tuberías, P&ID) y menús clásicos. Funciona sin servidor y sin conexión, en cinco idiomas.
 
 ## Puesta en marcha
 
@@ -17,7 +17,7 @@ npm start                 # servidor local en http://localhost:8080 (o: python -
 
 ## Imagen, temas e idiomas
 
-- **Tres temas**: claro (papel vegetal, por defecto), intermedio (granito) y oscuro (pizarra). Se eligen con los tres botones de la cabecera (sol, medio círculo, luna), en la página de inicio o en *Opciones › Visualización*.
+- **Tres temas**: oscuro (pizarra), intermedio (granito) y claro (papel vegetal). Se eligen en la pestaña Inicio, en *Vista › Interfaz › Tema* o en *OPCIONES › Visualización*.
 - **Cinco idiomas**: castellano, galego, português, català e English. Selector ES/GL/PT/CA/EN de la barra de título, pestaña Inicio u *OPCIONES*. Se traduce toda la interfaz y la línea de comandos, sin recargar.
 - **Línea de comandos multilingüe**:
   - Comandos en cualquiera de los idiomas: `LINEA`, `LIÑA`, `LINHA`, `LÍNIA` o `LINE`; `DESPLAZA`, `DESPRAZA`, `MOVER`, `DESPLAÇA` o `MOVE`… Con o sin tildes. Los alias ingleses (`L`, `C`, `M`…) siguen funcionando. `POL` es polilínea.
@@ -47,7 +47,7 @@ npm start                 # servidor local en http://localhost:8080 (o: python -
 | Colaboración | **Nube opcional con Supabase** (NUBE, GUARDARNUBE, ABRIRNUBE, VERSIONES): dibujos compartidos con el equipo e historial de versiones; **marcas de revisión** (MARCA, MARCAS) guardadas en el dibujo y en la nube. Esquema en `supabase/schema.sql` |
 | AutoLISP | Intérprete propio (`defun`, `command` con `pause`, `getpoint`…, `entget`/`entmod` con datos extendidos, `ssget` con filtros, diccionarios y `vlax-ldata-*`, reactores de comando `vlr-*`) y **cuadros DCL** (`load_dialog`, `new_dialog`, `action_tile`, `get_tile`, listas, botones de opción…). APPLOAD carga `.lsp`, `.scr` y `.dcl`; editor Visual LISP con consola |
 | ActiveX (`vla-*`, `vlax-*`) | Modelo de objetos compatible: Application, Document, ModelSpace/PaperSpace, colecciones (Layers, Blocks, Layouts, TextStyles, Linetypes, Groups, Dictionaries, SelectionSets…), Utility, SummaryInfo y AcCmColor. Propiedades y métodos de cada tipo de entidad (`AddLine`…`AddTable`, `InsertBlock`, `Offset`, `Mirror`, `IntersectWith`, `GetAttributes`, `GetDynamicBlockProperties`, `GetXData`…), variants y safearrays, `vlax-curve-*` con parámetros estándar, `SendCommand`, `vlax-dump-object` |
-| Interfaz | Cabecera con pestañas de planos, buscador de comandos, tema e idioma; barra lateral de herramientas por categorías (Principal, Bloques, Anotación, Vista, Configuración, Impresión, Restricciones, Instalaciones, Nube y Utilidades), plegable; consola de comandos anclada bajo el dibujo; barra de estado con interruptores (rejilla, forzado, orto, polar, referencias, rastreo, grosor, entrada dinámica); menús clásicos opcionales (*Disposición › Menús clásicos*); cargador `.MNU`; alias y atajos personalizables |
+| Interfaz | Cinta con pestañas Inicio, Insertar, Anotar, Vista, Administrar, Salida, **Paramétrico**, **Instalaciones**, **Colaborar** y Herramientas extra; barra de menús y menú de pantalla clásicos; cargador `.MNU`; alias y atajos personalizables |
 | Rendimiento | Índice espacial para designar, referenciar y dibujar; encuadre rápido con imagen en caché en dibujos grandes |
 
 Ejemplos en `samples/`: `rutinas-ejemplo.lsp` (BRIDA, CAPAS, LONG, CAMBIACAPA), `rutinas-activex.lsp` (LONGTOTAL, ALTURATEXTO, NUMERAR, INFOCAPAS) y `menu-ejemplo.mnu`.
@@ -89,7 +89,7 @@ js/view/              render en canvas, referencias, rastreo, índice espacial
 js/cmd/               motor de comandos y comandos (dibujo, edición, anotación, bloques, paramétrico, instalaciones, salida, nube…)
 js/lisp/              intérprete AutoLISP, modelo ActiveX (vla-/vlax-) y cuadros DCL
 js/io/                DXF (lectura, escritura 12 y 2000), DWG, SVG, PDF, nube
-js/ui/                barra lateral, menús clásicos, paletas, diálogos, biblioteca, línea de comandos
+js/ui/                cinta, menús clásicos, paletas, diálogos, biblioteca, línea de comandos
 tests/                pruebas unitarias y extremo a extremo (npm test)
 tools/build-sw.mjs    genera la lista del service worker
 supabase/schema.sql   esquema de la nube opcional

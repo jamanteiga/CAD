@@ -56,7 +56,7 @@ function attach(d) {
 app.addDoc = (d) => {
   const cur = app.doc;
   // reemplaza el dibujo inicial vacío y sin modificar
-  if (cur && app.docs.length === 1 && !cur.modified && !cur.model.length && !cur.undoStack.length && /^(Plano|Plànol|Desenho|Drawing|Dibujo|Debuxo)1(\.dwg)?$/i.test(cur.name)) app.docs = [];
+  if (cur && app.docs.length === 1 && !cur.modified && !cur.model.length && !cur.undoStack.length && /^(Dibujo|Debuxo|Drawing)1\.dwg$/i.test(cur.name)) app.docs = [];
   for (const k of Object.keys(d.ltypes)) if (!d.ltypes[k] && LINETYPES[k]) d.ltypes[k] = LINETYPES[k];
   app.docs.push(d); attach(d); app.switchDoc(d);
 };
@@ -78,7 +78,7 @@ app.closeDoc = async (d) => {
 app.cmd.register('CLOSE', async () => app.closeDoc(app.doc), { alias: ['CLOSEALL', 'QUIT', 'EXIT'] });
 
 app.docs.push(app.doc); attach(app.doc);
-app.doc.name = docBase() + '1';
+app.doc.name = docBase() + '1.dwg';
 createUI(app);
 Files.register(app.cmd, app);
 Param.register(app.cmd, app);
@@ -88,7 +88,7 @@ app.ui.translateStatic();
 
 // dibujo de ejemplo (marcado como ejemplo)
 app.ui.loadSample = () => {
-  const d = new Doc(); d.reset('Ejemplo-Brida');
+  const d = new Doc(); d.reset('Ejemplo-Brida.dwg');
   d.ensureLayer('CONTORNO', { color: 7, lw: 50 }); d.ensureLayer('EJES', { color: 1, ltype: 'CENTER' }); d.ensureLayer('COTAS', { color: 3 }); d.ensureLayer('SOMBREADO', { color: 8 }); d.ensureLayer('TEXTO', { color: 2 });
   d.ltypes.CENTER = LINETYPES.CENTER; d.vars.LTSCALE = 5; d.dimstyle.dimscale = 4;
   const add = (e) => { d.stamp(e); d.model.push(e); return e; };

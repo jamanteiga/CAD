@@ -10,7 +10,7 @@ export default app;
 // Preferencias de usuario (por navegador)
 const KEY = 'webcad.settings.v1';
 export const DEFAULT_SETTINGS = {
-  theme: 'light', lang: 'es', bgModel: '#fbfdfd', bgPaper: '#ffffff', bgLayoutOut: '#c6cfd0', crosshair: 12, uiVersion: 2,
+  theme: 'light', lang: 'es', bgModel: '#fbfdfd', bgPaper: '#ffffff', bgLayoutOut: '#c6cfd0', crosshair: 100, uiVersion: 3,
   screenMenu: false, menuBar: false, ribbon: true, toolbarsR12: false, ribbonMin: false,
   aliases: {}, shortcuts: {}, startupLisp: [], recent: [], autocomplete: true, gripSize: 6, pickbox: 4,
   cmdlineLines: 3, fileTabs: true, layoutTabs: true, statusBar: true, ucsIcon: true, gridStyle: 'lines',
@@ -22,9 +22,10 @@ export function loadSettings() {
   if (r.bgModel === '#212830') r.bgModel = THEMES.dark.model; // valores de versiones anteriores
   if (r.bgLayoutOut === '#8c8c8c') r.bgLayoutOut = THEMES.dark.out;
   if (!THEMES[r.theme]) r.theme = 'light';
-  if ((s.uiVersion || 1) < 2) { // nueva imagen: tema claro, cursor compacto y fondos del tema
-    Object.assign(r, { theme: 'light', bgModel: THEMES.light.model, bgLayoutOut: THEMES.light.out, crosshair: 12, ribbon: true, uiVersion: 2 });
+  if ((s.uiVersion || 1) < 2) { // tema claro por defecto con sus fondos
+    Object.assign(r, { theme: 'light', bgModel: THEMES.light.model, bgLayoutOut: THEMES.light.out });
   }
+  if ((s.uiVersion || 1) < 3) Object.assign(r, { crosshair: 100, ribbon: true, uiVersion: 3 }); // vuelta a la disposición clásica
   return r;
 }
 // Fondos de dibujo por defecto de cada tema (el usuario puede cambiarlos en Opciones)

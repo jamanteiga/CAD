@@ -59,8 +59,8 @@ export function tKnown(s) {
 }
 export const _lookup = lookup;
 // nombres por defecto de dibujos y presentaciones
-export const docBase = () => ({ es: 'Plano', gl: 'Plano', pt: 'Desenho', ca: 'Plànol', en: 'Drawing' })[LANG];
-export const layoutBase = () => ({ es: 'Lámina', gl: 'Lámina', pt: 'Folha', ca: 'Làmina', en: 'Sheet' })[LANG];
+export const docBase = () => ({ es: 'Dibujo', gl: 'Debuxo', pt: 'Desenho', ca: 'Dibuix', en: 'Drawing' })[LANG];
+export const layoutBase = () => ({ es: 'Presentación', gl: 'Presentación', pt: 'Layout', ca: 'Presentació', en: 'Layout' })[LANG];
 
 export const norm = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
 
