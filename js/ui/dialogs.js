@@ -44,6 +44,7 @@ export function createDialogs(app) {
     const inputs = {};
     const rows = fields.map((f) => {
       let el;
+      if (f.t === 'sep') return [h('div', { class: 'fsep', text: f.l, style: { gridColumn: '1 / -1', fontWeight: '600', marginTop: '6px', borderBottom: '1px solid var(--line, #8884)' } })];
       if (f.t === 'check') el = h('input', { type: 'checkbox', checked: !!f.v });
       else if (f.t === 'select') el = h('select', {}, (f.opts || []).map((o) => h('option', { value: typeof o === 'object' ? o.v : o, selected: (typeof o === 'object' ? o.v : o) == f.v }, typeof o === 'object' ? o.l : o)));
       else el = h('input', { type: f.t === 'number' ? 'number' : 'text', value: f.v ?? '', step: 'any' });

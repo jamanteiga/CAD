@@ -17,6 +17,9 @@ export const SYSVARS = {
   AREA: 0, PERIMETER: 0, USERS1: '', USERS2: '', USERS3: '', USERS4: '', USERS5: '', ACADVER: '24.2s (WebCAD)', PLATFORM: 'Web',
   SAVETIME: 10, ISAVEPERCENT: 50, MAXSORT: 1000, QTEXTMODE: 0, FILLMODE: 1, REGENMODE: 1, UCSICON: 1,
   CURSORSIZE: 5, MEASUREMENT: 1, NOMUTT: 0, QAFLAGS: 0, OSNAPZ: 0, DELOBJ: 1, EDGEMODE: 0, PEDITACCEPT: 1,
+  CMLEADERSTYLE: 'Standard', CTABLESTYLE: 'Standard', CMLSTYLE: 'STANDARD', CMLSCALE: 1, CMLJUST: 0, DIMASSOC: 2, CANNOSCALE: '1:1', ANNOAUTOSCALE: 4,
+  TRANSPARENCYDISPLAY: 1, CETRANSPARENCY: -1, SELECTIONCYCLING: 0, LASSOMODE: 1, IMAGEFRAME: 1, PDFFRAME: 1, UCSFOLLOW: 0, UCSNAME: '', DIMBREAK: 3.75,
+  GEOMARKERVISIBILITY: 1, VSCURRENT: '2dWireframe', FACETRES: 0.5, POINTCLOUDDENSITY: 15,
 };
 const READONLY = new Set(['ACADVER', 'PLATFORM', 'DWGNAME', 'DWGPREFIX', 'CDATE', 'DATE', 'VIEWCTR', 'VIEWSIZE', 'EXTMIN', 'EXTMAX', 'CMDNAMES', 'LASTPOINT']);
 
@@ -25,6 +28,7 @@ export function newLayer(name, o = {}) {
 }
 
 export class Doc {
+  static hooks = []; // funciones (doc, tx) que se ejecutan al cerrar cada operación (cotas asociativas, anotativos…)
   constructor() { this.listeners = {}; this.reset(); }
   on(ev, fn) { (this.listeners[ev] ||= []).push(fn); }
   emit(ev, a) { if (ev === 'change' || ev === 'reset' || ev === 'layers') this.rev = (this.rev || 0) + 1; for (const f of this.listeners[ev] || []) f(a); }
@@ -42,6 +46,9 @@ export class Doc {
     this.styles = { Standard: { name: 'Standard', font: 'Arial', h: 0, wf: 1 } };
     this.vars = { ...SYSVARS };
     this.dimstyle = { ...DIMDEF };
+    this.dimstyles = { 'ISO-25': this.dimstyle };
+    // tablas adicionales (estilos de directriz/tabla/multilínea, imágenes, nubes de puntos, SCP, geolocalización, conjunto de planos...)
+    this.ext = { mlstyles: {}, mleaderstyles: {}, tablestyles: {}, images: {}, clouds: {}, ucs: null, ucsNamed: {}, geo: null, sheetset: null, actions: {}, annoScales: ['1:1', '1:2', '1:5', '1:10', '1:20', '1:25', '1:50', '1:100', '1:200', '1:500', '1:1000', '2:1', '5:1', '10:1'] };
     this.handseed = 0x100;
     this.undoStack = []; this.redoStack = []; this.tx = null;
     this.modified = false;
@@ -52,6 +59,7 @@ export class Doc {
     this.constraints = [];
     this.markups = [];
     this.dicts = {}; this.regapps = {}; this.layerStates = {}; delete this._nod;
+    this.endHooks = this.endHooks || [];
     this.prevSel = [];
     this.emit('reset');
   }
@@ -143,6 +151,8 @@ export class Doc {
     if (--this.tx.depth > 0) return;
     // restricciones paramétricas: se resuelven dentro de la misma operación (un solo deshacer)
     if (this.constraints?.length && this.solveHook && !this.tx.solving) { this.tx.solving = true; try { this.solveHook(this, this.tx); } catch (e) { console.error(e); } }
+    const hooks = [...(this.endHooks || []), ...Doc.hooks];
+    if (hooks.length && !this.tx.hooked) { this.tx.hooked = true; this.tx.depth = 1; for (const h of hooks) { try { h(this, this.tx); } catch (e) { console.error(e); } } this.tx.depth = 0; }
     const t = this.tx; this.tx = null;
     if (t.ops.length) {
       delete t.touched;
@@ -164,6 +174,7 @@ export class Doc {
     if (e.color == null) e.color = this.vars.CECOLOR;
     if (e.ltype == null) e.ltype = this.vars.CELTYPE;
     if (e.lw == null) e.lw = this.vars.CELWEIGHT;
+    if (e.transp == null && this.vars.CETRANSPARENCY >= 0) e.transp = this.vars.CETRANSPARENCY;
     if (!this.layers[e.layer]) this.ensureLayer(e.layer);
     return e;
   }
@@ -191,16 +202,26 @@ export class Doc {
   }
   mod(e, fn) { this.touch(e); fn(e); invalidate(e); return e; }
   tablesSnap() {
-    return JSON.stringify({ layers: this.layers, blocks: this.blocks, dimstyle: this.dimstyle, clayer: this.clayer, ltypes: this.ltypes, styles: this.styles, layouts: this.layouts.map((l) => ({ ...l, ents: undefined })), groups: this.groups, constraints: this.constraints, props: this.props, markups: this.markups }, (k, v) => (k[0] === '_' ? undefined : v));
+    return JSON.stringify({ layers: this.layers, blocks: this.blocks, dimstyle: this.dimstyle, dimstyles: this.dimstyles, ext: this.ext, curDim: this.vars.DIMSTYLE, clayer: this.clayer, ltypes: this.ltypes, styles: this.styles, layouts: this.layouts.map((l) => ({ ...l, ents: undefined })), groups: this.groups, constraints: this.constraints, props: this.props, markups: this.markups }, (k, v) => (k[0] === '_' ? undefined : v));
   }
   tablesRestore(s) {
     const o = JSON.parse(s);
-    this.layers = o.layers; this.blocks = o.blocks; this.dimstyle = o.dimstyle; this.clayer = o.clayer; this.ltypes = o.ltypes; this.styles = o.styles;
+    this.layers = o.layers; this.blocks = o.blocks; this.dimstyle = o.dimstyle; this.relinkDim(o.dimstyles, o.curDim); if (o.ext) this.ext = o.ext; this.clayer = o.clayer; this.ltypes = o.ltypes; this.styles = o.styles;
     if (o.groups) this.groups = o.groups; if (o.constraints) this.constraints = o.constraints; if (o.props) this.props = o.props; if (o.markups) this.markups = o.markups;
     for (const lm of o.layouts) { const l = this.layouts.find((x) => x.name === lm.name); if (l) Object.assign(l, lm, { ents: l.ents }); }
     for (const e of this.allEnts()) if (e.type === 'INSERT' || e.type === 'DIMENSION') invalidate(e);
     this.emit('layers');
   }
+  relinkDim(styles, cur) {
+    if (styles) this.dimstyles = styles;
+    if (cur) this.vars.DIMSTYLE = cur;
+    this.dimstyles[this.vars.DIMSTYLE || 'ISO-25'] = this.dimstyle;
+  }
+  setDimStyle(name) {
+    if (!this.dimstyles[name]) throw new Error('Estilo no existe');
+    this.touchTables(); this.vars.DIMSTYLE = name; this.dimstyle = this.dimstyles[name]; this.emit('var', 'DIMSTYLE');
+  }
+  dimStyleOf(e) { return (e && e.dstyle && this.dimstyles[e.dstyle]) || this.dimstyle; }
   touchTables() {
     if (this.tx && this.tx.touched.has('tables')) return;
     if (this.tx) this.tx.touched.add('tables');
@@ -237,7 +258,7 @@ export class Doc {
       format: 'webcad', version: 1, name: this.name, layers: this.layers, clayer: this.clayer, blocks: this.blocks,
       model: this.model, layouts: this.layouts, ltypes: this.ltypes, styles: this.styles, vars: this.vars,
       dimstyle: this.dimstyle, handseed: this.handseed, views: this.views, props: this.props, groups: this.groups, constraints: this.constraints, markups: this.markups,
-      plotStyles: this.plotStyles, dataLinks: this.dataLinks, dicts: this.dicts, regapps: this.regapps, layerStates: this.layerStates,
+      plotStyles: this.plotStyles, dataLinks: this.dataLinks, dicts: this.dicts, regapps: this.regapps, layerStates: this.layerStates, dimstyles: this.dimstyles, ext: this.ext,
     };
   }
   serialize() { return JSON.stringify(this.toJSON(), (k, v) => (k[0] === '_' ? undefined : v)); }
@@ -252,6 +273,9 @@ export class Doc {
     Object.assign(this.styles, o.styles || {});
     Object.assign(this.vars, o.vars || {});
     Object.assign(this.dimstyle, o.dimstyle || {});
+    if (o.dimstyles) { this.dimstyles = o.dimstyles; this.dimstyle = this.dimstyles[this.vars.DIMSTYLE] || (this.dimstyles[this.vars.DIMSTYLE] = this.dimstyle); }
+    else this.dimstyles = { [this.vars.DIMSTYLE || 'ISO-25']: this.dimstyle };
+    if (o.ext) Object.assign(this.ext, o.ext);
     this.handseed = o.handseed || this.handseed;
     this.views = o.views || {};
     if (o.props) this.props = { ...this.props, ...o.props };

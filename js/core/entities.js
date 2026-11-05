@@ -7,6 +7,19 @@ const { M } = G;
 
 export const ENT_TYPES = ['LINE', 'CIRCLE', 'ARC', 'LWPOLYLINE', 'POINT', 'TEXT', 'MTEXT', 'INSERT', 'ELLIPSE', 'SPLINE', 'HATCH', 'DIMENSION', 'SOLID', 'XLINE', 'RAY', 'LEADER', 'ATTDEF', 'VIEWPORT', 'WIPEOUT', 'TABLE', 'DUCT'];
 
+// Entidades «generadas»: tipos nuevos que se dibujan a partir de sub-entidades (GEN[type].ents)
+// y opcionalmente se transforman/pinzan/dibujan con funciones propias.
+export const GEN = {};
+export function genEnts(e, doc) { if (!e._gen) e._gen = GEN[e.type].ents(e, doc) || []; return e._gen; }
+function genXform(e, m, mir, s) {
+  const d = GEN[e.type] || {};
+  for (const k of d.pts || []) if (e[k]) e[k] = M.apply(m, e[k]);
+  for (const k of d.arrs || []) if (e[k]) e[k] = e[k].map((p) => { const q = M.apply(m, p); return p.b != null ? { x: q.x, y: q.y, b: mir ? -(p.b || 0) : p.b } : { ...p, x: q.x, y: q.y }; });
+  for (const k of d.loops || []) if (e[k]) e[k] = e[k].map((l) => l.map((p) => { const q = M.apply(m, p); return { x: q.x, y: q.y, b: mir ? -(p.b || 0) : p.b || 0 }; }));
+  for (const k of d.lens || []) if (e[k] != null) e[k] *= s;
+  for (const k of d.vecs || []) if (e[k]) e[k] = M.vec(m, e[k]);
+  if (d.xform) d.xform(e, m, { s, mir, rotA: M.angOf(m) });
+}
 export function cloneEnt(e) {
   return JSON.parse(JSON.stringify(e, (k, v) => (k[0] === '_' ? undefined : v)));
 }
@@ -185,7 +198,7 @@ export function localPrims(e, doc) {
     case 'TABLE': { const o = []; for (const s of tableEnts(e)) if (s.type === 'LINE') o.push(...localPrims(s, doc)); return o; }
     case 'DIMENSION': { const o = []; for (const s of dimEnts(e, doc)) if (s.type !== 'TEXT' && s.type !== 'MTEXT') o.push(...localPrims(s, doc)); return o; }
     case 'VIEWPORT': { const x1 = e.c.x - e.w / 2, x2 = e.c.x + e.w / 2, y1 = e.c.y - e.h / 2, y2 = e.c.y + e.h / 2; return segsOf([{ x: x1, y: y1 }, { x: x2, y: y1 }, { x: x2, y: y2 }, { x: x1, y: y2 }], true); }
-    default: return [];
+    default: if (GEN[e.type]) { if (GEN[e.type].prims) return GEN[e.type].prims(e, doc); const o = []; for (const s of genEnts(e, doc)) if (s.type !== 'TEXT' && s.type !== 'MTEXT') o.push(...localPrims(s, doc)); return o; } return [];
   }
 }
 export function transformPrim(p, m) {
@@ -357,6 +370,8 @@ export function dimMeasure(e) {
     case 'diameter': return G.dist(e.p1, e.p2) * lf;
     case 'angular': { let a = G.normA(G.ang(e.c, e.p2) - G.ang(e.c, e.p1)); if (e.dp && !G.angIn(G.ang(e.c, e.dp), G.ang(e.c, e.p1), G.ang(e.c, e.p2))) a = G.TAU - a; return G.deg(a); }
     case 'ordinate': return Math.abs(e.xord ? e.p1.x - (e.org?.x || 0) : e.p1.y - (e.org?.y || 0));
+    case 'arclen': return G.dist(e.c, e.p1) * G.arcSweep(G.ang(e.c, e.p1), G.ang(e.c, e.p2)) * lf;
+    case 'jogged': return G.dist(e.c, e.p1) * lf;
   }
   return 0;
 }
@@ -367,7 +382,11 @@ export function dimText(e, st) {
   if (e.dt === 'angular') s = G.fmt(v, Math.max(0, (st.dimadec ?? 0))) + '%%d';
   else s = v.toFixed(st.dimdec ?? 2).replace(/^-0(\.0+)?$/, '0$1');
   if (st.dimzin_trailing) s = s.replace(/\.?0+$/, '');
-  if (e.dt === 'radius') s = 'R' + s;
+  if (st.dimtol && e.dt !== 'angular') { const tp_ = (+st.dimtp || 0).toFixed(st.dimtdec ?? st.dimdec ?? 2), tm_ = (+st.dimtm || 0).toFixed(st.dimtdec ?? st.dimdec ?? 2); s += +st.dimtp === +st.dimtm ? '%%p' + tp_ : ` +${tp_}/-${tm_}`; }
+  if (st.dimlim && e.dt !== 'angular') { const v0 = v, dd = st.dimdec ?? 2; s = `${(v0 + (+st.dimtp || 0)).toFixed(dd)}/${(v0 - (+st.dimtm || 0)).toFixed(dd)}`; }
+  if (st.dimpre) s = st.dimpre + s;
+  if (e.dt === 'radius' || e.dt === 'jogged') s = 'R' + s;
+  if (e.dt === 'arclen' && (st.dimarcsym ?? 0) === 0) s = '⌒' + s;
   if (e.dt === 'diameter') s = '%%c' + s;
   s = s + (st.dimpost || '');
   if (e.text != null && e.text !== '' && e.text !== '<>') s = e.text.replace('<>', s);
@@ -379,7 +398,7 @@ export function dimEnts(e, doc) {
     const blk = doc.blocks[e.block];
     return (e._dim = blk.ents.map((x) => { const c = cloneEnt(x); if (c.color === 0) c.color = e.color ?? 256; if (e.xf) transformEnt(c, e.xf); return c; }));
   }
-  const st = { ...DIMDEF, ...(doc?.dimstyle || {}), ...(e.st || {}) };
+  const st = { ...DIMDEF, ...((doc?.dimStyleOf ? doc.dimStyleOf(e) : doc?.dimstyle) || {}), ...(e.st || {}) };
   const k = st.dimscale || 1, asz = st.dimasz * k, txt = st.dimtxt * k, gap = st.dimgap * k, exo = st.dimexo * k, exe = st.dimexe * k;
   const out = [], col = st.dimclrd ?? 256;
   const line = (a, b) => out.push({ type: 'LINE', p1: a, p2: b, color: col, layer: e.layer });
@@ -451,6 +470,48 @@ export function dimEnts(e, doc) {
     const dp = e.dp || e.p1;
     line(e.p1, dp);
     text(G.add(dp, e.xord ? { x: 0, y: (dp.y > e.p1.y ? 1 : -1) * (tw / 2 + gap) } : { x: (dp.x > e.p1.x ? 1 : -1) * (tw / 2 + gap), y: 0 }), e.xord ? Math.PI / 2 : 0, str);
+  } else if (e.dt === 'arclen') {
+    const c = e.c, a1 = G.ang(c, e.p1), a2 = G.ang(c, e.p2), r0 = G.dist(c, e.p1);
+    const r = e.dp ? G.dist(c, e.dp) : r0 + 10 * k;
+    out.push({ type: 'ARC', c, r, a1, a2, color: col, layer: e.layer });
+    for (const [p, a] of [[e.p1, a1], [e.p2, a2]]) { const sg = r >= r0 ? 1 : -1; line(G.polar(c, a, r0 + sg * exo), G.polar(c, a, r + sg * exe)); }
+    arrow(G.polar(c, a1, r), G.mul(G.perp({ x: Math.cos(a1), y: Math.sin(a1) }), -1));
+    arrow(G.polar(c, a2, r), G.perp({ x: Math.cos(a2), y: Math.sin(a2) }));
+    const am = a1 + G.arcSweep(a1, a2) / 2;
+    text(e.tp || G.polar(c, am, r + gap + txt / 2), readable(am - Math.PI / 2), str);
+  } else if (e.dt === 'jogged') {
+    const c = e.c, p = e.p1, u = G.norm(G.sub(p, c)), jc = e.jc || c;
+    const jp = e.jp || G.lerp(jc, p, 0.5);
+    const n = G.perp(u);
+    const A = G.add(c, G.mul(u, G.dot(G.sub(jp, c), u)));
+    const off = G.dot(G.sub(jc, c), n);
+    const B = G.add(A, G.mul(n, off));
+    const ja = (st.dimjogang ?? 45) * Math.PI / 180, jl = asz * 1.5;
+    const m2 = G.add(B, G.mul(u, jl * Math.tan(Math.PI / 2 - ja) / 2 + jl / 2));
+    line(p, A); line(A, m2); line(m2, B); line(B, jc);
+    arrow(p, u);
+    const dp = e.dp || G.add(p, G.mul(u, txt * 2));
+    const tr = readable(G.ang(c, p)), up = G.perp({ x: Math.cos(tr), y: Math.sin(tr) });
+    if (G.dist(c, dp) > G.dist(c, p) + 1e-9) { line(p, dp); text(e.tp || G.add(dp, G.mul(u, tw / 2 + gap)), tr, str); }
+    else text(e.tp || G.add(G.mid(p, A), G.mul(up, gap + txt / 2)), tr, str);
+  }
+  // cortes de cota (DIMBREAK): puntos de corte automáticos y huecos manuales
+  if ((e.brk && e.brk.length) || (e.brkm && e.brkm.length)) {
+    const bs = (st.dimbreak ?? 3.75) * k / 2;
+    const cutLine = (o) => {
+      const L_ = G.dist(o.p1, o.p2); if (L_ < 1e-9) return [o];
+      const u = G.mul(G.sub(o.p2, o.p1), 1 / L_), iv = [];
+      for (const q of e.brk || []) if (G.segDist(q, o.p1, o.p2) < 1e-6 * Math.max(1, L_)) { const t = G.dot(G.sub(q, o.p1), u); iv.push([t - bs, t + bs]); }
+      for (const [q1, q2] of e.brkm || []) { if (G.segDist(q1, o.p1, o.p2) < 1e-6 * Math.max(1, L_) && G.segDist(q2, o.p1, o.p2) < 1e-6 * Math.max(1, L_)) { const t1 = G.dot(G.sub(q1, o.p1), u), t2 = G.dot(G.sub(q2, o.p1), u); iv.push([Math.min(t1, t2), Math.max(t1, t2)]); } }
+      if (!iv.length) return [o];
+      iv.sort((a, b) => a[0] - b[0]);
+      const res = []; let t0 = 0;
+      for (const [a, b] of iv) { if (a > t0 + 1e-9) res.push({ ...o, p1: G.add(o.p1, G.mul(u, t0)), p2: G.add(o.p1, G.mul(u, Math.min(a, L_))) }); t0 = Math.max(t0, b); }
+      if (t0 < L_ - 1e-9) res.push({ ...o, p1: G.add(o.p1, G.mul(u, t0)), p2: o.p2 });
+      return res;
+    };
+    const o2 = []; for (const o of out) { if (o.type === 'LINE') o2.push(...cutLine(o)); else o2.push(o); }
+    out.length = 0; out.push(...o2);
   }
   for (const o of out) { o.ltype = 'CONTINUOUS'; }
   return (e._dim = out);
@@ -474,6 +535,7 @@ export function entBBox(e, doc) {
     case 'TABLE': for (const x of tableEnts(e)) { const b = entBBox(x, doc); if (G.bbValid(b)) G.bbUnion(bb, b); } break;
     case 'DIMENSION': for (const x of dimEnts(e, doc)) { const b = entBBox(x, doc); if (G.bbValid(b)) G.bbUnion(bb, b); } break;
     default:
+      if (GEN[e.type]) { if (GEN[e.type].bbox) bb = GEN[e.type].bbox(e, doc); else for (const x of genEnts(e, doc)) { const b = entBBox(x, doc); if (G.bbValid(b)) G.bbUnion(bb, b); } break; }
       for (const p of localPrims(e, doc)) {
         if (p.k === 'L') { G.bbAdd(bb, p.a); G.bbAdd(bb, p.b); } else G.bbUnion(bb, G.bbArc(p.c, p.r, p.a1, p.a2, p.full));
       }
@@ -483,6 +545,7 @@ export function entBBox(e, doc) {
 
 // ---------- distancia para selección
 export function entDist(e, p, doc) {
+  if (GEN[e.type]?.inside && GEN[e.type].inside(e, p, doc)) return 0;
   if (e.type === 'TEXT' || e.type === 'MTEXT' || e.type === 'ATTDEF' || e.type === 'ATTRIB') {
     const box = textBox(e);
     if (G.ptInPoly(p, box)) return 0;
@@ -537,6 +600,11 @@ export function entSnaps(e, doc, m = null) {
         for (const s of entSnaps(ent, doc, m ? M.mul(m, cm) : cm)) out.push(s);
       }
       break;
+    }
+    default: if (GEN[e.type]) {
+      const d = GEN[e.type];
+      if (d.snaps) d.snaps(e, push, doc);
+      else for (const x of genEnts(e, doc)) for (const s of entSnaps(x, doc, m)) out.push(s);
     }
   }
   return out;
@@ -593,11 +661,13 @@ export function transformEnt(e, m, opts = {}) {
     case 'DUCT': e.pts = e.pts.map((p) => { const q = tp(m, p); return { x: q.x, y: q.y }; }); break;
     case 'TABLE': e.p = tp(m, e.p); e.rot = (e.rot || 0) + rotA; if (Math.abs(s - 1) > 1e-12) { e.cols = e.cols.map((v) => v * s); e.rows = e.rows.map((v) => v * s); e.th *= s; } break;
     case 'DIMENSION':
-      for (const k of ['p1', 'p2', 'dp', 'c', 'tp', 'org']) if (e[k]) e[k] = tp(m, e[k]);
+      for (const k of ['p1', 'p2', 'dp', 'c', 'tp', 'org', 'jc', 'jp']) if (e[k]) e[k] = tp(m, e[k]);
+      if (e.brk) e.brk = e.brk.map((q) => tp(m, q)); if (e.brkm) e.brkm = e.brkm.map((g) => g.map((q) => tp(m, q)));
       if (e.dt === 'linear') e.rot = (e.rot || 0) + rotA;
       if (e.block && !e.p1) { e.xf = e.xf ? M.mul(m, e.xf) : m; }
       break;
     case 'VIEWPORT': e.c = tp(m, e.c); e.w *= s; e.h *= s; break;
+    default: if (GEN[e.type]) genXform(e, m, mir, s);
   }
   invalidate(e);
   return e;
@@ -642,11 +712,19 @@ export function entGrips(e, doc) {
     case 'HATCH': if (e.loops[0]) e.loops[0].forEach((v, i) => add(v, (x, p) => (x.loops[0][i] = { x: p.x, y: p.y, b: x.loops[0][i].b || 0 }))); break;
     case 'DUCT': e.pts.forEach((v, i) => add(v, (x, p) => { x.pts[i] = { x: p.x, y: p.y }; })); break;
     case 'TABLE': add(e.p, (x, p) => (x.p = p)); break;
-    case 'DIMENSION': for (const k of ['p1', 'p2', 'c', 'dp']) if (e[k]) add(e[k], (x, p) => (x[k] = p)); if (e.p1) add(textAnchorOfDim(e, doc), (x, p) => (x.tp = p)); break;
+    case 'DIMENSION': for (const k of ['p1', 'p2', 'c', 'dp', 'jc', 'jp']) if (e[k]) add(e[k], (x, p) => (x[k] = p)); if (e.p1) add(textAnchorOfDim(e, doc), (x, p) => (x.tp = p)); break;
     case 'VIEWPORT': {
       const c = e.c; add(c, (x, p) => (x.c = p));
       [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => add({ x: c.x + sx * e.w / 2, y: c.y + sy * e.h / 2 }, (x, p) => { x.w = Math.max(1, Math.abs(p.x - x.c.x) * 2); x.h = Math.max(1, Math.abs(p.y - x.c.y) * 2); }));
       break;
+    }
+    default: if (GEN[e.type]) {
+      const d = GEN[e.type];
+      if (d.grips) d.grips(e, add, doc);
+      else {
+        for (const k of d.pts || []) if (e[k]) add(e[k], (x, p) => (x[k] = p));
+        for (const k of d.arrs || []) if (e[k]) e[k].forEach((v, i) => add(v, (x, p) => (x[k][i] = { ...x[k][i], x: p.x, y: p.y })));
+      }
     }
   }
   return g;
@@ -680,6 +758,7 @@ export function explodeEnt(e, doc) {
     case 'SPLINE': return [{ type: 'LWPOLYLINE', ...base, pts: splineTess(e).map((p) => ({ x: p.x, y: p.y, b: 0 })), closed: false }];
     case 'ELLIPSE': return [{ type: 'LWPOLYLINE', ...base, pts: ellipsePoints(e).map((p) => ({ x: p.x, y: p.y, b: 0 })), closed: false }];
   }
+  if (GEN[e.type]) { if (GEN[e.type].explode) return GEN[e.type].explode(e, doc); return genEnts(e, doc).map((x) => { const c = cloneEnt(x); if (c.layer == null) c.layer = e.layer; if (c.color == null || c.color === 0) c.color = e.color; return c; }); }
   return null;
 }
 
@@ -742,6 +821,7 @@ export function entLength(e) {
     case 'ELLIPSE': { const p = ellipsePoints(e, 360); let s = 0; for (let i = 1; i < p.length; i++) s += G.dist(p[i - 1], p[i]); return s; }
     case 'SPLINE': { const p = splineTess(e); let s = 0; for (let i = 1; i < p.length; i++) s += G.dist(p[i - 1], p[i]); return s; }
   }
+  if (GEN[e.type]?.length) return GEN[e.type].length(e);
   return 0;
 }
 export function entArea(e) {
@@ -752,6 +832,7 @@ export function entArea(e) {
     case 'HATCH': return e.loops.reduce((s, l, i) => s + (i === 0 ? 1 : -1) * Math.abs(G.polyArea(polyPoints({ pts: l, closed: true }))), 0);
     case 'SPLINE': return Math.abs(G.polyArea(splineTess(e)));
   }
+  if (GEN[e.type]?.area) return GEN[e.type].area(e);
   return 0;
 }
 // parámetro de recorrido para curvas (para TRIM/BREAK/DIVIDE)

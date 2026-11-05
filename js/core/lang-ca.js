@@ -562,3 +562,24 @@ export const CMD = {
 };
 export const ALIAS = {};
 export const OSNAP = { FIN: 'end', MIG: 'mid', CEN: 'cen', NOD: 'nod', QUA: 'qua', INT: 'int', INS: 'ins', PER: 'per', TAN: 'tan', PRO: 'nea', CAP: 'non', EXT: 'ext', APA: 'app' };
+
+// herramientas extra
+MSG_RE.push(
+  [/^(\d+) block\(s\) exploded\.$/, "$1 bloc(s) descompost(os)."],
+  [/^The drawing needs at least two blocks\.$/, "El dibuix necessita almenys dos blocs."],
+  [/^(\d+) block reference\(s\) replaced\.$/, "$1 referència(es) a bloc substituïda(es)."],
+  [/^No blocks with attributes selected\.$/, "No s'han designat blocs amb atributs."],
+  [/^(\d+) block\(s\) exported\.$/, "$1 bloc(s) exportat(s)."],
+  [/^(\d+) block\(s\) updated\.$/, "$1 bloc(s) actualitzat(s)."],
+  [/^The file must start with HANDLE and BLOCKNAME columns\.$/, "El fitxer ha de començar per les columnes HANDLE i BLOCKNAME."],
+  [/^Extended data attached to (.*)\.$/, "Dades esteses afegides a $1."],
+  [/^Object has no extended data\.$/, "L'objecte no té dades esteses."],
+  [/^\* Registered application: (.*)$/, "* Aplicació registrada: $1"],
+  [/^Select a circle or an arc\.$/, "Designeu un cercle o un arc."],
+  [/^Select a line\.$/, "Designeu una línia."],
+  [/^Object: (.*)$/, "Objecte: $1"],
+  [/^Layer: (.*)$/, "Capa: $1"],
+  [/^Color: (.*)\s+\(layer: (.*)\)$/, "Color: $1  (capa: $2)"],
+  [/^Linetype: (.*)\s+\(layer: (.*)\)$/, "Tipus de línia: $1  (capa: $2)"],
+  [/^Handle: (.*)$/, "Identificador: $1"],
+);

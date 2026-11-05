@@ -7,7 +7,7 @@ import * as G from '../core/geom.js';
 import * as E from '../core/entities.js';
 import { aciCss, colorName, lwName, LWEIGHTS, HATCHES } from '../core/tables.js';
 
-export const TNAME = { LINE: 'Línea', CIRCLE: 'Círculo', ARC: 'Arco', LWPOLYLINE: 'Polilínea', POINT: 'Punto', TEXT: 'Texto', MTEXT: 'Texto de líneas múltiples', INSERT: 'Referencia a bloque', ELLIPSE: 'Elipse', SPLINE: 'Spline', HATCH: 'Sombreado', DIMENSION: 'Cota', SOLID: 'Sólido 2D', XLINE: 'Línea auxiliar', RAY: 'Rayo', LEADER: 'Directriz', ATTDEF: 'Definición de atributo', VIEWPORT: 'Ventana gráfica', WIPEOUT: 'Cobertura', TABLE: 'Tabla', DUCT: 'Conducto' };
+export const TNAME = { LINE: 'Línea', CIRCLE: 'Círculo', ARC: 'Arco', LWPOLYLINE: 'Polilínea', POINT: 'Punto', TEXT: 'Texto', MTEXT: 'Texto de líneas múltiples', INSERT: 'Referencia a bloque', ELLIPSE: 'Elipse', SPLINE: 'Spline', HATCH: 'Sombreado', DIMENSION: 'Cota', SOLID: 'Sólido 2D', XLINE: 'Línea auxiliar', RAY: 'Rayo', LEADER: 'Directriz', ATTDEF: 'Definición de atributo', VIEWPORT: 'Ventana gráfica', WIPEOUT: 'Cobertura', TABLE: 'Tabla', DUCT: 'Conducto', IMAGE: 'Imagen ráster', TOLERANCE: 'Tolerancia', MLINE: 'Línea múltiple', REGION: 'Región', ARCTEXT: 'Texto en arco', SUPERHATCH: 'Supersombreado', '3DSOLID': 'Sólido 3D', POINTCLOUD: 'Nube de puntos' };
 
 export function createProps(app) {
   const host = document.getElementById('host');
@@ -70,6 +70,9 @@ export function createProps(app) {
       sel_('Tipo de línea', (e) => (e.ltype || 'BYLAYER').toUpperCase(), ['BYLAYER', 'BYBLOCK', ...Object.keys(doc.ltypes)].map((n) => ({ v: n, l: n === 'BYLAYER' ? 'PorCapa' : n === 'BYBLOCK' ? 'PorBloque' : n })), (e, v) => (e.ltype = v));
       num('Escala de tipo de línea', (e) => e.lts ?? 1, (e, v) => (e.lts = v));
       sel_('Grosor de línea', (e) => e.lw ?? -1, LWEIGHTS.map((w) => ({ v: w, l: lwName(w) })), (e, v) => (e.lw = v));
+      sel_('Transparencia', (e) => e.transp ?? -1, [{ v: -1, l: 'PorCapa' }, { v: -2, l: 'PorBloque' }, ...[0, 10, 20, 30, 40, 50, 60, 70, 80, 90].map((v) => ({ v, l: String(v) })), ...(sel.some((e) => e.transp > 0 && e.transp % 10) ? [{ v: sel.find((e) => e.transp % 10).transp, l: String(sel.find((e) => e.transp % 10).transp) }] : [])], (e, v) => { if (v === -1) delete e.transp; else e.transp = v; });
+      txt('Hipervínculo', (e) => e.url || '', (e, v) => { if (v) e.url = v; else { delete e.url; delete e.urlDesc; } });
+      if (sel.length === 1 && sel[0].anno) ro('Anotativo', 'Sí');
     }
     const t = common((e) => e.type);
     if (t && cat(t === 'TEXT' || t === 'MTEXT' ? 'Texto' : 'Geometría')) {
@@ -181,6 +184,16 @@ export function createProps(app) {
           num('Escala personalizada', (e) => e.scale, (e, v) => (e.scale = v));
           sel_('Visualización bloqueada', (e) => !!e.locked, [{ v: false, l: 'No' }, { v: true, l: 'Sí' }], (e, v) => (e.locked = v)); break;
         case 'XLINE': case 'RAY': P2('Punto base', 'p'); break;
+        case 'IMAGE': P2('Posición', 'p'); num('Anchura', (e) => G.len(e.u), (e, v) => { const k = v / G.len(e.u); e.u = G.mul(e.u, k); e.v = G.mul(e.v, k); }); num('Altura', (e) => G.len(e.v), (e, v) => { const k = v / G.len(e.v); e.u = G.mul(e.u, k); e.v = G.mul(e.v, k); });
+          num('Rotación', (e) => Math.atan2(e.u.y, e.u.x), (e, v) => { const L = G.len(e.u), H = G.len(e.v); e.u = G.polar({ x: 0, y: 0 }, v, L); e.v = G.polar({ x: 0, y: 0 }, v + Math.PI / 2, H); }, true);
+          num('Brillo', (e) => e.bright ?? 50, (e, v) => (e.bright = v)); num('Contraste', (e) => e.contrast ?? 50, (e, v) => (e.contrast = v)); num('Atenuación', (e) => e.fade ?? 0, (e, v) => (e.fade = v));
+          sel_('Mostrar imagen', (e) => e.show !== false, [{ v: true, l: 'Sí' }, { v: false, l: 'No' }], (e, v) => (e.show = v)); sel_('Delimitación', (e) => !!e.clipOn, [{ v: false, l: 'No' }, { v: true, l: 'Sí' }], (e, v) => (e.clipOn = v));
+          sel_('Transparencia de imagen', (e) => e.transp !== false, [{ v: true, l: 'Sí' }, { v: false, l: 'No' }], (e, v) => (e.transp = v)); if (sel.length === 1) ro('Nombre', doc.ext.images[sel[0].img]?.name || ''); break;
+        case 'MLINE': ro('Estilo', sel[0].style || 'STANDARD'); num('Escala', (e) => e.scale ?? 1, (e, v) => (e.scale = v)); sel_('Justificación', (e) => e.just || 0, [{ v: 0, l: 'Superior' }, { v: 1, l: 'Cero' }, { v: 2, l: 'Inferior' }], (e, v) => (e.just = v)); sel_('Cerrada', (e) => !!e.closed, [{ v: false, l: 'No' }, { v: true, l: 'Sí' }], (e, v) => (e.closed = v)); break;
+        case 'REGION': ro('Área', G.fmt(E.entArea(sel[0]))); ro('Perímetro', G.fmt(E.entLength(sel[0]))); break;
+        case 'ARCTEXT': txt('Contenido', (e) => e.text, (e, v) => (e.text = v)); num('Altura', (e) => e.h, (e, v) => (e.h = v)); break;
+        case '3DSOLID': num('Altura', (e) => e.h, (e, v) => (e.h = v)); num('Elevación', (e) => e.z0 || 0, (e, v) => (e.z0 = v)); ro('Volumen', G.fmt(E.GEN['3DSOLID']?.volume?.(sel[0]) ?? 0)); break;
+        case 'POINTCLOUD': ro('Puntos', String(doc.ext.clouds[sel[0].cloud]?.n || 0)); num('Tamaño de punto', (e) => e.psize ?? 2, (e, v) => (e.psize = v)); sel_('Color', (e) => e.cmode || 'rgb', [{ v: 'rgb', l: 'Color verdadero' }, { v: 'z', l: 'Elevación' }, { v: 'obj', l: 'Color del objeto' }], (e, v) => (e.cmode = v)); break;
         case 'SPLINE': ro('Puntos de ajuste', String((sel[0].fit || []).length)); ro('Puntos de control', String((sel[0].cps || []).length)); ro('Longitud', G.fmt(E.entLength(sel[0]))); break;
       }
     }

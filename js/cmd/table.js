@@ -61,12 +61,13 @@ export function register(eng, app) {
   };
 
   R('TABLE', async (c) => {
-    const d = doc();
+    const d = doc(), ts = eng.tableStyle ? eng.tableStyle() : null;
     const r = await dlg().form('Insertar tabla', [
+      { k: 'style', l: 'Estilo de tabla', v: d.vars.CTABLESTYLE, t: 'select', opts: Object.keys(d.ext?.tablestyles || { Standard: 1 }) },
       { k: 'src', l: 'Origen', v: 'empty', t: 'select', opts: [{ v: 'empty', l: 'Tabla vacía' }, { v: 'file', l: 'Desde archivo CSV/Excel...' }] },
       { k: 'rows', l: 'Filas', v: 5, t: 'number' }, { k: 'cols', l: 'Columnas', v: 4, t: 'number' },
-      { k: 'cw', l: 'Ancho de columna', v: 30, t: 'number' }, { k: 'rh', l: 'Alto de fila', v: 7, t: 'number' },
-      { k: 'th', l: 'Altura de texto', v: d.vars.TEXTSIZE || 2.5, t: 'number' }, { k: 'head', l: 'Filas de cabecera', v: 1, t: 'number' },
+      { k: 'cw', l: 'Ancho de columna', v: ts?.colw ?? 30, t: 'number' }, { k: 'rh', l: 'Alto de fila', v: ts?.rowh ?? 7, t: 'number' },
+      { k: 'th', l: 'Altura de texto', v: ts?.th ?? (d.vars.TEXTSIZE || 2.5), t: 'number' }, { k: 'head', l: 'Filas de cabecera', v: ts ? (ts.titleRow !== false) + (ts.headRow !== false) : 1, t: 'number' },
     ]);
     if (!r) return;
     let cells = null;

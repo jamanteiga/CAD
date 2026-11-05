@@ -8,10 +8,12 @@ export function createCmdline(app) {
   const root = document.getElementById('cmd');
   const hist = document.getElementById('cmdhist'), prompt = document.getElementById('cmdprompt'), inp = document.getElementById('cmdin'), ac = document.getElementById('ac');
   document.getElementById('cmdX').innerHTML = icon('close');
-  document.getElementById('cmdCfg').innerHTML = icon('cmdline');
+  document.getElementById('cmdCfg').innerHTML = icon('wrench');
   document.getElementById('cmdX').onclick = () => { app.cmd.cancel(); inp.value = ''; };
   document.getElementById('cmdCfg').onclick = () => app.cmd.run('OPTIONS');
   const cl = {};
+  document.getElementById('cmdExp').onclick = () => cl.expand();
+  document.getElementById('cmdRecent').onclick = (e) => { const r = e.currentTarget.getBoundingClientRect(); const recent = [...new Set(histCmds.slice().reverse())].filter((x) => !/^[(!]/.test(x)).slice(0, 10); app.ui.popup(r.left, r.top - 24 * (recent.length || 1) - 10, recent.length ? recent.map((c) => [c.toUpperCase(), () => cl.submit(c)]) : [['(sin comandos recientes)', () => {}]]); };
   let lines = [], curPrompt = '', histCmds = [], hpos = -1, acItems = [], acSel = -1;
 
   cl.print = (msg) => {

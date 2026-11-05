@@ -519,6 +519,101 @@ Pulse la combinación | Prema a combinación | Press the key combination
 COMANDO o macro | COMANDO ou macro | COMMAND or macro
 Alias de comandos (.pgp) | Alias de comandos (.pgp) | Command aliases (.pgp)
 Repetir {0} | Repetir {0} | Repeat {0}
+Comandos recientes | Comandos recentes | Recent commands
+Parámetros de forzcursor | Parámetros de forzado do cursor | Snap settings
+Ángulos polares | Ángulos polares | Polar angles
+Espacio de trabajo y personalización | Espazo de traballo e personalización | Workspace and customization
+Pantalla limpia (Ctrl+0) | Pantalla limpa (Ctrl+0) | Clean screen (Ctrl+0)
+Miniaturas | Miniaturas | Thumbnails
+Más opciones | Máis opcións | More options
+Aprendizaje | Aprendizaxe | Learning
+Acerca de WebCAD Libre | Acerca de WebCAD Libre | About WebCAD Libre
+Gestionar atributos | Xestionar atributos | Manage attributes
+Cargar fuente SHX | Cargar fonte SHX | Load SHX font
+Extraer datos | Extraer datos | Extract data
+Exportar atributos | Exportar atributos | Export attributes
+Importar atributos | Importar atributos | Import attributes
+Vinculación y extracción | Vinculación e extracción | Linking & extraction
+Administrar estilos de cota... | Administrar estilos de cota... | Manage dimension styles...
+Usar capa actual | Usar capa actual | Use current layer
+Capa para las cotas | Capa para as cotas | Layer for dimensions
+Marca de centro | Marca de centro | Center mark
+Línea de centro | Liña de centro | Centerline
+Líneas de centro | Liñas de centro | Centerlines
+Mostrar todas | Amosar todas | Show all
+Ocultar todas | Ocultar todas | Hide all
+Herramientas de ventana gráfica | Ferramentas de xanela gráfica | Viewport tools
+Vista no guardada | Vista non gardada | Unsaved view
+Nueva vista | Nova vista | New view
+Configuración de ventana gráfica | Configuración de xanela gráfica | Viewport configuration
+Ventanas gráficas del modelo | Xanelas gráficas do modelo | Model viewports
+Paletas de herramientas | Paletas de ferramentas | Tool palettes
+Importar menú .MNU | Importar menú .MNU | Import .MNU menu
+Cargar formas | Cargar formas | Load shapes
+Limpieza | Limpeza | Cleanup
+Trazar lotes | Trazar lotes | Batch plot
+Vista preliminar | Vista previa | Preview
+Administrador de configuraciones de página | Administrador de configuracións de páxina | Page setup manager
+Ver detalles | Ver detalles | View details
+Administrador de trazadores | Administrador de trazadores | Plotter manager
+Exportar: Pantalla | Exportar: Pantalla | Export: Display
+Exportar: Presentación actual | Exportar: Presentación actual | Export: Current layout
+Exportar: Todas las presentaciones | Exportar: Todas as presentacións | Export: All layouts
+Qué exportar | Que exportar | What to export
+Configuración de página: Actual | Configuración de páxina: Actual | Page setup: Current
+Configuración de página | Configuración de páxina | Page setup
+Exportar a PDF | Exportar a PDF | Export to PDF
+Compartir dibujo | Compartir debuxo | Share drawing
+Compartir | Compartir | Share
+Paleta de marcas | Paleta de marcas | Markups palette
+Reemplazar bloque | Substituír bloque | Replace block
+Lista de propiedades | Lista de propiedades | List properties
+Numeración automática | Numeración automática | Auto number
+Convertir a texto M | Converter en texto M | Convert to Mtext
+Encerrar en objeto | Encerrar en obxecto | Enclose in object
+Modificar texto | Modificar texto | Modify text
+Símbolo de línea de rotura | Símbolo de liña de rotura | Break-line symbol
+Adjuntar datos X | Anexar datos X | Attach Xdata
+Listar datos X | Listar datos X | List Xdata
+Editar matriz | Editar matriz | Edit array
+Cambiar a capa actual | Cambiar á capa actual | Change to current layer
+Sincronizar atributos | Sincronizar atributos | Synchronize attributes
+Texto de una línea | Texto dunha liña | Single line text
+Convertir a texto de líneas múltiples | Converter en texto de liñas múltiples | Convert to multiline text
+Administrador de estilos de cota | Administrador de estilos de cota | Dimension style manager
+Bloque que se reemplaza | Bloque que se substitúe | Block to replace
+Bloque nuevo | Bloque novo | New block
+Limpiar el bloque reemplazado | Limpar o bloque substituído | Purge the replaced block
+Ordenar por | Ordenar por | Sort by
+Y (de arriba abajo) | Y (de arriba abaixo) | Y (top to bottom)
+X (de izquierda a derecha) | X (de esquerda a dereita) | X (left to right)
+Orden de designación | Orde de designación | Selection order
+Número inicial | Número inicial | Start number
+Incremento | Incremento | Increment
+Colocación | Colocación | Placement
+Prefijo | Prefixo | Prefix
+Sobrescribir | Sobrescribir | Overwrite
+Encerrar texto en objeto | Encerrar texto en obxecto | Enclose text in object
+Ranura | Rañura | Slot
+Separación (× altura de texto) | Separación (× altura do texto) | Offset (× text height)
+Adjuntar datos extendidos | Anexar datos estendidos | Attach extended data
+Aplicación | Aplicación | Application
+Cadena (1000) | Cadea (1000) | String (1000)
+Real (1040) | Real (1040) | Real (1040)
+Entero (1070) | Enteiro (1070) | Integer (1070)
+Quitar de la lista | Quitar da lista | Remove from list
+Abrir de la nube... | Abrir da nube... | Open from cloud...
+Referencia de comandos | Referencia de comandos | Command reference
+Todos los comandos en castellano e inglés, con sus alias. | Todos os comandos en castelán e inglés, cos seus alias. | All commands in Spanish and English, with their aliases.
+Rutinas LISP | Rutinas LISP | LISP routines
+Cargue rutinas .lsp, .dcl y guiones .scr. | Cargue rutinas .lsp, .dcl e guións .scr. | Load .lsp and .dcl routines and .scr scripts.
+Plantillas | Modelos | Templates
+Nuevo dibujo con capas normalizadas y cajetín. | Novo debuxo con capas normalizadas e caixetín. | New drawing with standard layers and title block.
+Brida con cotas, sombreado y un bloque dinámico. | Brida con cotas, sombreado e un bloque dinámico. | Flange with dimensions, hatch and a dynamic block.
+(sin comandos recientes) | (sen comandos recentes) | (no recent commands)
+Cinta de opciones | Cinta de opcións | Ribbon
+Coordenadas | Coordenadas | Coordinates
+Modo forzcursor (F9) | Modo forzado do cursor (F9) | Snap mode (F9)
 Papel | Papel | Paper
 Polar | Polar | Polar
 Orto | Orto | Ortho

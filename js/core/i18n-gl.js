@@ -579,3 +579,24 @@ MSG_RE_GL.unshift(
   [/^Duct: (.*) mm, (.*) m³\/h, (.*)$/, 'Conduto: $1 mm, $2 m³/h, $3'], [/^Delta X = (.*), Delta Y = (.*), Delta Z = 0\.0000$/, 'Incremento X = $1, Incremento Y = $2, Incremento Z = 0.0000'],
   [/^Distance = (.*),\s+Angle in XY Plane = (.*), Angle from XY Plane = 0\nDelta X = (.*), Delta Y = (.*), Delta Z = 0\.0000$/, 'Distancia = $1,  Ángulo no plano XY = $2, Ángulo desde o plano XY = 0\nIncremento X = $3, Incremento Y = $4, Incremento Z = 0.0000'],
 );
+
+// herramientas extra
+MSG_RE_GL.push(
+  [/^(\d+) block\(s\) exploded\.$/, "$1 bloque(s) descomposto(s)."],
+  [/^The drawing needs at least two blocks\.$/, "O debuxo necesita polo menos dous bloques."],
+  [/^(\d+) block reference\(s\) replaced\.$/, "$1 referencia(s) a bloque substituída(s)."],
+  [/^No blocks with attributes selected\.$/, "Non se designaron bloques con atributos."],
+  [/^(\d+) block\(s\) exported\.$/, "$1 bloque(s) exportado(s)."],
+  [/^(\d+) block\(s\) updated\.$/, "$1 bloque(s) actualizado(s)."],
+  [/^The file must start with HANDLE and BLOCKNAME columns\.$/, "O ficheiro debe comezar polas columnas HANDLE e BLOCKNAME."],
+  [/^Extended data attached to (.*)\.$/, "Datos estendidos engadidos a $1."],
+  [/^Object has no extended data\.$/, "O obxecto non ten datos estendidos."],
+  [/^\* Registered application: (.*)$/, "* Aplicación rexistrada: $1"],
+  [/^Select a circle or an arc\.$/, "Designe un círculo ou un arco."],
+  [/^Select a line\.$/, "Designe unha liña."],
+  [/^Object: (.*)$/, "Obxecto: $1"],
+  [/^Layer: (.*)$/, "Capa: $1"],
+  [/^Color: (.*)\s+\(layer: (.*)\)$/, "Cor: $1  (capa: $2)"],
+  [/^Linetype: (.*)\s+\(layer: (.*)\)$/, "Tipo de liña: $1  (capa: $2)"],
+  [/^Handle: (.*)$/, "Identificador: $1"],
+);

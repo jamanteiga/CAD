@@ -1,4 +1,5 @@
 // Arranque de WebCAD
+import * as E from './core/entities.js';
 import { app, loadSettings, saveSettings } from './app.js';
 import { Doc } from './core/document.js';
 import { View } from './view/viewport.js';
@@ -16,6 +17,12 @@ import * as Hvac from './cmd/hvac.js';
 import * as Tools from './cmd/tools.js';
 import * as Output from './cmd/output.js';
 import * as Collab from './cmd/collab.js';
+import * as Express from './cmd/express.js';
+import * as Annot2 from './cmd/annot2.js';
+import * as Refs from './cmd/refs.js';
+import * as Layers2 from './cmd/layers2.js';
+import * as Prod2 from './cmd/prod2.js';
+import * as Solid3D from './cmd/solid3d.js';
 import { Lisp } from './lisp/lisp.js';
 import { createIO } from './io/io.js';
 import { createUI } from './ui/ui.js';
@@ -83,6 +90,12 @@ createUI(app);
 Files.register(app.cmd, app);
 Param.register(app.cmd, app);
 Collab.register(app.cmd, app);
+Express.register(app.cmd, app);
+Annot2.register(app.cmd, app);
+Refs.register(app.cmd, app);
+Layers2.register(app.cmd, app);
+Prod2.register(app.cmd, app);
+Solid3D.register(app.cmd, app);
 app.ui.applyLayout();
 app.ui.translateStatic();
 
@@ -140,6 +153,7 @@ app.ui.refresh();
 app.ui.start.show();
 app.ui.cmdline.forceFocus();
 window.webcad = app;
+app.E = E; app.G = G; // geometría y entidades (consola y pruebas)
 
 // aplicación instalable y sin conexión (no dentro de visores incrustados)
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !app.io.inArtifact() && window.top === window.self) {

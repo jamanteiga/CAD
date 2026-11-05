@@ -47,6 +47,13 @@ npm start                 # servidor local en http://localhost:8080 (o: python -
 | Colaboración | **Nube opcional con Supabase** (NUBE, GUARDARNUBE, ABRIRNUBE, VERSIONES): dibujos compartidos con el equipo e historial de versiones; **marcas de revisión** (MARCA, MARCAS) guardadas en el dibujo y en la nube. Esquema en `supabase/schema.sql` |
 | AutoLISP | Intérprete propio (`defun`, `command` con `pause`, `getpoint`…, `entget`/`entmod` con datos extendidos, `ssget` con filtros, diccionarios y `vlax-ldata-*`, reactores de comando `vlr-*`) y **cuadros DCL** (`load_dialog`, `new_dialog`, `action_tile`, `get_tile`, listas, botones de opción…). APPLOAD carga `.lsp`, `.scr` y `.dcl`; editor Visual LISP con consola |
 | ActiveX (`vla-*`, `vlax-*`) | Modelo de objetos compatible: Application, Document, ModelSpace/PaperSpace, colecciones (Layers, Blocks, Layouts, TextStyles, Linetypes, Groups, Dictionaries, SelectionSets…), Utility, SummaryInfo y AcCmColor. Propiedades y métodos de cada tipo de entidad (`AddLine`…`AddTable`, `InsertBlock`, `Offset`, `Mirror`, `IntersectWith`, `GetAttributes`, `GetDynamicBlockProperties`, `GetXData`…), variants y safearrays, `vlax-curve-*` con parámetros estándar, `SendCommand`, `vlax-dump-object` |
+| Cotas (v7) | **Varios estilos de cota** (administrador DIMSTYLE: crear, modificar, renombrar, tolerancias, prefijo/sufijo, anotativo), **cotas asociativas** (DIMASSOC: se actualizan al modificar la geometría; DIMREASSOCIATE, DIMDISASSOCIATE), DIMARC, DIMJOGGED, **QDIM** (continua, línea base, coordenadas, radio, diámetro), DIMSPACE, DIMBREAK (automático y manual), **TOLERANCE** (marco de control geométrico) |
+| Anotación (v7) | **Escala de anotación** (CANNOSCALE, ANNOSCALE, ANNOTATIVE; selector en la barra de estado), estilos de **directriz múltiple** (MLEADERSTYLE) y de **tabla** (TABLESTYLE), **editor de texto in situ** para MTEXT, TEXTALIGN, **SPELL** (con el corrector del navegador), ARCTEXT |
+| Referencias (v7) | **IMAGEATTACH** (PNG/JPG/GIF/WebP; también arrastrando), IMAGECLIP rectangular o poligonal, IMAGEADJUST, TRANSPARENCY, IMAGEFRAME; **PDFATTACH** (página como imagen a escala real) y **PDFIMPORT** (líneas, rellenos y texto vectoriales); **HYPERLINK** (Ctrl+clic para abrir) |
+| Capas y vista (v7) | **Transparencia** por capa, por objeto (CETRANSPARENCY) y por ventana; **administrador de estados de capa** (LAYERSTATE, exportar/importar); **VPLAYER** y columnas por ventana en el administrador de capas (inutilizar, color, transparencia); LAYWALK; LAYTRANS; **SCP** (UCS, UCSMAN, UCSICON: coordenadas escritas, orto y coordenadas de estado en el SCP; prefijo `*` = universales); **ventanas en mosaico** del modelo (VPORTS/-VPORTS) |
+| Productividad (v7) | **Grabadora de acciones** (ACTRECORD, ACTSTOP, ACTPLAY, ACTMANAGER, exportación a LISP), **DWGCOMPARE** (diferencias en verde/rojo, informe, insertar diferencias), **conjunto de planos** (SHEETSET, lista de planos, publicar), **ETRANSMIT** (ZIP con DXF, .wcad, imágenes, LISP e informe), **selección por lazo** (arrastrar), ciclo de selección, **MLINE/MLSTYLE**, **REGION** con UNION/SUBTRACT/INTERSECT y **MASSPROP**, MOCORO, SUPERHATCH (bloque o imagen), CHSPACE |
+| 3D básico (v7) | Pestaña Modelado 3D: BOX, CYLINDER, CONE, SPHERE, EXTRUDE (con ahusamiento), REVOLVE; **visor 3D** con órbita, encuadre, zoom, **ViewCube**, estilos visuales (alámbrico, oculto, sombreado, realista) y RENDER a PNG; exportación **STL** y OBJ; volumen en MASSPROP |
+| Nubes y geolocalización (v7) | **Nubes de puntos** XYZ/TXT/CSV/PTS/PLY ASCII con color RGB o por elevación (POINTCLOUDATTACH, POINTCLOUDCROP, POINTCLOUDCOLORMAP), visibles también en el visor 3D; **GEOGRAPHICLOCATION** con mapa callejero de OpenStreetMap de fondo (GEOMAP, requiere conexión), GEOLATLONG, GEOMARKLATLONG |
 | Interfaz | Cinta con pestañas Inicio, Insertar, Anotar, Vista, Administrar, Salida, **Paramétrico**, **Instalaciones**, **Colaborar** y Herramientas extra; barra de menús y menú de pantalla clásicos; cargador `.MNU`; alias y atajos personalizables |
 | Rendimiento | Índice espacial para designar, referenciar y dibujar; encuadre rápido con imagen en caché en dibujos grandes |
 
@@ -75,8 +82,11 @@ Las pruebas están en `tests/unit` (idiomas, geometría, conductos, DXF) y `test
 
 ## Limitaciones conocidas
 
-- Solo 2D. Sólidos 3D y regiones se omiten al importar (se informa en la línea de comandos).
-- DWG es de solo lectura: LibreDWG no ofrece escritura fiable de DWG. Para intercambiar con otros programas se usa DXF 2000.
+- 3D básico: sólidos por extrusión, revolución y primitivas, sin edición de caras ni booleanas entre sólidos (las booleanas son de regiones). Los sólidos se exportan a DXF como su contorno en planta y a STL/OBJ completos. Los sólidos ACIS de un DWG/DXF se omiten al importar.
+- DWG es de solo lectura: LibreDWG no ofrece escritura fiable de DWG y el formato es cerrado. Para intercambiar con otros programas se usa DXF 2000.
+- No hay API .NET ni VBA (no pueden ejecutarse en un navegador); AutoLISP con ActiveX (`vla-*`) cubre la automatización.
+- Nubes de puntos solo en formatos de texto (no RCP/RCS ni LAS binario). El mapa de geolocalización es callejero (OpenStreetMap) y necesita conexión; no hay vista aérea.
+- DIMBREAK calcula los cortes al ejecutarlo (no se recalculan solos al mover objetos). MLEDIT no está: se descompone la multilínea y se edita.
 - ActiveX: sin objetos 3D, regiones ni objetos COM externos (`vlax-create-object` devuelve nil). Los reactores que no son de comando se registran pero no se disparan.
 
 ## Estructura
@@ -93,7 +103,7 @@ js/ui/                cinta, menús clásicos, paletas, diálogos, biblioteca, l
 tests/                pruebas unitarias y extremo a extremo (npm test)
 tools/build-sw.mjs    genera la lista del service worker
 supabase/schema.sql   esquema de la nube opcional
-vendor/               LibreDWG, jsPDF, SheetJS, supabase-js y tipografías
+vendor/               LibreDWG, jsPDF, SheetJS, supabase-js, pdf.js, polygon-clipping, earcut y tipografías
 ```
 
 ## Licencia

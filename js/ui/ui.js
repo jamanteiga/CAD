@@ -82,29 +82,38 @@ export function createUI(app) {
 
   // ---- barra de estado
   const status = document.getElementById('status'), coords = document.getElementById('coords');
-  const sbtn = (label, title, on, fn, menu) => { const b = h('button', { class: 'stb' + (on ? ' on' : ''), title, text: label, onclick: fn }); if (menu) b.oncontextmenu = (e) => { e.preventDefault(); menu(e); }; return b; };
-  const chk = (label, title, on, fn) => h('label', { class: 'stchk', title }, h('input', { type: 'checkbox', checked: on, onchange: (e) => fn(e.target.checked) }), label);
-  ui.status = {
+    ui.status = {
     update() {
       const d = app.doc, v = d.vars, s = app.settings;
       status.innerHTML = '';
       const tog = (n) => () => { d.setvar(n, v[n] ? 0 : 1); ui.status.update(); app.view.redraw(); };
+      const ib = (ic, title, on, fn, menu) => { const bt = h('button', { class: 'stb' + (on ? ' on' : ''), title, onclick: fn, html: icon(ic) }); if (menu) bt.oncontextmenu = (e) => { e.preventDefault(); menu(e); }; return bt; };
+      const dd = (title, fn) => h('button', { class: 'stb dd', title, text: '▾', onclick: fn });
+      const sep = () => h('span', { class: 'stsep' });
       status.append(
-        sbtn(d.active === 'Model' ? 'MODELO' : d.mspace ? 'MODELO' : 'PAPEL', 'Espacio modelo o papel', d.active !== 'Model' && !d.mspace, () => { if (d.active !== 'Model') app.cmd.run(d.mspace ? 'PSPACE' : 'MSPACE'); }),
-        sbtn('REJILLA', 'Mostrar rejilla del dibujo (F7)', v.GRIDMODE, tog('GRIDMODE')),
-        sbtn('FORZC', 'Modo forzcursor (F9)', v.SNAPMODE, tog('SNAPMODE')),
-        sbtn('ORTO', 'Modo orto (F8)', v.ORTHOMODE, () => { d.setvar('ORTHOMODE', v.ORTHOMODE ? 0 : 1); if (v.ORTHOMODE) d.setvar('POLARMODE', 0); ui.status.update(); }),
-        sbtn('POLAR', 'Rastreo polar (F10)', v.POLARMODE, () => { d.setvar('POLARMODE', v.POLARMODE ? 0 : 1); if (v.POLARMODE) d.setvar('ORTHOMODE', 0); ui.status.update(); }, () => app.cmd.run('DSETTINGS')),
-        sbtn('REFENT', 'Referencia a objetos (F3) — clic derecho: modos', !(v.OSMODE & 16384), () => { d.setvar('OSMODE', v.OSMODE ^ 16384); ui.status.update(); }, (e) => ui.osnapMenu(e)),
-        sbtn('RASTREO', 'Rastreo de referencias a objetos (F11)', !!(v.AUTOSNAP & 16), () => { d.setvar('AUTOSNAP', v.AUTOSNAP ^ 16); ui.status.update(); }),
-        sbtn('GLN', 'Mostrar/ocultar grosor de línea', v.LWDISPLAY, () => { d.setvar('LWDISPLAY', v.LWDISPLAY ? 0 : 1); ui.status.update(); app.view.redraw(); }),
-        sbtn('DIN', 'Entrada dinámica (F12)', v.DYNMODE, tog('DYNMODE')),
-        chk('Menú clásico', 'Mostrar el menú de pantalla lateral clásico', !!s.screenMenu, (on) => { s.screenMenu = on; saveSettings(); ui.applyLayout(); }),
-        chk('Barra menús', 'Mostrar la barra de menús clásica', !!s.menuBar, (on) => { s.menuBar = on; saveSettings(); ui.applyLayout(); }),
-        h('button', { class: 'stb', title: 'Personalización', html: '≡', onclick: (e) => ui.popup(e.clientX - 200, e.clientY - 230, [['Opciones...', 'OPTIONS'], ['Parámetros de dibujo...', 'DSETTINGS'], ['Atajos y alias (CUI)...', 'CUI'], ['Cargar menú .MNU...', 'MENU'], null, ['Pantalla limpia (cinta sí/no)', () => { s.ribbon = !s.ribbon; saveSettings(); ui.applyLayout(); }], ['Historial de comandos (F2)', 'TEXTSCR']]) }),
+        h('button', { class: 'stb txt', title: 'Espacio modelo o papel', text: d.active === 'Model' || d.mspace ? t('MODELO') : t('PAPEL'), onclick: () => { if (d.active !== 'Model') app.cmd.run(d.mspace ? 'PSPACE' : 'MSPACE'); } }),
+        sep(),
+        ib('stGrid', 'Mostrar rejilla del dibujo (F7)', v.GRIDMODE, tog('GRIDMODE')),
+        ib('stSnap', 'Modo forzcursor (F9)', v.SNAPMODE, tog('SNAPMODE')), dd('Parámetros de forzcursor', () => app.cmd.run('DSETTINGS')),
+        ib('stOrtho', 'Modo orto (F8)', v.ORTHOMODE, () => { d.setvar('ORTHOMODE', v.ORTHOMODE ? 0 : 1); if (v.ORTHOMODE) d.setvar('POLARMODE', 0); ui.status.update(); }),
+        ib('stPolar', 'Rastreo polar (F10)', v.POLARMODE, () => { d.setvar('POLARMODE', v.POLARMODE ? 0 : 1); if (v.POLARMODE) d.setvar('ORTHOMODE', 0); ui.status.update(); }, () => app.cmd.run('DSETTINGS')), dd('Ángulos polares', () => app.cmd.run('DSETTINGS')),
+        ib('stIso', 'Dibujo isométrico', !!v.SNAPSTYL, () => app.cmd.run('ISODRAFT')),
+        ib('stOtrack', 'Rastreo de referencias a objetos (F11)', !!(v.AUTOSNAP & 16), () => { d.setvar('AUTOSNAP', v.AUTOSNAP ^ 16); ui.status.update(); }),
+        ib('stOsnap', 'Referencia a objetos (F3)', !(v.OSMODE & 16384), () => { d.setvar('OSMODE', v.OSMODE ^ 16384); ui.status.update(); }, (e) => ui.osnapMenu(e)), dd('Modos de referencia a objetos', (e) => ui.osnapMenu(e)),
+        ib('stLw', 'Mostrar/ocultar grosor de línea', v.LWDISPLAY, () => { d.setvar('LWDISPLAY', v.LWDISPLAY ? 0 : 1); ui.status.update(); app.view.redraw(); }),
+        ib('stDyn', 'Entrada dinámica (F12)', v.DYNMODE, tog('DYNMODE')),
+        ib('stTransp', 'Mostrar/ocultar transparencia', v.TRANSPARENCYDISPLAY !== 0, () => { d.setvar('TRANSPARENCYDISPLAY', v.TRANSPARENCYDISPLAY === 0 ? 1 : 0); ui.status.update(); app.view.redraw(); }),
+        ib('stCycle', 'Ciclo de selección', (v.SELECTIONCYCLING || 0) >= 2, () => { d.setvar('SELECTIONCYCLING', (v.SELECTIONCYCLING || 0) >= 2 ? 0 : 2); ui.status.update(); }),
+        sep(),
+        h('button', { class: 'stb txt', title: 'Escala de anotación', text: v.CANNOSCALE || '1:1', onclick: (e) => ui.popup(e.clientX - 60, e.clientY - 330, [...(d.ext?.annoScales || ['1:1']).map((sc) => [sc, () => { app.setAnnoScale?.(sc); ui.status.update(); }, null, sc === v.CANNOSCALE]), null, ['Escala de anotación…', 'ANNOSCALE']]) }),
+        ...(app.cmd.recorder ? [h('button', { class: 'stb txt rec', title: 'Grabadora de acciones', text: '● REC', onclick: () => app.cmd.run('ACTSTOP') })] : []),
+        sep(),
+        ib('stGear', 'Espacio de trabajo y personalización', false, (e) => ui.popup(e.clientX - 230, e.clientY - 250, [['Opciones...', 'OPTIONS'], ['Parámetros de dibujo...', 'DSETTINGS'], ['Atajos y alias (CUI)...', 'CUI'], ['Cargar menú .MNU...', 'MENU'], null, ['Menú de pantalla clásico', () => { s.screenMenu = !s.screenMenu; saveSettings(); ui.applyLayout(); }, null, !!s.screenMenu], ['Barra de menús clásica', () => { s.menuBar = !s.menuBar; saveSettings(); ui.applyLayout(); }, null, !!s.menuBar], ['Cinta de opciones', () => { s.ribbon = !s.ribbon; saveSettings(); ui.applyLayout(); }, null, !!s.ribbon]])),
+        ib('stFull', 'Pantalla limpia (Ctrl+0)', !s.ribbon, () => { s.ribbon = !s.ribbon; saveSettings(); ui.applyLayout(); }),
+        ib('stMenu', 'Personalización', false, (e) => ui.popup(e.clientX - 200, e.clientY - 120, [['Coordenadas', () => { s.showCoords = s.showCoords === false; saveSettings(); ui.applyLayout(); }, null, s.showCoords !== false], ['Historial de comandos (F2)', 'TEXTSCR']])),
       );
     },
-    coords(p) { coords.textContent = `${fmt(p.x, 4)}, ${fmt(p.y, 4)}, 0.0000`; },
+    coords(p) { const u = app.doc?.ext?.ucs; if (u) { const q = { x: p.x - u.o.x, y: p.y - u.o.y }, c = Math.cos(-(u.a || 0)), s = Math.sin(-(u.a || 0)); p = { x: q.x * c - q.y * s, y: q.x * s + q.y * c }; } coords.textContent = `${fmt(p.x, 4)}, ${fmt(p.y, 4)}, 0.0000`; },
   };
   ui.osnapMenu = (e) => {
     const v = app.doc.vars;
@@ -195,6 +204,7 @@ export function createUI(app) {
     document.getElementById('screen').hidden = !s.screenMenu;
     document.getElementById('filetabs').hidden = s.fileTabs === false;
     document.getElementById('ltabs').hidden = s.layoutTabs === false;
+    document.getElementById('coords').hidden = s.showCoords === false;
     ws.value = !s.ribbon && s.menuBar ? 'classic' : s.ribbon && (s.menuBar || s.screenMenu) ? 'both' : 'ribbon';
     app.doc.vars.PICKBOX = s.pickbox || app.doc.vars.PICKBOX;
     ui.ribbon.render(); ui.status.update();
@@ -261,6 +271,8 @@ export function createUI(app) {
       else if (/\.scr$/i.test(f.name)) app.lisp.runScript(await f.text());
       else if (/\.(mnu|mns)$/i.test(f.name)) ui.menu12.loadMNU(await f.text(), f.name);
       else if (/\.(dwg|dxf|wcad|json)$/i.test(f.name)) { ui.start.hide(); await app.io.openFile(f); }
+      else if (/\.(png|jpe?g|gif|bmp|webp)$/i.test(f.name) && app.attachImage) { const r = host.getBoundingClientRect(), p = app.view.toWorld(e.clientX - r.left, e.clientY - r.top); const data = await new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(f); }); await app.attachImage(f.name, data, p, 100 / app.view.cur.s * 3); }
+      else if (/\.(xyz|pts|ply|las_txt|csv)$/i.test(f.name) && app.attachCloud) await app.attachCloud(f);
     }
   });
   return ui;

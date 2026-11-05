@@ -518,6 +518,101 @@ Pulse la combinación | Prima a combinação | Premeu la combinació
 COMANDO o macro | COMANDO ou macro | ORDRE o macro
 Alias de comandos (.pgp) | Alias de comandos (.pgp) | Àlies d'ordres (.pgp)
 Repetir {0} | Repetir {0} | Repetir {0}
+Comandos recientes | Comandos recentes | Ordres recents
+Parámetros de forzcursor | Parâmetros de snap | Paràmetres de forçat
+Ángulos polares | Ângulos polares | Angles polars
+Espacio de trabajo y personalización | Espaço de trabalho e personalização | Espai de treball i personalització
+Pantalla limpia (Ctrl+0) | Ecrã limpo (Ctrl+0) | Pantalla neta (Ctrl+0)
+Miniaturas | Miniaturas | Miniatures
+Más opciones | Mais opções | Més opcions
+Aprendizaje | Aprendizagem | Aprenentatge
+Acerca de WebCAD Libre | Acerca do WebCAD Libre | Quant a WebCAD Libre
+Gestionar atributos | Gerir atributos | Gestionar atributs
+Cargar fuente SHX | Carregar fonte SHX | Carregar font SHX
+Extraer datos | Extrair dados | Extreure dades
+Exportar atributos | Exportar atributos | Exportar atributs
+Importar atributos | Importar atributos | Importar atributs
+Vinculación y extracción | Vinculação e extração | Vinculació i extracció
+Administrar estilos de cota... | Gerir estilos de cota... | Administrar estils de cota...
+Usar capa actual | Usar camada atual | Utilitzar capa actual
+Capa para las cotas | Camada para as cotas | Capa per a les cotes
+Marca de centro | Marca de centro | Marca de centre
+Línea de centro | Linha de centro | Línia de centre
+Líneas de centro | Linhas de centro | Línies de centre
+Mostrar todas | Mostrar todas | Mostrar-les totes
+Ocultar todas | Ocultar todas | Amagar-les totes
+Herramientas de ventana gráfica | Ferramentas da janela gráfica | Eines de finestra gràfica
+Vista no guardada | Vista não guardada | Vista no desada
+Nueva vista | Nova vista | Nova vista
+Configuración de ventana gráfica | Configuração da janela gráfica | Configuració de finestra gràfica
+Ventanas gráficas del modelo | Janelas gráficas do modelo | Finestres gràfiques del model
+Paletas de herramientas | Paletas de ferramentas | Paletes d'eines
+Importar menú .MNU | Importar menu .MNU | Importar menú .MNU
+Cargar formas | Carregar formas | Carregar formes
+Limpieza | Limpeza | Neteja
+Trazar lotes | Plotar lotes | Traçar lots
+Vista preliminar | Pré-visualização | Visualització prèvia
+Administrador de configuraciones de página | Gestor de configurações de página | Administrador de configuracions de pàgina
+Ver detalles | Ver detalhes | Veure detalls
+Administrador de trazadores | Gestor de plotters | Administrador de traçadors
+Exportar: Pantalla | Exportar: Ecrã | Exportar: Pantalla
+Exportar: Presentación actual | Exportar: Layout atual | Exportar: Presentació actual
+Exportar: Todas las presentaciones | Exportar: Todos os layouts | Exportar: Totes les presentacions
+Qué exportar | O que exportar | Què exportar
+Configuración de página: Actual | Configuração de página: Atual | Configuració de pàgina: Actual
+Configuración de página | Configuração de página | Configuració de pàgina
+Exportar a PDF | Exportar para PDF | Exportar a PDF
+Compartir dibujo | Partilhar desenho | Compartir dibuix
+Compartir | Partilhar | Compartir
+Paleta de marcas | Paleta de marcas | Paleta de marques
+Reemplazar bloque | Substituir bloco | Substituir bloc
+Lista de propiedades | Lista de propriedades | Llista de propietats
+Numeración automática | Numeração automática | Numeració automàtica
+Convertir a texto M | Converter em texto M | Convertir a text M
+Encerrar en objeto | Envolver em objeto | Envoltar amb objecte
+Modificar texto | Modificar texto | Modificar text
+Símbolo de línea de rotura | Símbolo de linha de quebra | Símbol de línia de ruptura
+Adjuntar datos X | Anexar dados X | Adjuntar dades X
+Listar datos X | Listar dados X | Llistar dades X
+Editar matriz | Editar matriz | Editar matriu
+Cambiar a capa actual | Mudar para a camada atual | Canviar a la capa actual
+Sincronizar atributos | Sincronizar atributos | Sincronitzar atributs
+Texto de una línea | Texto de uma linha | Text d'una línia
+Convertir a texto de líneas múltiples | Converter em texto de várias linhas | Convertir a text de línies múltiples
+Administrador de estilos de cota | Gestor de estilos de cota | Administrador d'estils de cota
+Bloque que se reemplaza | Bloco a substituir | Bloc que es substitueix
+Bloque nuevo | Bloco novo | Bloc nou
+Limpiar el bloque reemplazado | Limpar o bloco substituído | Netejar el bloc substituït
+Ordenar por | Ordenar por | Ordenar per
+Y (de arriba abajo) | Y (de cima para baixo) | Y (de dalt a baix)
+X (de izquierda a derecha) | X (da esquerda para a direita) | X (d'esquerra a dreta)
+Orden de designación | Ordem de seleção | Ordre de designació
+Número inicial | Número inicial | Número inicial
+Incremento | Incremento | Increment
+Colocación | Colocação | Col·locació
+Prefijo | Prefixo | Prefix
+Sobrescribir | Substituir | Sobreescriure
+Encerrar texto en objeto | Envolver texto em objeto | Envoltar text amb objecte
+Ranura | Ranhura | Ranura
+Separación (× altura de texto) | Afastamento (× altura do texto) | Separació (× alçada del text)
+Adjuntar datos extendidos | Anexar dados expandidos | Adjuntar dades esteses
+Aplicación | Aplicação | Aplicació
+Cadena (1000) | Cadeia (1000) | Cadena (1000)
+Real (1040) | Real (1040) | Real (1040)
+Entero (1070) | Inteiro (1070) | Enter (1070)
+Quitar de la lista | Remover da lista | Treure de la llista
+Abrir de la nube... | Abrir da nuvem... | Obrir del núvol...
+Referencia de comandos | Referência de comandos | Referència d'ordres
+Todos los comandos en castellano e inglés, con sus alias. | Todos os comandos em castelhano e inglês, com os seus alias. | Totes les ordres en castellà i anglès, amb els seus àlies.
+Rutinas LISP | Rotinas LISP | Rutines LISP
+Cargue rutinas .lsp, .dcl y guiones .scr. | Carregue rotinas .lsp, .dcl e scripts .scr. | Carregueu rutines .lsp, .dcl i guions .scr.
+Plantillas | Modelos | Plantilles
+Nuevo dibujo con capas normalizadas y cajetín. | Novo desenho com camadas normalizadas e legenda. | Nou dibuix amb capes normalitzades i caixetí.
+Brida con cotas, sombreado y un bloque dinámico. | Flange com cotas, tracejado e um bloco dinâmico. | Brida amb cotes, sombrejat i un bloc dinàmic.
+(sin comandos recientes) | (sem comandos recentes) | (sense ordres recents)
+Cinta de opciones | Friso | Cinta d'opcions
+Coordenadas | Coordenadas | Coordenades
+Modo forzcursor (F9) | Modo snap (F9) | Mode forçat (F9)
 Papel | Papel | Paper
 Polar | Polar | Polar
 Orto | Orto | Orto

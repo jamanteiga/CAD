@@ -116,6 +116,7 @@ export function createIO(app) {
     return true;
   }
   io.deliver = deliver;
+  io.parseFile = parseFile;
   const baseName = () => app.doc.name.replace(/\.(dwg|dxf|wcad)$/i, '');
   const content = (fmt) => (fmt === 'wcad' ? app.doc.serialize() : fmt === 'dxf12' ? writeDXF(app.doc, { paper: app.doc.layouts[0]?.ents.filter((e) => e.type !== 'VIEWPORT') }) : writeDXF2000(app.doc));
   io.content = content;
@@ -166,6 +167,7 @@ export function createIO(app) {
   io.listRecent = async () => {
     try { const db = await idb(); return await new Promise((res) => { const r = db.transaction('recent').objectStore('recent').getAll(); r.onsuccess = () => res((r.result || []).sort((a, b) => b.t - a.t)); r.onerror = () => res([]); }); } catch (_) { return []; }
   };
+  io.removeRecent = async (name) => { try { const db = await idb(); await new Promise((res) => { const tx = db.transaction('recent', 'readwrite'); tx.objectStore('recent').delete(name); tx.oncomplete = res; tx.onerror = res; }); } catch (_) { /* nada */ } };
   io.openRecent = async (name) => {
     try {
       const db = await idb(); const rec = await new Promise((res) => { const r = db.transaction('recent').objectStore('recent').get(name); r.onsuccess = () => res(r.result); r.onerror = () => res(null); });

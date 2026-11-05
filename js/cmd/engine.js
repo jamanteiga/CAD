@@ -98,6 +98,7 @@ export class Engine {
     if (transparent || cmd.transparentOnly) return this.runTransparent(cmd);
     if (this.active) { this.print(`** ${dispCmd(name)} command not allowed while ${dispCmd(this.active)} is active **`); return; }
     this.active = name; this.lastCmd = name.startsWith('-') ? name : raw;
+    this.recorder?.command(name);
     if (!cmd.noRepeat) this.lastCmd = name;
     this.ui?.cmdline?.echoCommand?.(dispCmd(name));
     this.doc.begin(name);
@@ -145,7 +146,7 @@ export class Engine {
   // ---- solicitud genérica
   ask(req) {
     return new Promise((resolve, reject) => {
-      req.resolve = (v) => { if (this.req === req) this.req = null; this.osOverride = null; if (v && v.x !== undefined && req.wantsPoint) this.lastPoint = v; resolve(v); this.view.redrawOverlay(); };
+      req.resolve = (v) => { if (this.req === req) this.req = null; this.osOverride = null; if (v && v.x !== undefined && req.wantsPoint) this.lastPoint = v; this.recorder?.input(req, v); resolve(v); this.view.redrawOverlay(); };
       req.reject = (e) => { if (this.req === req) this.req = null; reject(e); };
       req.kws = req.kws || parseKws(req.prompt);
       if (!req.raw) { const li = kwInfos(req.kws.map((k) => k.name)); req.kws = req.kws.map((k, i) => ({ ...k, ...li[i] })); }
@@ -355,6 +356,20 @@ export class Engine {
     }
     if (req.single && req.sel.length) req.resolve(req.sel);
   }
+  polySelect(pts, crossing) {
+    const d = this.doc, poly = pts.map((p, i) => ({ k: 'L', a: p, b: pts[(i + 1) % pts.length] }));
+    const pb = G.bbNew(); for (const p of pts) G.bbAdd(pb, p);
+    return d.space.filter((e) => {
+      if (!d.isVisible(e)) return false;
+      const b = E.entBBox(e, d); if (G.bbValid(b) && !G.bbOverlap(b, pb)) return false;
+      const ps = E.prims(e, d);
+      if (!ps.length) { const q = e.p || e.c || (G.bbValid(b) ? { x: (b.x1 + b.x2) / 2, y: (b.y1 + b.y2) / 2 } : null); return !!q && G.ptInPoly(q, pts); }
+      const inside = ps.every((p) => G.ptInPoly(p.k === 'L' ? p.a : G.polar(p.c, p.a1, p.r), pts) && (p.k !== 'L' || G.ptInPoly(p.b, pts)));
+      if (inside) return true;
+      if (!crossing) return false;
+      return ps.some((p) => poly.some((q) => G.primInter(p, q).length)) || (e.type === 'HATCH' && E.entDist(e, pts[0], d) === 0);
+    });
+  }
   windowSelect(p1, p2, crossing) {
     const bb = { x1: Math.min(p1.x, p2.x), y1: Math.min(p1.y, p2.y), x2: Math.max(p1.x, p2.x), y2: Math.max(p1.y, p2.y) };
     const d = this.doc, out = [];
@@ -388,6 +403,13 @@ export class Engine {
   }
   pointerMove(info) {
     const req = this.req;
+    const w = this.win;
+    if (w && w.down && (info.ev?.buttons & 1) && this.doc.vars.LASSOMODE !== 0) {
+      const last = w.spath[w.spath.length - 1];
+      if (Math.hypot(info.sx - last.x, info.sy - last.y) > 3) { w.spath.push({ x: info.sx, y: info.sy }); w.path.push({ ...info.raw }); }
+      if (!w.lasso && Math.hypot(info.sx - w.sx, info.sy - w.sy) > 8) { w.lasso = true; w.crossing = info.sx < w.sx; }
+      if (w.lasso) this.view.redrawOverlay();
+    }
     if (!req || req.kind === 'select' || req.kind === 'entity') {
       const before = this.hover;
       this.hover = (this.win || this.gripDrag) ? null : this.view.pickAt(info.raw);
@@ -424,6 +446,12 @@ export class Engine {
       if (g) return this.startGrip(g);
     }
     const e = this.view.pickAt(info.raw);
+    if (e && !req && info.ctrl && e.url && this.app.openHyperlink) { this.app.openHyperlink(e); return; }
+    if (e && !info.shift && this.cyclePick(info, (x) => {
+      if (req && this.req === req) { if (this.selectable(x, req) && !req.sel.includes(x)) req.sel.push(x); this.print(`1 found, ${req.sel.length} total`); if (req.single) return req.resolve(req.sel); }
+      else if (!req) { if (!this.sel.includes(x)) this.sel.push(x); this.updateGrips(); this.ui?.refresh?.(); }
+      this.view.redrawOverlay();
+    })) return;
     if (e) {
       if (req) {
         if (!this.selectable(e, req)) { this.print('1 was on a locked layer.'); return; }
@@ -438,14 +466,43 @@ export class Engine {
       if (info.shift) this.sel = this.sel.filter((x) => !grp.includes(x)); else for (const x of grp) if (!this.sel.includes(x)) this.sel.push(x);
       this.updateGrips(); this.ui?.refresh?.(); this.view.redrawOverlay(); return;
     }
-    this.win = { p1: info.raw, sx: info.sx, sy: info.sy, t: performance.now(), shift: info.shift };
+    this.win = { p1: info.raw, sx: info.sx, sy: info.sy, t: performance.now(), shift: info.shift, down: true, path: [{ ...info.raw }], spath: [{ x: info.sx, y: info.sy }] };
     this.view.redrawOverlay();
   }
   pointerUp(info) {
     if (this.win && info.button === 0) {
       const moved = Math.hypot(info.sx - this.win.sx, info.sy - this.win.sy);
+      if (this.win.lasso && this.win.path.length > 2) return this.finishLasso(info);
       if (moved > 6) this.finishWindow(info);
+      else if (this.win) this.win.down = false;
     }
+  }
+  // selección por lazo: arrastrar a la derecha = ventana, a la izquierda = captura
+  finishLasso(info) {
+    const w = this.win; this.win = null;
+    const found = this.withGroups(this.polySelect(w.path, w.crossing));
+    const req = this.req;
+    if (req && req.kind === 'select') {
+      const ok = found.filter((e) => this.selectable(e, req));
+      if (info.shift || req.mode === 'remove') req.sel = req.sel.filter((e) => !ok.includes(e));
+      else for (const e of ok) if (!req.sel.includes(e)) req.sel.push(e);
+      this.print(`${ok.length} found, ${req.sel.length} total`);
+      if (req.single && req.sel.length) return req.resolve(req.sel);
+    } else if (!req) {
+      if (info.shift || w.shift) this.sel = this.sel.filter((e) => !found.includes(e));
+      else for (const e of found) if (!this.sel.includes(e)) this.sel.push(e);
+      this.updateGrips(); this.ui?.refresh?.();
+    }
+    this.view.redrawOverlay();
+  }
+  // ciclo de selección: si hay varios objetos superpuestos bajo el cursor se muestra una lista para elegir
+  cyclePick(info, cb) {
+    const all = this.view.pickAll(info.raw);
+    if (all.length < 2 || !(this.doc.vars.SELECTIONCYCLING >= 2) || !this.ui?.popup) return false;
+    const r = this.view.host.getBoundingClientRect(), T = this.app.ui?.typeName || ((t) => t);
+    this.ui.popup(r.left + info.sx + 12, r.top + info.sy + 12, all.slice(0, 12).map((e) => [`${T(e.type)} — ${e.layer || '0'}`, () => cb(e)]));
+    this._cycling = all;
+    return true;
   }
   finishWindow(info) {
     const w = this.win; this.win = null;
@@ -593,13 +650,17 @@ const NUM = '[-+]?(?:\\d+\\.?\\d*|\\.\\d+)(?:[eE][-+]?\\d+)?';
 export function parsePoint(t, eng) {
   t = t.trim();
   const last = eng.lastPoint || { x: 0, y: 0 };
-  let rel = false, abs = false;
+  let rel = false, wcs = false;
   if (t.startsWith('@')) { rel = true; t = t.slice(1); if (!t) return { ...last }; }
-  else if (t.startsWith('#')) { abs = true; t = t.slice(1); }
-  void abs;
+  else if (t.startsWith('#')) t = t.slice(1);
+  if (t.startsWith('*')) { wcs = true; t = t.slice(1); }
+  // SCP actual: las coordenadas escritas se interpretan en el SCP (salvo con el prefijo *)
+  const u = !wcs && eng.doc?.ext?.ucs;
+  const toW = (p) => (u ? G.add(u.o, G.rotate(p, { x: 0, y: 0 }, u.a || 0)) : p);
+  const vec = (p) => (u ? G.rotate(p, { x: 0, y: 0 }, u.a || 0) : p);
   let m = new RegExp(`^(${NUM})\\s*,\\s*(${NUM})(?:\\s*,\\s*(${NUM}))?$`).exec(t);
-  if (m) { const p = { x: +m[1], y: +m[2] }; return rel ? G.add(last, p) : p; }
+  if (m) { const p = { x: +m[1], y: +m[2] }; return rel ? G.add(last, vec(p)) : toW(p); }
   m = new RegExp(`^(${NUM})\\s*<\\s*(.+)$`).exec(t);
-  if (m) { const a = parseAngle(m[2], eng.doc); if (a == null) return null; const p = G.polar({ x: 0, y: 0 }, a, +m[1]); return rel ? G.add(last, p) : p; }
+  if (m) { const a = parseAngle(m[2], eng.doc); if (a == null) return null; const p = G.polar({ x: 0, y: 0 }, a, +m[1]); return rel ? G.add(last, vec(p)) : toW(p); }
   return null;
 }

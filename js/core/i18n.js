@@ -6,6 +6,7 @@ import * as GL from './i18n-gl.js';
 import * as PT from './lang-pt.js';
 import * as CA from './lang-ca.js';
 import { UI, UI_RE } from './ui-strings.js';
+import { applyV7 } from './i18n-v7.js';
 import { TXT_PTCA, RE_PTCA } from './ui-ptca.js';
 
 export const LANGS = { es: 'Castellano', gl: 'Galego', pt: 'Português', ca: 'Català', en: 'English' };
@@ -405,6 +406,27 @@ export function trMsg(s) {
   return tKnown(str); // mensajes escritos en castellano en el código
 }
 
+// herramientas extra
+MSG_RE.push(
+  [/^(\d+) block\(s\) exploded\.$/, "$1 bloque(s) descompuesto(s)."],
+  [/^The drawing needs at least two blocks\.$/, "El dibujo necesita al menos dos bloques."],
+  [/^(\d+) block reference\(s\) replaced\.$/, "$1 referencia(s) a bloque reemplazada(s)."],
+  [/^No blocks with attributes selected\.$/, "No se han designado bloques con atributos."],
+  [/^(\d+) block\(s\) exported\.$/, "$1 bloque(s) exportado(s)."],
+  [/^(\d+) block\(s\) updated\.$/, "$1 bloque(s) actualizado(s)."],
+  [/^The file must start with HANDLE and BLOCKNAME columns\.$/, "El archivo debe empezar por las columnas HANDLE y BLOCKNAME."],
+  [/^Extended data attached to (.*)\.$/, "Datos extendidos añadidos a $1."],
+  [/^Object has no extended data\.$/, "El objeto no tiene datos extendidos."],
+  [/^\* Registered application: (.*)$/, "* Aplicación registrada: $1"],
+  [/^Select a circle or an arc\.$/, "Designe un círculo o un arco."],
+  [/^Select a line\.$/, "Designe una línea."],
+  [/^Object: (.*)$/, "Objeto: $1"],
+  [/^Layer: (.*)$/, "Capa: $1"],
+  [/^Color: (.*)\s+\(layer: (.*)\)$/, "Color: $1  (capa: $2)"],
+  [/^Linetype: (.*)\s+\(layer: (.*)\)$/, "Tipo de línea: $1  (capa: $2)"],
+  [/^Handle: (.*)$/, "Identificador: $1"],
+);
+
 // ---------- nombres de comando en castellano (AutoCAD en español) -> comando interno
 export const CMD_ES = {
   LINEA: 'LINE', POL: 'PLINE', POLILINEA: 'PLINE', CIRCULO: 'CIRCLE', ARCO: 'ARC', RECTANGULO: 'RECTANG', POLIGONO: 'POLYGON', ELIPSE: 'ELLIPSE', PUNTO: 'POINT',
@@ -442,6 +464,8 @@ export const CMD_ES = {
   // mismos nombres que en inglés (para que figuren en la lista en castellano)
   SPLINE: 'SPLINE', ID: 'ID', U: 'U', BASE: 'BASE', ZOOM: 'ZOOM', REGEN: 'REGEN', COLOR: 'COLOR', MENU: 'MENU', VLISP: 'VLISP', SCRIPT: 'SCRIPT', BIBLIOTECA: 'BIBLIOTECA',
   CELTSCALE: 'CELTSCALE', PDMODE: 'PDMODE',
+  MARCACENTRO: 'CENTERMARK', LINEACENTRO: 'CENTERLINE', BURST: 'BURST', BLOCKREPLACE: 'BLOCKREPLACE', XLIST: 'XLIST', ATTOUT: 'ATTOUT', ATTIN: 'ATTIN', TXT2MTXT: 'TXT2MTXT',
+  TCOUNT: 'TCOUNT', TCIRCLE: 'TCIRCLE', BREAKLINE: 'BREAKLINE', XDATA: 'XDATA', XDLIST: 'XDLIST',
 };
 // alias cortos en castellano (no pisan alias ingleses)
 export const ALIAS_ES = {
@@ -449,6 +473,7 @@ export const ALIAS_ES = {
   EM: 'FILLET', CH: 'CHAMFER', MZ: 'ARRAY', ET: 'STRETCH', PA: 'BREAK', JU: 'JOIN', EP: 'PEDIT', IP: 'MATCHPROP', TX: 'TEXT', TM: 'MTEXT', SB: 'HATCH', BL: 'BLOCK',
   IN: 'INSERT', CA: 'LAYER', TL: 'LINETYPE', EN: 'PAN', AC: 'DIMLINEAR', AA: 'AREA', PR: 'PROPERTIES', DR: 'DRAWORDER', RG: 'REGEN', DB: 'BEDIT',
 };
+applyV7({ UI, TXT_PTCA, KW, SENT, MSG, MSG_RE, CMD_ES, GL, PT, CA });
 // nombre en castellano para mostrar (eco y ayuda)
 const revName = (map) => { const m = {}; for (const [k, en] of Object.entries(map)) if (!m[en] && !k.startsWith('-')) m[en] = k; return m; };
 export const ES_NAME = revName(CMD_ES);

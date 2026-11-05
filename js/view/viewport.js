@@ -29,13 +29,31 @@ export class View {
   }
   get doc() { return this.app.doc; }
   get eng() { return this.app.cmd; }
-  get W() { return this.host.clientWidth; }
-  get H() { return this.host.clientHeight; }
+  // ventanas en mosaico del espacio modelo (VPORTS): doc.ext.vports = { cfg, act, tiles: [{ x, y, w, h (fracciones), v: {cx, cy, s} }] }
+  get tiles() { const d = this.doc; if (!d || d.blockEdit || d.active !== 'Model') return null; const t = d.ext?.vports; return t && t.tiles?.length > 1 ? t : null; }
+  tileRect(i) {
+    const t = this.tiles; if (!t) return null; const k = t.tiles[i ?? (this._rt ?? t.act)] || t.tiles[0];
+    const HW = this.host.clientWidth, HH = this.host.clientHeight;
+    const x = Math.round(k.x * HW), y = Math.round(k.y * HH);
+    return { x, y, w: Math.round((k.x + k.w) * HW) - x, h: Math.round((k.y + k.h) * HH) - y };
+  }
+  get W() { const t = this.tileRect(); return t ? t.w : this.host.clientWidth; }
+  get H() { const t = this.tileRect(); return t ? t.h : this.host.clientHeight; }
   resize() {
     this.dpr = window.devicePixelRatio || 1;
-    for (const c of [this.cv, this.ov]) { c.width = Math.max(1, this.W * this.dpr); c.height = Math.max(1, this.H * this.dpr); }
-    this.dirty = true;
+    const HW = this.host.clientWidth, HH = this.host.clientHeight;
+    this.cv.width = Math.max(1, HW * this.dpr); this.cv.height = Math.max(1, HH * this.dpr);
+    const t = this.tileRect();
+    this.ov.width = Math.max(1, this.W * this.dpr); this.ov.height = Math.max(1, this.H * this.dpr);
+    Object.assign(this.ov.style, t ? { left: t.x + 'px', top: t.y + 'px', width: t.w + 'px', height: t.h + 'px' } : { left: '', top: '', width: '', height: '' });
+    this.dirty = true; this.odirty = true;
   }
+  syncTiles() {
+    const t = this.tiles;
+    if (t) { this.views.Model = t.tiles[t.act].v; this._tileKey !== JSON.stringify([t.cfg, t.act, t.tiles.length]) && ((this._tileKey = JSON.stringify([t.cfg, t.act, t.tiles.length])), this.resize()); }
+    else if (this._tileKey) { this._tileKey = null; this.resize(); }
+  }
+  setActiveTile(i) { const t = this.tiles; if (!t || i === t.act || !t.tiles[i]) return; t.act = i; this.views.Model = t.tiles[i].v; this.syncTiles(); this.updateCursor?.(); this.redraw(); this.app.ui?.status?.update?.(); }
   redraw() { this.dirty = true; }
   redrawOverlay() { this.odirty = true; }
 
@@ -121,7 +139,7 @@ export class View {
         if (ot) { p = ot.p; this.otrack = ot; }
         else {
           if (d.vars.SNAPMODE) p = gridSnap(p, d.vars.SNAPUNIT || 1);
-          if (base && d.vars.ORTHOMODE) p = d.vars.SNAPSTYL === 1 ? isoOrthoPoint(base, p, d.vars.ISOPLANE || 0) : orthoPoint(base, p, d.vars.SNAPANG || 0);
+          if (base && d.vars.ORTHOMODE) p = d.vars.SNAPSTYL === 1 ? isoOrthoPoint(base, p, d.vars.ISOPLANE || 0) : orthoPoint(base, p, (d.vars.SNAPANG || 0) + (d.ext?.ucs?.a || 0));
           else if (base && d.vars.POLARMODE) { const pp = polarPoint(base, p, d.vars.POLARANG || 90); if (pp) { p = pp.p; this.trackInfo = { base, ang: pp.ang, d: G.dist(base, p) }; } }
         }
       }
@@ -188,11 +206,34 @@ export class View {
     return { px: v.s * this.dpr, bgDark: this.isDarkBg(bg), bg, lwdisplay: d.vars.LWDISPLAY, viewBB: this.worldBB(v), vh: this.H / v.s, qtext: d.vars.QTEXTMODE, showAttdefValue: false, ...extra };
   }
   render() {
+    this.syncTiles();
+    const T = this.tiles;
+    if (T) {
+      const main = this.cv, mctx = this.ctx, r = this.dpr, keep = this.views.Model;
+      mctx.setTransform(1, 0, 0, 1, 0, 0); mctx.fillStyle = '#5a5f66'; mctx.fillRect(0, 0, main.width, main.height);
+      this._tileCv ||= document.createElement('canvas');
+      const tc = this._tileCv, tctx = tc.getContext('2d');
+      T.tiles.forEach((k, i) => {
+        this._rt = i; this.views.Model = k.v; this._last = null;
+        const rc = this.tileRect(i);
+        tc.width = Math.max(1, rc.w * r); tc.height = Math.max(1, rc.h * r);
+        this.cv = tc; this.ctx = tctx;
+        try { this.renderSingle(); } finally { this.cv = main; this.ctx = mctx; }
+        mctx.setTransform(1, 0, 0, 1, 0, 0); mctx.drawImage(tc, rc.x * r, rc.y * r);
+        mctx.lineWidth = (i === T.act ? 2 : 1) * r; mctx.strokeStyle = i === T.act ? '#2b8cff' : '#8a8f96';
+        mctx.strokeRect(rc.x * r + mctx.lineWidth / 2, rc.y * r + mctx.lineWidth / 2, rc.w * r - mctx.lineWidth, rc.h * r - mctx.lineWidth);
+      });
+      this._rt = undefined; this.views.Model = keep; this._last = null;
+      return;
+    }
+    this.renderSingle();
+  }
+  renderSingle() {
     const ctx = this.ctx, d = this.doc;
     // encuadre rápido: si solo cambió la traslación y el último dibujo fue costoso, se desplaza la imagen
     // anterior y el dibujo completo se hace al parar
     const v0 = this.cur, L = this._last;
-    if (L && !this._full && (d.blockEdit || d.active === 'Model') && L.cost > 25 && L.s === v0.s && L.rev === d.rev && L.sp === d.space && L.w === this.cv.width && L.h === this.cv.height && (L.cx !== v0.cx || L.cy !== v0.cy)) {
+    if (L && !this._full && this._rt === undefined && (d.blockEdit || d.active === 'Model') && L.cost > 25 && L.s === v0.s && L.rev === d.rev && L.sp === d.space && L.w === this.cv.width && L.h === this.cv.height && (L.cx !== v0.cx || L.cy !== v0.cy)) {
       const r = this.dpr, dx = (L.cx - v0.cx) * v0.s * r, dy = (v0.cy - L.cy) * v0.s * r;
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = this.bg(); ctx.fillRect(0, 0, this.cv.width, this.cv.height);
       ctx.drawImage(L.img, dx, dy);
@@ -206,6 +247,7 @@ export class View {
     ctx.lineCap = 'butt'; ctx.lineJoin = 'miter';
     if (d.blockEdit || d.active === 'Model') {
       const v = this.cur;
+      if (!d.blockEdit) this.app.drawUnderlay?.(ctx, this, v);
       if (d.vars.GRIDMODE) this.drawGrid(ctx, v);
       this.setWorld(ctx, v);
       drawEnts(ctx, d.blockEdit ? d.space : this.near(this.worldBB(v)), d, this.baseStyle(v));
@@ -213,7 +255,7 @@ export class View {
     } else this.renderLayout(ctx);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     const cost = performance.now() - t0;
-    if (cost > 25 && (d.blockEdit || d.active === 'Model')) {
+    if (cost > 25 && this._rt === undefined && (d.blockEdit || d.active === 'Model')) {
       const img = this._lastImg ||= document.createElement('canvas');
       if (img.width !== this.cv.width || img.height !== this.cv.height) { img.width = this.cv.width; img.height = this.cv.height; }
       img.getContext('2d').drawImage(this.cv, 0, 0);
@@ -242,7 +284,7 @@ export class View {
       const vbb = { x1: vp.vc.x - vp.w / 2 / vp.scale, x2: vp.vc.x + vp.w / 2 / vp.scale, y1: vp.vc.y - vp.h / 2 / vp.scale, y2: vp.vc.y + vp.h / 2 / vp.scale };
       const frozen = new Set(vp.frozen || []);
       const ents = frozen.size ? d.model.filter((e) => !frozen.has(e.layer)) : d.model;
-      drawEnts(ctx, ents, d, { ...stP, px: mv.s * r, viewBB: vbb, ltk: d.vars.PSLTSCALE ? 1 / vp.scale : 1 });
+      drawEnts(ctx, ents, d, { ...stP, px: mv.s * r, viewBB: vbb, ltk: d.vars.PSLTSCALE ? 1 / vp.scale : 1, vpOvr: vp.ovr || null });
       ctx.restore();
     }
     this.setWorld(ctx, pv);
@@ -317,6 +359,7 @@ export class View {
     let n = 0;
     for (const e of selSet) { if (n++ > 3000) break; drawEnt(c, e, d, { ...st, override: dark ? '#4fd1c5' : '#0b6f6a', extraW: 1.5, noDash: false }); }
     if (eng.hover && !selSet.has(eng.hover)) { c.globalAlpha = 0.85; drawEnt(c, eng.hover, d, { ...st, extraW: 2, noDash: true }); c.globalAlpha = 1; }
+    if (eng.hover?.url && !eng.req) { c.save(); c.setTransform(r, 0, 0, r, 0, 0); c.font = '12px Segoe UI, Arial, sans-serif'; const tx = '🔗 ' + (eng.hover.urlDesc || eng.hover.url) + '  (Ctrl+clic)', tw = c.measureText(tx).width; c.fillStyle = dark ? '#2b3340' : '#ffffe1'; c.fillRect(this.mouse.x + 14, this.mouse.y + 12, tw + 8, 18); c.fillStyle = dark ? '#e6e6e6' : '#111'; c.fillText(tx, this.mouse.x + 18, this.mouse.y + 25); c.restore(); }
     // previsualización
     const prev = eng.preview ? eng.preview(this.snapped) : null;
     if (prev) for (const e of prev) { if (!e) continue; if (e.layer == null) { e.layer = d.clayer; e.color ??= d.vars.CECOLOR; e.ltype ??= d.vars.CELTYPE; } drawEnt(c, e, d, { ...st, override: e._ghost ? (dark ? 'rgba(200,200,200,.55)' : 'rgba(60,60,60,.6)') : null }); }
@@ -329,7 +372,13 @@ export class View {
     }
     // ventana de selección
     const win = eng.win;
-    if (win) {
+    if (win && win.lasso && win.path.length > 1) {
+      const crossing = win.crossing;
+      c.fillStyle = crossing ? 'rgba(60,180,80,.18)' : 'rgba(60,110,230,.18)';
+      c.strokeStyle = crossing ? '#3c3' : '#4a8cff'; c.lineWidth = 1 / (v.s * r);
+      if (crossing) c.setLineDash([5 / v.s, 3 / v.s]);
+      c.beginPath(); win.path.forEach((q, i) => (i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y))); c.closePath(); c.fill(); c.stroke(); c.setLineDash([]);
+    } else if (win) {
       const p1 = win.p1, p2 = this.cursor;
       const crossing = p2.x < p1.x;
       c.fillStyle = crossing ? 'rgba(60,180,80,.18)' : 'rgba(60,110,230,.18)';
@@ -379,6 +428,7 @@ export class View {
       c.strokeStyle = '#4caf50'; c.setLineDash([3 * r, 3 * r]); c.lineWidth = r; c.beginPath(); c.moveTo(a.x * r, a.y * r); c.lineTo((a.x + dx / L * 4000) * r, (a.y + dy / L * 4000) * r); c.stroke(); c.setLineDash([]);
     }
     this.app.drawConstraints?.(c, this, dark);
+    this.app.drawCompare?.(c, this, dark);
     this.app.drawMarkups?.(c, this, dark);
     // cursor
     if (this.mouse.in) this.drawCursor(c, dark);
@@ -420,10 +470,14 @@ export class View {
     c.stroke();
     // icono SCU
     if (this.app.settings.ucsIcon) {
-      const o = { x: 40 * r, y: (this.H - 40) * r }, L = 30 * r;
-      c.strokeStyle = dark ? '#d33' : '#c00'; c.lineWidth = 2 * r; c.beginPath(); c.moveTo(o.x, o.y); c.lineTo(o.x + L, o.y); c.stroke();
-      c.strokeStyle = dark ? '#3c3' : '#090'; c.beginPath(); c.moveTo(o.x, o.y); c.lineTo(o.x, o.y - L); c.stroke();
-      c.fillStyle = dark ? '#ccc' : '#333'; c.font = `${10 * r}px system-ui`; c.fillText('X', o.x + L + 3 * r, o.y + 4 * r); c.fillText('Y', o.x - 3 * r, o.y - L - 4 * r);
+      const u = this.doc.ext?.ucs, ang = u?.a || 0, L = 30 * r;
+      let o = { x: 40 * r, y: (this.H - 40) * r };
+      if (u && this.app.settings.ucsIconOrigin !== false) { const q = this.toScreen(u.o); if (q.x > 30 && q.x < this.W - 50 && q.y > 50 && q.y < this.H - 30) o = { x: q.x * r, y: q.y * r }; }
+      const ax = { x: Math.cos(ang), y: -Math.sin(ang) }, ay = { x: -Math.sin(ang), y: -Math.cos(ang) };
+      c.strokeStyle = dark ? '#d33' : '#c00'; c.lineWidth = 2 * r; c.beginPath(); c.moveTo(o.x, o.y); c.lineTo(o.x + ax.x * L, o.y + ax.y * L); c.stroke();
+      c.strokeStyle = dark ? '#3c3' : '#090'; c.beginPath(); c.moveTo(o.x, o.y); c.lineTo(o.x + ay.x * L, o.y + ay.y * L); c.stroke();
+      c.fillStyle = dark ? '#ccc' : '#333'; c.font = `${10 * r}px system-ui`; c.fillText('X', o.x + ax.x * (L + 7 * r) - 3 * r, o.y + ax.y * (L + 7 * r) + 4 * r); c.fillText('Y', o.x + ay.x * (L + 7 * r) - 3 * r, o.y + ay.y * (L + 7 * r) + 4 * r);
+      if (!u) { c.strokeStyle = dark ? '#ccc' : '#333'; c.lineWidth = r; c.strokeRect(o.x - 4 * r, o.y - 4 * r, 8 * r, 8 * r); }
     }
   }
 
@@ -431,6 +485,13 @@ export class View {
   bindEvents() {
     const el = this.ov;
     el.addEventListener('contextmenu', (e) => e.preventDefault());
+    // pulsar en otra ventana en mosaico la activa
+    this.cv.addEventListener('pointerdown', (e) => {
+      const t = this.tiles; if (!t) return;
+      const hr = this.host.getBoundingClientRect(), x = e.clientX - hr.left, y = e.clientY - hr.top;
+      const i = t.tiles.findIndex((_, k) => { const rc = this.tileRect(k); return x >= rc.x && x < rc.x + rc.w && y >= rc.y && y < rc.y + rc.h; });
+      if (i >= 0) this.setActiveTile(i);
+    });
     el.addEventListener('pointermove', (e) => {
       const r = el.getBoundingClientRect();
       const nx = e.clientX - r.left, ny = e.clientY - r.top;
@@ -473,6 +534,17 @@ export class View {
     return { raw: this.cursor, p: this.snapped, sx: this.mouse.x, sy: this.mouse.y, button: e.button, shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey, alt: e.altKey, ev: e };
   }
   pickTol() { return (this.doc.vars.PICKBOX || 4) / this.scale; }
+  // todos los objetos bajo el cursor (ciclo de selección)
+  pickAll(p) {
+    const tol = this.pickTol(), d = this.doc, out = [];
+    const bb = { x1: p.x - tol, y1: p.y - tol, x2: p.x + tol, y2: p.y + tol };
+    for (const e of this.near(bb)) {
+      if (!d.isVisible(e)) continue;
+      if (e.type !== 'XLINE' && e.type !== 'RAY') { const b = E.entBBox(e, d); if (G.bbValid(b) && !G.bbOverlap(b, bb)) continue; }
+      if (E.entDist(e, p, d) <= tol) out.push(e);
+    }
+    return out.reverse();
+  }
   pickAt(p, ents = null) {
     const tol = this.pickTol(), d = this.doc;
     let best = null, bd = Infinity;

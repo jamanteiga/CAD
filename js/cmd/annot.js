@@ -63,7 +63,7 @@ export function register(eng, app) {
     }
     const w = Math.abs(p2.x - p1.x);
     const top = { x: Math.min(p1.x, p2.x), y: Math.max(p1.y, p2.y) };
-    const res = await app.ui.dlg.mtext({ text: '', h, w });
+    const res = await (app.ui.mtextEdit || app.ui.dlg.mtext)({ text: '', h, w, p: top, rot, style: v.TEXTSTYLE, att });
     if (!res || !res.text) return;
     const col = (att - 1) % 3, row = Math.floor((att - 1) / 3);
     const H = Math.abs(p2.y - p1.y);
@@ -77,7 +77,7 @@ export function register(eng, app) {
       const s = await c.select('Select an annotation object or [Undo]:', { single: true, filter: (e) => ['TEXT', 'MTEXT', 'ATTDEF', 'DIMENSION', 'INSERT'].includes(e.type) });
       const e = s[0]; if (!e) return;
       if (e.type === 'TEXT') { const t = await app.ui.dlg.prompt('Editar texto', 'Texto:', e.text); if (t != null) doc().mod(e, (x) => (x.text = t)); }
-      else if (e.type === 'MTEXT') { const r = await app.ui.dlg.mtext({ text: e.text.replace(/\\P/g, '\n'), h: e.h, w: e.w }); if (r) doc().mod(e, (x) => { x.text = r.text; x.h = r.h; }); }
+      else if (e.type === 'MTEXT') { const r = await (app.ui.mtextEdit || app.ui.dlg.mtext)({ text: e.text.replace(/\\P/g, '\n'), h: e.h, w: e.w, p: e.p, rot: e.rot, style: e.style, att: e.att, ent: e }); if (r) doc().mod(e, (x) => { x.text = r.text; x.h = r.h; }); }
       else if (e.type === 'ATTDEF') { const r = await app.ui.dlg.form('Editar definición de atributo', [{ k: 'tag', l: 'Identificador', v: e.tag }, { k: 'prompt', l: 'Mensaje', v: e.prompt || '' }, { k: 'def', l: 'Valor por defecto', v: e.def || '' }]); if (r) doc().mod(e, (x) => Object.assign(x, r)); }
       else if (e.type === 'DIMENSION') { const t = await app.ui.dlg.prompt('Editar texto de cota', 'Texto (<> = medida):', e.text || '<>'); if (t != null) doc().mod(e, (x) => (x.text = t)); }
       else if (e.type === 'INSERT') { c.sel = [e]; await editAttribs(c, e); }
@@ -123,7 +123,8 @@ export function register(eng, app) {
   R('SHXLOAD', async () => { await loadShxFile(); for (const e of doc().allEntsDeep()) if (/TEXT|ATT|DIMENSION/.test(e.type)) E.invalidate(e); app.view.redraw(); }, { alias: ['CARGASHX'] });
 
   // ---------------- COTAS
-  const addDim = (o) => { const e = doc().add({ type: 'DIMENSION', ...o }); eng.lastDim = e; eng.print(`Dimension text = ${E.decodeSpecial(E.dimText(e, { ...E.DIMDEF, ...doc().dimstyle }))}`); return e; };
+  const addDim = (o) => { const e = doc().add({ type: 'DIMENSION', dstyle: doc().vars.DIMSTYLE, ...o }); eng.onNewDim?.(e); eng.lastDim = e; eng.print(`Dimension text = ${E.decodeSpecial(E.dimText(e, { ...E.DIMDEF, ...doc().dimStyleOf(e), ...(e.st || {}) }))}`); return e; };
+  eng.addDim = addDim; eng.dimLocation = (c, b, k) => dimLocation(c, b, k);
   const dimLocation = async (c, base, kinds) => {
     let text = null, forced = null, rot = 0;
     for (;;) {
@@ -203,7 +204,7 @@ export function register(eng, app) {
       const q = need(await c.getPoint('Specify leader endpoint or [Xdatum/Ydatum/Mtext/Text/Angle]:', { base: p, preview: (x) => [{ type: 'DIMENSION', dt: 'ordinate', p1: p, dp: x, xord: forced ? forced === 'x' : Math.abs(x.y - p.y) > Math.abs(x.x - p.x) }] }));
       if (q === 'Xdatum') { forced = 'x'; continue; } if (q === 'Ydatum') { forced = 'y'; continue; }
       if (!isPt(q)) continue;
-      addDim({ dt: 'ordinate', p1: p, dp: q, xord: forced ? forced === 'x' : Math.abs(q.y - p.y) > Math.abs(q.x - p.x) }); return;
+      addDim({ type: 'DIMENSION', dt: 'ordinate', p1: p, dp: q, xord: forced ? forced === 'x' : Math.abs(q.y - p.y) > Math.abs(q.x - p.x) }); return;
     }
   }, { alias: ['DIMORD'] });
   const contBase = (baseline) => async (c) => {
@@ -263,17 +264,18 @@ export function register(eng, app) {
     if (pts.length < 2) return;
     const last = pts[pts.length - 1], prev = pts[pts.length - 2];
     const dir = last.x >= prev.x ? 1 : -1;
-    const st = { ...E.DIMDEF, ...doc().dimstyle }, h = st.dimtxt * (st.dimscale || 1);
-    const land = G.add(last, { x: dir * h, y: 0 });
+    const ms = (ml && doc().ext.mleaderstyles[doc().vars.CMLEADERSTYLE]) || null;
+    const st = { ...E.DIMDEF, ...doc().dimstyle }, h = ms ? ms.txt * (ms.scale || 1) : st.dimtxt * (st.dimscale || 1);
+    const land = G.add(last, { x: dir * (ms ? (ms.land ?? 8) * (ms.scale || 1) : h), y: 0 });
     let text;
-    if (ml) { const r = await app.ui.dlg.mtext({ text: '', h }); text = r?.text; }
+    if (ml) { const r = await (app.ui.mtextEdit || app.ui.dlg.mtext)({ text: '', h, p: G.add(land, { x: dir * st.dimgap, y: h / 2 }), w: 0 }); text = r?.text; }
     else {
       const lines = [];
       for (;;) { const s = await c.getString(lines.length ? 'Enter next line of annotation text:' : 'Enter first line of annotation text <Mtext>:', { spaces: true }); if (!s) break; lines.push(s); }
       text = lines.join('\\P');
     }
-    doc().add({ type: 'LEADER', pts: [...pts, land], arrow: true });
-    if (text) doc().add({ type: 'MTEXT', p: G.add(land, { x: dir * st.dimgap * (st.dimscale || 1), y: h / 2 }), h, w: 0, text, att: dir > 0 ? 1 : 3 });
+    const ld = doc().add({ type: 'LEADER', pts: [...pts, land], arrow: !ms || ms.arrow !== false, ...(ms ? { asz: ms.asz * (ms.scale || 1), mlstyle: doc().vars.CMLEADERSTYLE } : {}), ...(ms && ms.color != null ? { color: ms.color } : {}) });
+    if (text) { const t = doc().add({ type: 'MTEXT', p: G.add(land, { x: dir * st.dimgap * (st.dimscale || 1), y: h / 2 }), h, w: 0, text, att: dir > 0 ? 1 : 3, ...(ms?.tstyle ? { style: ms.tstyle } : {}) }); if (ms?.frame) t.frame = true; ld.mtext = t.hid; }
   };
   R('QLEADER', (c) => leader(c, false), { alias: ['LEADER', 'LE', 'LEAD'] });
   R('MLEADER', (c) => leader(c, true), { alias: ['MLD'] });

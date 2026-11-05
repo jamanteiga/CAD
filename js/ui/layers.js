@@ -24,6 +24,8 @@ export function createLayers(app) {
         edit((dd) => { delete dd.layers[n]; selName = null; });
       } }, h('span', { class: 'ico', html: icon('erase') }), 'Suprimir'),
       h('button', { class: 'sm', type: 'button', title: 'Establecer como actual', onclick: () => { if (selName && d().layers[selName] && !d().layers[selName].frozen) { d().clayer = selName; app.ui.refresh(); } } }, h('span', { class: 'ico', html: icon('laymcur') }), 'Actual'),
+      h('button', { class: 'sm', type: 'button', title: 'Administrador de estados de capa', onclick: () => app.cmd.run('LAYERSTATE') }, h('span', { class: 'ico', html: icon('layers') }), 'Estados'),
+      h('button', { class: 'sm', type: 'button', title: 'Recorrer capas', onclick: () => app.cmd.run('LAYWALK') }, h('span', { class: 'ico', html: icon('layers') }), 'Recorrer'),
       search);
     pal = h('div', { class: 'palette', id: 'layerpal', style: { left: '60px', top: '40px' } },
       h('div', { class: 'pal-h' }, 'Administrador de propiedades de capas', h('span', { class: 'sp' }), h('span', { class: 'hint', id: 'laycount' }), h('button', { class: 'tbtn', title: 'Cerrar', html: icon('close'), onclick: () => { pal.hidden = true; } })), tb, body);
@@ -40,6 +42,7 @@ export function createLayers(app) {
     pal.querySelector('#laycount').textContent = t('Todas: {0} de {1} capas', rows.length, Object.keys(doc.layers).length);
     const ic = (name, title, fn) => h('span', { class: 'ic', title, html: icon(name), onclick: (e) => { e.stopPropagation(); fn(); } });
     const tbody = h('tbody');
+    const vp = doc.active !== 'Model' && !doc.blockEdit ? (doc.mspace || (app.cmd.sel?.length === 1 && app.cmd.sel[0].type === 'VIEWPORT' ? app.cmd.sel[0] : null)) : null;
     for (const l of rows) {
       const tr = h('tr', { class: l.name === selName ? 'sel' : '', onclick: () => { selName = l.name; L.render(); }, ondblclick: (e) => { if (e.target.closest('.nmcell')) return; if (!l.frozen) { doc.clayer = l.name; app.ui.refresh(); } } });
       const nameCell = h('td', { class: 'nmcell', text: l.name, ondblclick: () => {
@@ -60,11 +63,17 @@ export function createLayers(app) {
         h('td', { style: { cursor: 'pointer' }, onclick: async () => { const c = await app.ui.dlg.color(l.color); if (c != null && c !== 0 && c !== 256) edit(() => (l.color = c)); } }, h('span', { class: 'swatch', style: { background: typeof l.color === 'string' ? l.color : aciCss(l.color) } }), typeof l.color === 'string' ? l.color : colorName(l.color).replace('Color ', '')),
         h('td', { style: { cursor: 'pointer' }, onclick: async () => { const n = await app.ui.dlg.pickLinetype(l.ltype); if (n) edit(() => (l.ltype = n)); } }, l.ltype === 'CONTINUOUS' ? 'Continuous' : l.ltype),
         h('td', { style: { cursor: 'pointer' }, onclick: async () => { const w = await app.ui.dlg.lweight(l.lw); if (w != null && w > -2) edit(() => (l.lw = w === -1 ? -3 : w)); } }, lwName(l.lw)),
+        h('td', { style: { cursor: 'pointer' }, title: 'Transparencia', onclick: async () => { const v = await app.ui.dlg.prompt('Transparencia de capa', 'Valor de transparencia (0-90):', String(l.transp || 0)); if (v != null && v !== '' && !isNaN(+v)) edit(() => (l.transp = Math.max(0, Math.min(90, Math.round(+v))))); } }, String(l.transp || 0)),
+        ...(vp ? [
+          h('td', {}, ic((vp.frozen || []).includes(l.name) ? 'snow' : 'sun', 'Inutilizar en ventana actual', () => edit(() => { vp.frozen = (vp.frozen || []).includes(l.name) ? vp.frozen.filter((x) => x !== l.name) : [...(vp.frozen || []), l.name]; }))),
+          h('td', { style: { cursor: 'pointer' }, title: 'Color de ventana', onclick: async () => { const c = await app.ui.dlg.color(vp.ovr?.[l.name]?.color ?? l.color); if (c != null && c !== 0) edit(() => { vp.ovr = { ...(vp.ovr || {}) }; if (c === 256) { const o = { ...(vp.ovr[l.name] || {}) }; delete o.color; vp.ovr[l.name] = o; } else vp.ovr[l.name] = { ...(vp.ovr[l.name] || {}), color: c }; }); } }, vp.ovr?.[l.name]?.color != null ? h('span', { class: 'swatch', style: { background: aciCss(vp.ovr[l.name].color) } }) : '—'),
+          h('td', { style: { cursor: 'pointer' }, title: 'Transparencia de ventana', onclick: async () => { const v = await app.ui.dlg.prompt('Transparencia de ventana', 'Valor de transparencia (0-90, vacío = capa):', vp.ovr?.[l.name]?.transp != null ? String(vp.ovr[l.name].transp) : ''); if (v == null) return; edit(() => { vp.ovr = { ...(vp.ovr || {}) }; const o = { ...(vp.ovr[l.name] || {}) }; if (v === '') delete o.transp; else o.transp = Math.max(0, Math.min(90, Math.round(+v) || 0)); vp.ovr[l.name] = o; }); } }, vp.ovr?.[l.name]?.transp != null ? String(vp.ovr[l.name].transp) : '—'),
+        ] : []),
         h('td', { style: { color: 'var(--fg-faint)' }, text: l.desc || '' }),
       );
       tbody.append(tr);
     }
-    body.replaceChildren(h('table', { class: 'ltab' }, h('thead', {}, h('tr', {}, ['E..', 'Nombre', 'Act.', 'Inutilizar', 'Bloquear', 'Trazar', 'Color', 'Tipo de línea', 'Grosor de línea', 'Descripción'].map((t) => h('th', { text: t })))), tbody));
+    body.replaceChildren(h('table', { class: 'ltab' }, h('thead', {}, h('tr', {}, ['E..', 'Nombre', 'Act.', 'Inutilizar', 'Bloquear', 'Trazar', 'Color', 'Tipo de línea', 'Grosor de línea', 'Transparencia', ...(vp ? ['Inutilizar VP', 'Color VP', 'Transparencia VP'] : []), 'Descripción'].map((t) => h('th', { text: t })))), tbody));
   };
   return L;
 }

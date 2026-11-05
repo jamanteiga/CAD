@@ -562,3 +562,24 @@ export const CMD = {
 };
 export const ALIAS = {};
 export const OSNAP = { FIM: 'end', MEI: 'mid', CEN: 'cen', NOD: 'nod', QUA: 'qua', INT: 'int', INS: 'ins', PER: 'per', TAN: 'tan', PRO: 'nea', NEN: 'non', NENHUM: 'non', EXT: 'ext', APA: 'app' };
+
+// herramientas extra
+MSG_RE.push(
+  [/^(\d+) block\(s\) exploded\.$/, "$1 bloco(s) decomposto(s)."],
+  [/^The drawing needs at least two blocks\.$/, "O desenho precisa de pelo menos dois blocos."],
+  [/^(\d+) block reference\(s\) replaced\.$/, "$1 referência(s) a bloco substituída(s)."],
+  [/^No blocks with attributes selected\.$/, "Não foram selecionados blocos com atributos."],
+  [/^(\d+) block\(s\) exported\.$/, "$1 bloco(s) exportado(s)."],
+  [/^(\d+) block\(s\) updated\.$/, "$1 bloco(s) atualizado(s)."],
+  [/^The file must start with HANDLE and BLOCKNAME columns\.$/, "O ficheiro deve começar pelas colunas HANDLE e BLOCKNAME."],
+  [/^Extended data attached to (.*)\.$/, "Dados expandidos adicionados a $1."],
+  [/^Object has no extended data\.$/, "O objeto não tem dados expandidos."],
+  [/^\* Registered application: (.*)$/, "* Aplicação registada: $1"],
+  [/^Select a circle or an arc\.$/, "Selecione um círculo ou um arco."],
+  [/^Select a line\.$/, "Selecione uma linha."],
+  [/^Object: (.*)$/, "Objeto: $1"],
+  [/^Layer: (.*)$/, "Camada: $1"],
+  [/^Color: (.*)\s+\(layer: (.*)\)$/, "Cor: $1  (camada: $2)"],
+  [/^Linetype: (.*)\s+\(layer: (.*)\)$/, "Tipo de linha: $1  (camada: $2)"],
+  [/^Handle: (.*)$/, "Identificador: $1"],
+);

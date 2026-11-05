@@ -12,17 +12,18 @@ export function resolveStyle(e, doc, st) {
   if (layName === '0' && st.blockLayer) layName = st.blockLayer;
   const L = doc.layers[layName] || doc.layers['0'];
   let c = e.color ?? 256, css;
+  const vo = st.vpOvr && st.vpOvr[layName];
   if (e.tc) css = e.tc;
   else {
-    if (c === 256) c = L.color; else if (c === 0) { c = st.byBlockColor ?? 7; if (st.byBlockCss) css = st.byBlockCss; }
+    if (c === 256) c = vo?.color ?? L.color; else if (c === 0) { c = st.byBlockColor ?? 7; if (st.byBlockCss) css = st.byBlockCss; }
     css = css || (typeof c === 'string' ? c : aciCss(c, st.bgDark));
     if (!st.bgDark && (c === 7 || c === 255) && !e.tc) css = '#000';
   }
   let lt = (e.ltype || 'BYLAYER').toUpperCase();
-  if (lt === 'BYLAYER') lt = (L.ltype || 'CONTINUOUS').toUpperCase();
+  if (lt === 'BYLAYER') lt = (vo?.ltype || L.ltype || 'CONTINUOUS').toUpperCase();
   else if (lt === 'BYBLOCK') lt = st.byBlockLtype || 'CONTINUOUS';
   let lw = e.lw ?? -1;
-  if (lw === -1) lw = L.lw; if (lw === -2) lw = st.byBlockLw ?? -3; if (lw == null || lw < 0) lw = 25;
+  if (lw === -1) lw = vo?.lw ?? L.lw; if (lw === -2) lw = st.byBlockLw ?? -3; if (lw == null || lw < 0) lw = 25;
   if (st.pstyle) { const r = st.pstyle(c, css, lw, L, e); css = r.css; lw = r.lw; }
   return { L, css, lt, lw, c };
 }
@@ -47,11 +48,21 @@ function setStroke(ctx, s, e, doc, st) {
   ctx.setLineDash([]);
 }
 
+// transparencia (0-90 %) del objeto o, si es PorCapa, de la capa (o de la modificación de la ventana)
+export function entAlpha(e, doc, st) {
+  if (doc.vars.TRANSPARENCYDISPLAY === 0 && !st.plotting) return 1;
+  let t = e.transp;
+  if (t == null || t === -1) { let ln = e.layer || '0'; if (ln === '0' && st.blockLayer) ln = st.blockLayer; t = st.vpOvr?.[ln]?.transp ?? (doc.layers[ln] || doc.layers['0'])?.transp ?? 0; }
+  else if (t === -2) t = st.byBlockTransp || 0;
+  return t > 0 ? 1 - Math.min(90, t) / 100 : 1;
+}
 export function drawEnts(ctx, ents, doc, st) {
   for (const e of ents) {
     if (!layerVisible(e, doc, st)) continue;
     if (st.viewBB && e.type !== 'XLINE' && e.type !== 'RAY') { const bb = E.entBBox(e, doc); if (G.bbValid(bb) && !G.bbOverlap(bb, st.viewBB)) continue; }
-    drawEnt(ctx, e, doc, st);
+    const a = entAlpha(e, doc, st);
+    if (a < 1) { const g0 = ctx.globalAlpha; ctx.globalAlpha = g0 * a; drawEnt(ctx, e, doc, st); ctx.globalAlpha = g0; }
+    else drawEnt(ctx, e, doc, st);
   }
 }
 
@@ -161,7 +172,7 @@ export function drawEnt(ctx, e, doc, st) {
     case 'LEADER': {
       ctx.beginPath(); pathPolyline(ctx, e.pts); ctx.stroke();
       if (e.arrow !== false && e.pts.length > 1) {
-        const asz = (doc.dimstyle.dimasz || 2.5) * (doc.dimstyle.dimscale || 1), t = e.pts[0], u = G.norm(G.sub(e.pts[1], t)), n = G.perp(u), b = G.add(t, G.mul(u, asz));
+        const ds = doc.dimStyleOf ? doc.dimStyleOf(e) : doc.dimstyle, asz = (e.asz || (ds.dimasz || 2.5) * (ds.dimscale || 1)), t = e.pts[0], u = G.norm(G.sub(e.pts[1], t)), n = G.perp(u), b = G.add(t, G.mul(u, asz));
         ctx.setLineDash([]); ctx.beginPath(); ctx.moveTo(t.x, t.y); ctx.lineTo(b.x + n.x * asz / 6, b.y + n.y * asz / 6); ctx.lineTo(b.x - n.x * asz / 6, b.y - n.y * asz / 6); ctx.closePath(); ctx.fill();
       }
       break;
@@ -247,6 +258,11 @@ export function drawEnt(ctx, e, doc, st) {
     }
     case 'VIEWPORT': {
       ctx.beginPath(); ctx.rect(e.c.x - e.w / 2, e.c.y - e.h / 2, e.w, e.h); ctx.stroke(); break;
+    }
+    default: {
+      const d = E.GEN[e.type]; if (!d) break;
+      if (d.draw) { d.draw(ctx, e, doc, st, s, drawEnts); break; }
+      drawEnts(ctx, E.genEnts(e, doc), doc, { ...st, viewBB: null, byBlockColor: s.c, byBlockCss: s.css, byBlockLtype: s.lt, byBlockLw: s.lw, blockLayer: e.layer });
     }
   }
 }

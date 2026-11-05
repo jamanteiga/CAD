@@ -12,18 +12,18 @@ const COL = (...items) => ({ col: items });
 
 export const TABS = [
   { id: 'home', name: 'Inicio', panels: [
-    { name: 'Dibujo', items: [B('LINE', 'Línea', 'line'), B('PLINE', 'Polilínea', 'pline'),
+    { name: 'Dibujo', more: [S('SPLINE', 'Spline', 'spline'), S('XLINE', 'Línea auxiliar', 'xline'), S('RAY', 'Rayo', 'ray'), S('POINT', 'Punto múltiple', 'point'), S('DIVIDE', 'Dividir', 'divide'), S('MEASURE', 'Medir', 'divide'), S('BOUNDARY', 'Contorno', 'boundary'), S('DONUT', 'Arandela', 'donut'), S('REVCLOUD', 'Nube de revisión', 'revcloud'), S('WIPEOUT', 'Cobertura', 'wipeout'), S('BREAKLINE', 'Símbolo de línea de rotura', 'breakline')], items: [B('LINE', 'Línea', 'line'), B('PLINE', 'Polilínea', 'pline'),
       B('CIRCLE', 'Círculo', 'circle', [S('^C^CCIRCLE', 'Centro, radio', 'circle'), S('^C^CCIRCLE \\_D', 'Centro, diámetro', 'circle'), S('^C^CCIRCLE _2P', '2 puntos', 'circle3p'), S('^C^CCIRCLE _3P', '3 puntos', 'circle3p'), S('^C^CCIRCLE _TTR', 'Tan, tan, radio', 'ttr')]),
       B('ARC', 'Arco', 'arc', [S('^C^CARC', '3 puntos', 'arc'), S('^C^CARC \\_C', 'Inicio, centro, fin', 'arc'), S('^C^CARC \\_E', 'Inicio, fin, centro', 'arc'), S('^C^CARC \\_E \\_R', 'Inicio, fin, radio', 'arc'), S('^C^CARC _C', 'Centro, inicio, fin', 'arc')]),
       COL(S('RECTANG', '', 'rect', [S('RECTANG', 'Rectángulo', 'rect'), S('POLYGON', 'Polígono', 'polygon')]), S('HATCH', '', 'hatch', [S('HATCH', 'Sombreado', 'hatch'), S('GRADIENT', 'Degradado', 'gradient'), S('BOUNDARY', 'Contorno', 'boundary')]), S('ELLIPSE', '', 'ellipse', [S('ELLIPSE', 'Eje, fin', 'ellipse'), S('^C^CELLIPSE _C', 'Centro', 'ellipse'), S('^C^CELLIPSE _A', 'Arco elíptico', 'ellipse')])),
       COL(S('SPLINE', '', 'spline'), S('XLINE', '', 'xline', [S('XLINE', 'Línea auxiliar', 'xline'), S('RAY', 'Rayo', 'ray')]), S('POINT', '', 'point', [S('POINT', 'Punto múltiple', 'point'), S('DIVIDE', 'Dividir', 'divide'), S('MEASURE', 'Medir', 'divide'), S('DONUT', 'Arandela', 'donut'), S('REVCLOUD', 'Nube de revisión', 'revcloud'), S('WIPEOUT', 'Cobertura', 'wipeout')]))] },
-    { name: 'Modificar', items: [COL(S('MOVE', 'Desplazar', 'move'), S('COPY', 'Copiar', 'copy'), S('STRETCH', 'Estirar', 'stretch')), COL(S('ROTATE', 'Girar', 'rotate'), S('MIRROR', 'Simetría', 'mirror'), S('SCALE', 'Escala', 'scale')),
+    { name: 'Modificar', more: [S('EXTEND', 'Alargar', 'extend'), S('CHAMFER', 'Chaflán', 'chamfer'), S('BREAKATPOINT', 'Partir en punto', 'break'), S('LENGTHEN', 'Longitud', 'lengthen'), S('ALIGN', 'Alinear', 'align'), S('DRAWORDER', 'Ordenar objetos', 'draworder'), S('ARRAYEDIT', 'Editar matriz', 'array'), S('OVERKILL', 'Suprimir duplicados', 'overkill')], items: [COL(S('MOVE', 'Desplazar', 'move'), S('COPY', 'Copiar', 'copy'), S('STRETCH', 'Estirar', 'stretch')), COL(S('ROTATE', 'Girar', 'rotate'), S('MIRROR', 'Simetría', 'mirror'), S('SCALE', 'Escala', 'scale')),
       COL(S('TRIM', 'Recortar', 'trim', [S('TRIM', 'Recortar', 'trim'), S('EXTEND', 'Alargar', 'extend')]), S('FILLET', 'Empalme', 'fillet', [S('FILLET', 'Empalme', 'fillet'), S('CHAMFER', 'Chaflán', 'chamfer')]), S('ARRAY', 'Matriz', 'array', [S('ARRAYRECT', 'Matriz rectangular', 'array'), S('ARRAYPATH', 'Matriz de camino', 'array'), S('ARRAYPOLAR', 'Matriz polar', 'arraypolar')])),
       COL(S('ERASE', '', 'erase'), S('EXPLODE', '', 'explode'), S('OFFSET', '', 'offset')), COL(S('BREAK', '', 'break', [S('BREAK', 'Partir', 'break'), S('BREAKATPOINT', 'Partir en punto', 'break')]), S('JOIN', '', 'join'), S('PEDIT', '', 'pedit', [S('PEDIT', 'Editar polilínea', 'pedit'), S('LENGTHEN', 'Longitud', 'lengthen'), S('ALIGN', 'Alinear', 'align'), S('DRAWORDER', 'Ordenar objetos', 'draworder')]))] },
     { name: 'Anotación', items: [B('MTEXT', 'Texto', 'text', [S('MTEXT', 'Texto de líneas múltiples', 'mtext'), S('TEXT', 'Una línea', 'text')]), B('DIMLINEAR', 'Cota', 'dimlinear'),
       COL(S('DIMLINEAR', 'Lineal', 'dimlinear', [S('DIMLINEAR', 'Lineal', 'dimlinear'), S('DIMALIGNED', 'Alineada', 'dimaligned'), S('DIMANGULAR', 'Angular', 'dimangular'), S('DIMRADIUS', 'Radio', 'dimradius'), S('DIMDIAMETER', 'Diámetro', 'dimdiameter'), S('DIMORDINATE', 'Por coordenadas', 'dimordinate')]), S('MLEADER', 'Directriz', 'leader', [S('MLEADER', 'Directriz múltiple', 'leader'), S('QLEADER', 'Directriz rápida', 'leader')]), S('DIMSTYLE', 'Estilo de cota', 'dimstyle'))] },
-    { name: 'Capas', items: [B('LAYER', 'Propiedades de capa', 'layers'), { combo: 'layer' }] },
-    { name: 'Bloque', items: [B('INSERT', 'Insertar', 'insert'), COL(S('BLOCK', 'Crear', 'block'), S('BEDIT', 'Editar', 'bedit'), S('EATTEDIT', 'Editar atributos', 'attedit'))] },
+    { name: 'Capas', more: [S('LAYOFF', 'Desactivar', 'layoff'), S('LAYISO', 'Aislar', 'layiso'), S('LAYUNISO', 'Desaislar', 'layiso'), S('LAYFRZ', 'Inutilizar', 'layfrz'), S('LAYTHW', 'Reutilizar todas', 'layfrz'), S('LAYON', 'Activar todas', 'layoff'), S('LAYMRG', 'Fusionar', 'layers'), S('LAYDEL', 'Suprimir', 'purge'), S('LAYCUR', 'Cambiar a capa actual', 'laymcur')], items: [B('LAYER', 'Propiedades de capa', 'layers'), { combo: 'layer' }] },
+    { name: 'Bloque', more: [S('ATTDEF', 'Definir atributos', 'attdef'), S('ATTSYNC', 'Sincronizar atributos', 'attsync'), S('WBLOCK', 'Bloque a disco', 'save'), S('BASE', 'Punto base', 'id')], items: [B('INSERT', 'Insertar', 'insert'), COL(S('BLOCK', 'Crear', 'block'), S('BEDIT', 'Editar', 'bedit'), S('EATTEDIT', 'Editar atributos', 'attedit'))] },
     { name: 'Propiedades', items: [B('MATCHPROP', 'Igualar propiedades', 'matchprop'), { combo: 'props' }] },
     { name: 'Utilidades', items: [B('DIST', 'Medir', 'measure', [S('DIST', 'Distancia', 'dist'), S('AREA', 'Área', 'area'), S('ID', 'Punto ID', 'id'), S('LIST', 'Lista', 'list')]), COL(S('QSELECT', 'Selección rápida', 'qselect'), S('SELECTSIMILAR', 'Seleccionar similares', 'qselect'), S('FIND', 'Buscar', 'find'))] },
     { name: 'Grupos', items: [B('GROUP', 'Grupo', 'group'), COL(S('UNGROUP', 'Desagrupar', 'ungroup'), S('GROUPEDIT', 'Editar grupo', 'groupedit'))] },
@@ -31,49 +31,63 @@ export const TABS = [
     { name: 'Vista', items: [COL(S('ZOOM _E', 'Extensión', 'zoomext'), S('ZOOM _W', 'Ventana', 'zoomwin'), S('PAN', 'Encuadre', 'pan'))] },
   ] },
   { id: 'insert', name: 'Insertar', panels: [
-    { name: 'Bloque', items: [B('INSERT', 'Insertar', 'insert'), B('EATTEDIT', 'Editar atributo', 'attedit')] },
-    { name: 'Definición de bloque', items: [B('BLOCK', 'Crear bloque', 'block'), B('ATTDEF', 'Definir atributos', 'attdef'), B('ATTSYNC', 'Sincronizar', 'attsync'), B('BEDIT', 'Editor de bloques', 'bedit')] },
-    { name: 'Referencia', items: [B('XATTACH', 'Enlazar', 'xref'), B('XREF', 'Referencias externas', 'xref'), B('WBLOCK', 'Bloque a disco', 'save')] },
-    { name: 'Biblioteca', items: [B('BIBLIOTECA', 'Biblioteca de bloques', 'library')] },
-    { name: 'Datos', items: [B('TABLE', 'Tabla', 'table'), COL(S('FIELD', 'Campo', 'field'), S('UPDATEFIELD', 'Actualizar campos', 'regen'), S('DATAEXTRACTION', 'Extracción de datos', 'dataext'))] },
-    { name: 'Importar', items: [B('DXFIN', 'Importar DXF/DWG', 'dxf')] },
+    { name: 'Bloque', items: [B('INSERT', 'Insertar', 'insert', [S('INSERT', 'Bloques del dibujo...', 'insert'), S('BIBLIOTECA', 'Biblioteca de bloques...', 'library'), S('XATTACH', 'Desde archivo (referencia)...', 'xref')]), B('EATTEDIT', 'Editar atributo', 'attedit', [S('EATTEDIT', 'Atributo único', 'attedit'), S('ATTSYNC', 'Sincronizar', 'attsync')])] },
+    { name: 'Definición de bloque', items: [B('BLOCK', 'Crear bloque', 'block'), B('ATTDEF', 'Definir atributos', 'attdef'), B('ATTSYNC', 'Gestionar atributos', 'attsync'), B('BEDIT', 'Editor de bloques', 'bedit')] },
+    { name: 'Referencia', items: [B('XATTACH', 'Enlazar', 'xref'), B('XREF', 'Referencias externas', 'xref'), COL(S('WBLOCK', 'Bloque a disco', 'save'), S('BIBLIOTECA', 'Biblioteca de bloques', 'library'))] },
+    { name: 'Importar', items: [B('DXFIN', 'Importar DXF/DWG', 'dxf'), COL(S('SHXLOAD', 'Cargar fuente SHX', 'text'), S('PASTEORIG', 'Pegar en coordenadas originales', 'paste'))] },
+    { name: 'Datos', items: [B('FIELD', 'Campo', 'field'), COL(S('UPDATEFIELD', 'Actualizar campos', 'regen'), S('TABLE', 'Tabla', 'table'), S('DWGPROPS', 'Propiedades del dibujo', 'dwgprops'))] },
+    { name: 'Vinculación y extracción', items: [B('DATAEXTRACTION', 'Extraer datos', 'dataext'), COL(S('TABLEEXPORT', 'Exportar tabla', 'tableexport'), S('ATTOUT', 'Exportar atributos', 'attout'), S('ATTIN', 'Importar atributos', 'attin'))] },
   ] },
   { id: 'annotate', name: 'Anotar', panels: [
-    { name: 'Texto', items: [B('MTEXT', 'Texto de líneas múltiples', 'mtext'), COL(S('TEXT', 'Una línea', 'text'), S('STYLE', 'Estilo de texto', 'text'), S('FIND', 'Buscar texto', 'find'))] },
-    { name: 'Cotas', items: [B('DIMLINEAR', 'Cota', 'dimlinear'), COL(S('DIMLINEAR', 'Lineal', 'dimlinear'), S('DIMALIGNED', 'Alineada', 'dimaligned'), S('DIMANGULAR', 'Angular', 'dimangular')), COL(S('DIMRADIUS', 'Radio', 'dimradius'), S('DIMDIAMETER', 'Diámetro', 'dimdiameter'), S('DIMORDINATE', 'Por coordenadas', 'dimordinate')), COL(S('DIMCONTINUE', 'Continua', 'dimcontinue'), S('DIMBASELINE', 'Línea base', 'dimbaseline'), S('DIMTEDIT', 'Editar texto', 'dimstyle')), B('DIMSTYLE', 'Estilo de cota', 'dimstyle')] },
-    { name: 'Tablas', items: [B('TABLE', 'Tabla', 'table'), COL(S('TABLEDIT', 'Editar tabla', 'tableedit'), S('TABLEEXPORT', 'Exportar tabla', 'tableexport'))] },
-    { name: 'Directrices', items: [B('MLEADER', 'Directriz múltiple', 'leader'), B('QLEADER', 'Directriz', 'leader')] },
-    { name: 'Revisión', items: [B('REVCLOUD', 'Nube de revisión', 'revcloud'), B('WIPEOUT', 'Cobertura', 'wipeout')] },
-  ] },
-  { id: 'view', name: 'Vista', panels: [
-    { name: 'Herramientas de ventana', items: [{ toggle: 'ucsIcon', label: 'Icono SCP', icon: 'ucs' }] },
-    { name: 'Navegar', items: [B('ZOOM _E', 'Extensión', 'zoomext'), B('ZOOM _W', 'Ventana', 'zoomwin'), B('ZOOM _P', 'Previo', 'zoomext'), B('PAN', 'Encuadre', 'pan')] },
-    { name: 'Vistas guardadas', items: [B('VIEW', 'Administrador de vistas', 'view'), B('REGEN', 'Regenerar', 'regen')] },
-    { name: 'Paletas', items: [B('PROPERTIES', 'Propiedades', 'properties'), B('LAYER', 'Capas', 'layers'), B('VLISP', 'Visual LISP', 'vlisp'), B('TEXTSCR', 'Historial de comandos', 'cmdline')] },
-    { name: 'Interfaz', items: [{ toggle: 'fileTabs', label: 'Fichas de archivo', icon: 'filetabs' }, { toggle: 'layoutTabs', label: 'Fichas de presentación', icon: 'layout' }, { toggle: 'menuBar', label: 'Barra de menús clásica', icon: 'menubar' }, { toggle: 'screenMenu', label: 'Menú de pantalla clásico', icon: 'screenmenu' }, { toggle: 'theme', label: 'Tema', icon: 'theme' }] },
-  ] },
-  { id: 'manage', name: 'Administrar', panels: [
-    { name: 'Dibujo', items: [B('NEW', 'Nuevo desde plantilla', 'template'), B('DWGPROPS', 'Propiedades del dibujo', 'dwgprops'), B('TITLEBLOCK', 'Cajetín', 'titleblk')] },
-    { name: 'Personalización', items: [B('CUI', 'Interfaz de usuario', 'cui'), B('ALIASEDIT', 'Editar alias', 'aliases'), B('MENU', 'Cargar .MNU', 'menubar')] },
-    { name: 'Aplicaciones', items: [B('APPLOAD', 'Cargar aplicación', 'appload'), B('SCRIPT', 'Ejecutar script', 'script'), B('VLISP', 'Editor de Visual LISP', 'vlisp')] },
-    { name: 'Limpiar', items: [B('PURGE', 'Limpiar', 'purge'), COL(S('OVERKILL', 'Suprimir duplicados', 'overkill'), S('AUDIT', 'Auditar', 'audit'), S('SETVAR ?', 'Variables de sistema', 'setvar'))] },
-    { name: 'Parámetros', items: [COL(S('UNITS', 'Unidades', 'units'), S('DSETTINGS', 'Parámetros de dibujo', 'options'), S('OPTIONS', 'Opciones', 'options')), COL(S('LINETYPE', 'Tipos de línea', 'line'), S('LWEIGHT', 'Grosores de línea', 'line'), S('DDPTYPE', 'Estilo de punto', 'point'))] },
-  ] },
-  { id: 'output', name: 'Salida', panels: [
-    { name: 'Trazar', items: [B('PLOT', 'Trazar', 'plot'), B('PAGESETUP', 'Configurar página', 'layout'), B('PUBLISH', 'Publicar', 'publish'), B('STYLESMANAGER', 'Estilos de trazado', 'styles')] },
-    { name: 'Exportar', items: [B('EXPORTPDF', 'Exportar PDF', 'pdf'), B('SVGOUT', 'SVG', 'svg'), B('PNGOUT', 'Imagen', 'png'), B('DXFOUT', 'DXF', 'dxf')] },
+    { name: 'Texto', more: [S('TEXT', 'Texto de una línea', 'text'), S('DDEDIT', 'Editar texto', 'text'), S('TXT2MTXT', 'Convertir a texto de líneas múltiples', 'txt2mtxt'), S('TCOUNT', 'Numeración automática', 'tcount'), S('TCIRCLE', 'Encerrar en objeto', 'tcircle')], items: [B('MTEXT', 'Texto de líneas múltiples', 'mtext', [S('MTEXT', 'Texto de líneas múltiples', 'mtext'), S('TEXT', 'Texto de una línea', 'text')]), { combo: 'textstyle' }] },
+    { name: 'Cotas', more: [S('DIMCONTINUE', 'Continua', 'dimcontinue'), S('DIMBASELINE', 'Línea base', 'dimbaseline'), S('DIMTEDIT', 'Editar texto de cota', 'dimlinear'), S('DIMSTYLE', 'Administrador de estilos de cota', 'dimstyle')], items: [B('DIMLINEAR', 'Cota', 'dimlinear'), { combo: 'dimstyle' }] },
+    { name: 'Líneas de centro', items: [B('CENTERMARK', 'Marca de centro', 'centermark'), B('CENTERLINE', 'Línea de centro', 'centerline')] },
+    { name: 'Directrices', items: [B('MLEADER', 'Directriz múltiple', 'leader'), COL(S('QLEADER', 'Directriz rápida', 'leader'), S('DIMTEDIT', 'Editar texto de cota', 'dimlinear'))] },
+    { name: 'Tablas', items: [B('TABLE', 'Tabla', 'table'), COL(S('TABLEDIT', 'Editar tabla', 'tableedit'), S('DATAEXTRACTION', 'Extraer datos', 'dataext'), S('TABLEEXPORT', 'Exportar tabla', 'tableexport'))] },
+    { name: 'Marca de revisión', items: [B('WIPEOUT', 'Cobertura', 'wipeout'), B('REVCLOUD', 'Nube de revisión', 'revcloud')] },
   ] },
   { id: 'param', name: 'Paramétrico', panels: [
     { name: 'Geométricas', items: [B('AUTOCONSTRAIN', 'Restricción automática', 'cAuto'),
-      COL(S('GEOMCONSTRAINT _Coincident', 'Coincidente', 'cCoin'), S('GEOMCONSTRAINT _COLlinear', 'Colineal', 'cColl'), S('GEOMCONSTRAINT _CONcentric', 'Concéntrica', 'cConc')),
-      COL(S('GEOMCONSTRAINT _Fix', 'Fija', 'cFix'), S('GEOMCONSTRAINT _Parallel', 'Paralela', 'cPar'), S('GEOMCONSTRAINT _Perpendicular', 'Perpendicular', 'cPerp')),
-      COL(S('GEOMCONSTRAINT _Horizontal', 'Horizontal', 'cHoriz'), S('GEOMCONSTRAINT _Vertical', 'Vertical', 'cVert'), S('GEOMCONSTRAINT _Tangent', 'Tangente', 'cTan')),
-      COL(S('GEOMCONSTRAINT _Equal', 'Igual', 'cEq'), S('CONSTRAINTBAR', 'Barras de restricción', 'cBar'))] },
-    { name: 'Por cota', items: [B('DIMCONSTRAINT _LInear', 'Lineal', 'cDim'),
-      COL(S('DIMCONSTRAINT _Horizontal', 'Horizontal', 'dimlinear'), S('DIMCONSTRAINT _Vertical', 'Vertical', 'dimlinear'), S('DIMCONSTRAINT _Aligned', 'Alineada', 'dimaligned')),
-      COL(S('DIMCONSTRAINT _Radius', 'Radio', 'dimradius'), S('DIMCONSTRAINT _Diameter', 'Diámetro', 'dimdiameter'), S('DIMCONSTRAINT _ANgular', 'Angular', 'dimangular')),
-      COL(S('DCDISPLAY', 'Mostrar/ocultar', 'cBar'))] },
+      COL(S('GEOMCONSTRAINT _Coincident', '', 'cCoin'), S('GEOMCONSTRAINT _COLlinear', '', 'cColl'), S('GEOMCONSTRAINT _CONcentric', '', 'cConc')),
+      COL(S('GEOMCONSTRAINT _Fix', '', 'cFix'), S('GEOMCONSTRAINT _Parallel', '', 'cPar'), S('GEOMCONSTRAINT _Perpendicular', '', 'cPerp')),
+      COL(S('GEOMCONSTRAINT _Horizontal', '', 'cHoriz'), S('GEOMCONSTRAINT _Vertical', '', 'cVert'), S('GEOMCONSTRAINT _Tangent', '', 'cTan')),
+      COL(S('GEOMCONSTRAINT _Equal', '', 'cEq')),
+      COL(S('CONSTRAINTBAR', 'Mostrar/ocultar', 'cBar'), S('CONSTRAINTBAR _S', 'Mostrar todas', 'cBar'), S('CONSTRAINTBAR _H', 'Ocultar todas', 'cBar'))] },
+    { name: 'Por cota', items: [B('DIMCONSTRAINT _LInear', 'Lineal', 'cDim', [S('DIMCONSTRAINT _LInear', 'Lineal', 'cDim'), S('DIMCONSTRAINT _Horizontal', 'Horizontal', 'dimlinear'), S('DIMCONSTRAINT _Vertical', 'Vertical', 'dimlinear')]), B('DIMCONSTRAINT _Aligned', 'Alineada', 'dimaligned'),
+      COL(S('DIMCONSTRAINT _Radius', '', 'dimradius'), S('DIMCONSTRAINT _Diameter', '', 'dimdiameter'), S('DIMCONSTRAINT _ANgular', '', 'dimangular')),
+      COL(S('DCDISPLAY', 'Mostrar/ocultar', 'cBar'), S('DCDISPLAY _S', 'Mostrar todas', 'cBar'), S('DCDISPLAY _H', 'Ocultar todas', 'cBar'))] },
     { name: 'Administrar', items: [B('DELCONSTRAINT', 'Suprimir restricciones', 'cDel'), B('PARAMETERS', 'Administrador de parámetros', 'params')] },
+  ] },
+  { id: 'view', name: 'Vista', panels: [
+    { name: 'Herramientas de ventana gráfica', items: [{ toggle: 'ucsIcon', label: 'Icono SCP', icon: 'ucs' }, B('ZOOM _E', 'Zoom extensión', 'zoomext', [S('ZOOM _E', 'Extensión', 'zoomext'), S('ZOOM _W', 'Ventana', 'zoomwin'), S('ZOOM _P', 'Previo', 'zoomext'), S('ZOOM _A', 'Todo', 'zoomext'), S('PAN', 'Encuadre', 'pan')])] },
+    { name: 'Vistas guardadas', items: [{ combo: 'views' }] },
+    { name: 'Ventanas gráficas del modelo', items: [B('MVIEW', 'Configuración de ventana gráfica', 'mview'), COL(S('REGEN', 'Regenerar', 'regen'), S('REDRAW', 'Redibujar', 'regen'))] },
+    { name: 'Paletas', items: [B('BIBLIOTECA', 'Paletas de herramientas', 'library'), B('PROPERTIES', 'Propiedades', 'properties'), B('INSERT', 'Bloques', 'insert'), B('COUNT', 'Contar', 'count'), COL(S('LAYER', 'Capas', 'layers'), S('VLISP', 'Visual LISP', 'vlisp'), S('TEXTSCR', 'Historial de comandos', 'cmdline'))] },
+    { name: 'Interfaz', items: [{ toggle: 'fileTabs', label: 'Fichas de archivo', icon: 'filetabs' }, { toggle: 'layoutTabs', label: 'Fichas de presentación', icon: 'layout' }, COL({ toggle: 'menuBar', label: 'Barra de menús clásica', icon: 'menubar', small: true }, { toggle: 'screenMenu', label: 'Menú de pantalla clásico', icon: 'screenmenu', small: true }, { toggle: 'theme', label: 'Tema', icon: 'theme', small: true })] },
+  ] },
+  { id: 'manage', name: 'Administrar', panels: [
+    { name: 'Personalización', items: [B('CUI', 'Interfaz de usuario', 'cui'), B('BIBLIOTECA', 'Paletas de herramientas', 'library'), COL(S('MENU', 'Importar menú .MNU', 'menubar'), S('ALIASEDIT', 'Editar alias', 'aliases'))] },
+    { name: 'Aplicaciones', items: [B('APPLOAD', 'Cargar aplicación', 'appload'), B('SCRIPT', 'Ejecutar script', 'script'), COL(S('VLISP', 'Editor de Visual LISP', 'vlisp'), S('LOAD', 'Cargar formas', 'appload'))] },
+    { name: 'Limpieza', items: [B('PURGE', 'Limpiar', 'purge'), COL(S('OVERKILL', 'Suprimir duplicados', 'overkill'), S('AUDIT', 'Auditar', 'audit'))] },
+    { name: 'Dibujo', items: [B('NEW', 'Nuevo desde plantilla', 'template'), B('DWGPROPS', 'Propiedades del dibujo', 'dwgprops'), B('TITLEBLOCK', 'Cajetín', 'titleblk')] },
+    { name: 'Parámetros', items: [COL(S('UNITS', 'Unidades', 'units'), S('DSETTINGS', 'Parámetros de dibujo', 'options'), S('OPTIONS', 'Opciones', 'options')), COL(S('LINETYPE', 'Tipos de línea', 'line'), S('LWEIGHT', 'Grosores de línea', 'line'), S('DDPTYPE', 'Estilo de punto', 'point'))] },
+  ] },
+  { id: 'output', name: 'Salida', panels: [
+    { name: 'Trazar', items: [B('PLOT', 'Trazar', 'plot'), B('PUBLISH', 'Trazar lotes', 'publish'), B('PLOT', 'Vista preliminar', 'preview'), COL(S('PAGESETUP', 'Administrador de configuraciones de página', 'pagesetup'), S('LIST', 'Ver detalles', 'list'), S('STYLESMANAGER', 'Administrador de trazadores', 'plotter'))] },
+    { name: 'Exportar a PDF', items: [B('EXPORTPDF', 'Exportar', 'pdf', [S('EXPORTPDF', 'PDF', 'pdf'), S('SVGOUT', 'SVG', 'svg'), S('PNGOUT', 'Imagen PNG', 'png'), S('DXFOUT', 'DXF', 'dxf')]), { combo: 'exportwhat' }] },
+  ] },
+  { id: 'collab', name: 'Colaborar', panels: [
+    { name: 'Compartir', items: [B('CLOUDSAVE', 'Compartir dibujo', 'share'), B('CLOUDOPEN', 'Abrir de la nube', 'cloudopen')] },
+    { name: 'Nube', items: [B('CLOUDVERSIONS', 'Versiones', 'versions'), B('CLOUD', 'Configurar nube', 'cloud')] },
+    { name: 'Marcas', items: [B('MARKUP', 'Marca de revisión', 'markup'), B('MARKUPS', 'Paleta de marcas', 'markups')] },
+  ] },
+  { id: 'express', name: 'Herramientas extra', panels: [
+    { name: 'Bloques', items: [B('BURST', 'Descomponer atributos', 'explode'), B('BLOCKREPLACE', 'Reemplazar bloque', 'blockreplace'), COL(S('XLIST', 'Lista de propiedades', 'list'), S('ATTIN', 'Importar atributos', 'attin'), S('ATTOUT', 'Exportar atributos', 'attout'))] },
+    { name: 'Texto', items: [B('TCOUNT', 'Numeración automática', 'tcount'), COL(S('TXT2MTXT', 'Convertir a texto M', 'txt2mtxt'), S('TCIRCLE', 'Encerrar en objeto', 'tcircle'), S('DDEDIT', 'Modificar texto', 'text'))] },
+    { name: 'Capas', items: [COL(S('LAYISO', 'Aislar', 'layiso'), S('LAYUNISO', 'Desaislar', 'layiso'), S('LAYOFF', 'Desactivar', 'layoff')), COL(S('LAYFRZ', 'Inutilizar', 'layfrz'), S('LAYTHW', 'Reutilizar todas', 'layfrz'), S('LAYON', 'Activar todas', 'layoff')), COL(S('LAYMRG', 'Fusionar', 'layers'), S('LAYDEL', 'Suprimir', 'purge'), S('LAYCUR', 'Cambiar a actual', 'laymcur'))] },
+    { name: 'Modificar', items: [COL(S('ISOLATEOBJECTS', 'Aislar objetos', 'isolate'), S('HIDEOBJECTS', 'Ocultar objetos', 'isolate'), S('UNISOLATEOBJECTS', 'Terminar aislamiento', 'isolate'))] },
+    { name: 'Dibujo', items: [B('BREAKLINE', 'Símbolo de línea de rotura', 'breakline'), B('COUNT', 'Contar', 'count')] },
+    { name: 'Herramientas', items: [B('ALIASEDIT', 'Alias de comandos', 'aliases'), COL(S('XDATA', 'Adjuntar datos X', 'xdata'), S('XDLIST', 'Listar datos X', 'xdata'), S('SETVAR ?', 'Variables de sistema', 'setvar')), B('CAL', 'Calculadora', 'units')] },
   ] },
   { id: 'mep', name: 'Instalaciones', panels: [
     { name: 'Conductos', items: [B('DUCT', 'Conducto', 'duct'), B('DUCTSIZE', 'Dimensionar', 'ductsize'), B('DUCTCALC', 'Pérdida de carga', 'ductcalc')] },
@@ -82,20 +96,43 @@ export const TABS = [
     { name: 'Isométrico', items: [B('ISODRAFT', 'Dibujo isométrico', 'iso'), COL(S('ISOPLANE', 'Plano isométrico', 'isoplane'), S('ISOCIRCLE', 'Círculo isométrico', 'isocircle'))] },
     { name: 'Mediciones', items: [B('DATAEXTRACTION', 'Extracción de datos', 'dataext'), B('TITLEBLOCK', 'Cajetín', 'titleblk')] },
   ] },
-  { id: 'collab', name: 'Colaborar', panels: [
-    { name: 'Nube', items: [B('CLOUD', 'Configurar nube', 'cloud'), B('CLOUDSAVE', 'Guardar en la nube', 'cloudsave'), B('CLOUDOPEN', 'Abrir de la nube', 'cloudopen'), B('CLOUDVERSIONS', 'Versiones', 'versions')] },
-    { name: 'Revisión', items: [B('MARKUP', 'Marca de revisión', 'markup'), B('MARKUPS', 'Marcas', 'markups'), B('REVCLOUD', 'Nube de revisión', 'revcloud')] },
-  ] },
-  { id: 'express', name: 'Herramientas extra', panels: [
-    { name: 'Bloques', items: [B('EXPLODE', 'Descomponer atributos', 'explode'), B('COUNT', 'Contar', 'count')] },
-    { name: 'Capas', items: [COL(S('LAYISO', 'Aislar', 'layiso'), S('LAYUNISO', 'Desaislar', 'layiso'), S('LAYOFF', 'Desactivar', 'layoff')), COL(S('LAYFRZ', 'Inutilizar', 'layfrz'), S('LAYTHW', 'Reutilizar todas', 'layfrz'), S('LAYON', 'Activar todas', 'layoff')), COL(S('LAYMRG', 'Fusionar', 'layers'), S('LAYDEL', 'Suprimir', 'purge'), S('LAYCUR', 'Cambiar a actual', 'laymcur'))] },
-    { name: 'Modificar', items: [COL(S('ISOLATEOBJECTS', 'Aislar objetos', 'isolate'), S('HIDEOBJECTS', 'Ocultar objetos', 'isolate'), S('UNISOLATEOBJECTS', 'Terminar aislamiento', 'isolate'))] },
-    { name: 'Herramientas', items: [B('ALIASEDIT', 'Alias de comandos', 'aliases'), B('SETVAR ?', 'Variables de sistema', 'setvar'), B('CAL', 'Calculadora', 'units')] },
-  ] },
 ];
-const LAYOUT_TAB = { id: 'layout', name: 'Presentación', panels: [
-  { name: 'Presentación', items: [B('LAYOUT _N', 'Nueva', 'layout'), B('PAGESETUP', 'Configurar página', 'plot')] },
-  { name: 'Ventanas de presentación', items: [B('MVIEW', 'Rectangular', 'mview'), COL(S('MSPACE', 'Espacio modelo', 'mspace'), S('PSPACE', 'Espacio papel', 'layout'), S('MVIEW _LOCK', 'Bloquear', 'laylck'))] },
+// ---- funciones v7: cotas y anotación avanzadas, referencias, SCP, ventanas, productividad, 3D
+{
+  const tab = (id) => TABS.find((t) => t.id === id), panel = (id, name) => tab(id).panels.find((p) => p.name === name);
+  panel('home', 'Dibujo').more.push(S('MLINE', 'Multilínea', 'mline'), S('REGION', 'Región', 'region'), S('SUPERHATCH', 'Supersombreado', 'superhatch'));
+  panel('home', 'Capas').more.push(S('LAYERSTATE', 'Estados de capa', 'laystate'), S('LAYWALK', 'Recorrer capas', 'laywalk'), S('LAYTRANS', 'Traductor de capas', 'laytrans'), S('VPLAYER', 'Capas por ventana', 'layfrz'), S('SETTRANSPARENCY', 'Transparencia', 'transp'));
+  panel('home', 'Modificar').more.push(S('MOCORO', 'Mover, copiar, girar', 'mocoro'), S('CHSPACE', 'Cambiar espacio', 'chspace'));
+  const cot = panel('annotate', 'Cotas');
+  cot.more.push(S('DIMREASSOCIATE', 'Volver a asociar', 'dimassoc'), S('DIMDISASSOCIATE', 'Disociar', 'dimassoc'), S('-DIMSTYLE', 'Estilo de cota', 'dimstyle'));
+  cot.items.push(COL(S('QDIM', 'Cota rápida', 'qdim'), S('DIMARC', 'Longitud de arco', 'dimarc'), S('DIMJOGGED', 'Radio con recodo', 'dimjogged')), COL(S('DIMSPACE', 'Ajustar espacio', 'dimspace'), S('DIMBREAK', 'Cortar cota', 'dimbreak'), S('TOLERANCE', 'Tolerancia', 'tolerance')));
+  panel('annotate', 'Texto').more.push(S('TEXTALIGN', 'Alinear textos', 'textalign'), S('SPELL', 'Ortografía', 'spell'), S('ARCTEXT', 'Texto en arco', 'arctext'));
+  panel('annotate', 'Directrices').items.push(COL(S('MLEADERSTYLE', 'Estilo de directriz', 'leader')));
+  panel('annotate', 'Tablas').items.push(COL(S('TABLESTYLE', 'Estilo de tabla', 'table')));
+  tab('annotate').panels.push({ name: 'Escala de anotación', items: [B('ANNOSCALE', 'Escala de anotación…', 'annoscale'), COL(S('ANNOTATIVE', 'Hacer anotativo', 'annotative'), S('TEXTALIGN', 'Alinear textos', 'textalign'), S('SPELL', 'Ortografía', 'spell'))] });
+  tab('insert').panels.splice(3, 0,
+    { name: 'Referencias e imágenes', items: [B('IMAGEATTACH', 'Imagen', 'image', [S('IMAGEATTACH', 'Imagen', 'image'), S('PDFATTACH', 'Adjuntar PDF', 'pdf'), S('PDFIMPORT', 'Importar PDF', 'pdf')]), B('PDFIMPORT', 'Importar PDF', 'pdf'), COL(S('IMAGECLIP', 'Delimitar', 'imageclip'), S('IMAGEADJUST', 'Ajustar', 'imageadjust'), S('HYPERLINK', 'Hipervínculo', 'hyperlink'))] },
+    { name: 'Nubes de puntos', items: [B('POINTCLOUDATTACH', 'Nube de puntos', 'pointcloud'), COL(S('POINTCLOUDCROP', 'Recortar nube', 'imageclip'), S('POINTCLOUDCOLORMAP', 'Colores de nube', 'pointcloud'))] },
+    { name: 'Ubicación', items: [B('GEOGRAPHICLOCATION', 'Ubicación', 'geo'), COL(S('GEOMAP', 'Mapa', 'geo'), S('GEOLATLONG', 'Coordenadas', 'id'), S('GEOMARKLATLONG', 'Marcar posición', 'point'))] });
+  panel('view', 'Ventanas gráficas del modelo').items.unshift(B('VPORTS', 'Ventanas del modelo', 'vports', [S('^C^C-VPORTS _SI', 'Una', 'vports'), S('^C^C-VPORTS _2 _V', 'Dos: vertical', 'vports'), S('^C^C-VPORTS _2 _H', 'Dos: horizontal', 'vports'), S('^C^C-VPORTS _3 _R', 'Tres: derecha', 'vports'), S('^C^C-VPORTS _4', 'Cuatro: iguales', 'vports'), S('VPORTS', 'Ventanas...', 'vports')]));
+  tab('view').panels.splice(1, 0, { name: 'Coordenadas', items: [B('UCS', 'SCP', 'ucs', [S('UCS', 'SCP', 'ucs'), S('^C^CUCS _W', 'SCP universal', 'ucs'), S('^C^CUCS _OB', 'SCP por objeto', 'ucs'), S('^C^CUCS _Z', 'Z', 'ucs'), S('^C^CUCS _P', 'Previo', 'ucs')]), COL(S('UCSMAN', 'Administrador de SCP', 'ucs'), S('^C^CUCS _W', 'SCP universal', 'ucs'), S('UCSICON', 'Icono SCP', 'ucs'))] });
+  tab('manage').panels.splice(2, 0, { name: 'Grabadora de acciones', items: [B('ACTRECORD', 'Grabar', 'record'), COL(S('ACTSTOP', 'Detener', 'stop'), S('ACTPLAY', 'Reproducir', 'play'), S('ACTMANAGER', 'Administrador de acciones', 'list'))] }, { name: 'Comparar', items: [B('DWGCOMPARE', 'Comparar dibujos', 'compare'), COL(S('DWGCOMPAREEXIT', 'Salir', 'close'))] });
+  tab('output').panels.push({ name: 'Publicar', items: [B('SHEETSET', 'Conjuntos de planos', 'sheetset'), B('ETRANSMIT', 'Transmitir', 'etransmit'), COL(S('SHEETLIST', 'Lista de planos', 'table'), S('STLOUT', 'Exportar STL', 'printer3d'), S('OBJOUT', 'OBJ', 'printer3d'))] });
+  panel('express', 'Texto').items.push(B('ARCTEXT', 'Texto en arco', 'arctext'));
+  panel('express', 'Modificar').items.push(COL(S('MOCORO', 'Mover, copiar, girar', 'mocoro'), S('CHSPACE', 'Cambiar espacio', 'chspace'), S('LAYTRANS', 'Traductor de capas', 'laytrans')));
+  panel('express', 'Dibujo').items.push(B('SUPERHATCH', 'Supersombreado', 'superhatch'));
+  TABS.splice(TABS.findIndex((t) => t.id === 'view') + 1, 0, { id: '3d', name: 'Modelado 3D', panels: [
+    { name: 'Modelado', items: [B('BOX', 'Prisma rectangular', 'box', [S('BOX', 'Prisma rectangular', 'box'), S('CYLINDER', 'Cilindro', 'cylinder'), S('CONE', 'Cono', 'cone'), S('SPHERE', 'Esfera', 'sphere')]), B('EXTRUDE', 'Extrusión', 'extrude'), B('REVOLVE', 'Revolución', 'revolve'), COL(S('CYLINDER', 'Cilindro', 'cylinder'), S('CONE', 'Cono', 'cone'), S('SPHERE', 'Esfera', 'sphere'))] },
+    { name: 'Edición de sólidos', items: [COL(S('UNION', 'Unión', 'union'), S('SUBTRACT', 'Diferencia', 'subtract'), S('INTERSECT', 'Intersección', 'intersect')), COL(S('REGION', 'Región', 'region'), S('MASSPROP', 'Propiedades físicas', 'list'))] },
+    { name: 'Vista', items: [B('3DORBIT', 'Órbita 3D', 'orbit'), COL(S('VSCURRENT', 'Estilo visual', 'visualstyle'), S('RENDER', 'Renderizar', 'render'), S('VPORTS', 'Ventanas del modelo', 'vports'))] },
+    { name: 'Nubes de puntos', items: [B('POINTCLOUDATTACH', 'Nube de puntos', 'pointcloud'), COL(S('POINTCLOUDCROP', 'Recortar nube', 'imageclip'), S('POINTCLOUDCOLORMAP', 'Colores de nube', 'pointcloud'))] },
+    { name: 'Exportar', items: [B('STLOUT', 'Exportar STL', 'printer3d', [S('STLOUT', 'STL', 'printer3d'), S('OBJOUT', 'OBJ', 'printer3d')])] },
+  ] });
+}
+const LAYOUT_TAB = { id: 'layout', name: 'Presentación', ctx: true, panels: [
+  { name: 'Presentación', items: [B('LAYOUT _N', 'Nueva', 'layout'), B('PAGESETUP', 'Configurar página', 'pagesetup')] },
+  { name: 'Ventanas de presentación', items: [B('MVIEW', 'Insertar vista', 'mview', [S('MVIEW', 'Rectangular', 'mview'), S('MVIEW _P', 'Poligonal', 'mview')]), COL(S('MSPACE', 'Espacio modelo', 'mspace'), S('PSPACE', 'Espacio papel', 'layout'), S('MVIEW _LOCK', 'Bloquear', 'laylck'))] },
+  { name: 'Estilos y normas', items: [B('STYLESMANAGER', 'Estilos de trazado', 'styles'), B('TITLEBLOCK', 'Cajetín', 'titleblk')] },
 ] };
 const BEDIT_TAB = { id: 'bedit', name: 'Editor de bloques', ctx: true, panels: [
   { name: 'Abrir/Guardar', items: [B('BSAVE', 'Guardar bloque', 'bsave'), B('BEDIT', 'Editar bloque', 'bedit')] },
@@ -140,9 +177,9 @@ export function createRibbon(app) {
     return b;
   };
   const toggleBtn = (it) => {
-    const on = it.toggle === 'theme' ? app.settings.theme !== 'dark' : !!app.settings[it.toggle];
+    const on = toggleOn(it);
     const b = h('button', { class: 'big' + (on ? ' on' : ''), type: 'button', title: it.label }, h('span', { class: 'ico', html: icon(it.icon) }), h('span', {}, it.label));
-    b.onclick = () => { if (it.toggle === 'theme') return app.ui.setTheme({ dark: 'mid', mid: 'light', light: 'dark' }[app.settings.theme] || 'dark'); app.settings[it.toggle] = !app.settings[it.toggle]; saveSettings(); app.ui.applyLayout(); rb.render(); };
+    b.onclick = () => toggleRun(it);
     return b;
   };
   // combos
@@ -209,11 +246,40 @@ export function createRibbon(app) {
     return h('div', { class: 'col', style: { gap: '3px' } }, h('label', { class: 'rlbl' }, 'Color de sombreado', col), h('label', { class: 'rlbl' }, 'Ángulo', an), h('label', { class: 'rlbl' }, 'Escala', sc));
   };
 
+  const toggleOn = (it) => (it.toggle === 'theme' ? app.settings.theme !== 'light' : !!app.settings[it.toggle]);
+  const toggleRun = (it) => { if (it.toggle === 'theme') return app.ui.setTheme({ light: 'mid', mid: 'dark', dark: 'light' }[app.settings.theme] || 'light'); app.settings[it.toggle] = !app.settings[it.toggle]; saveSettings(); app.ui.applyLayout(); rb.render(); };
+  const smToggle = (it) => { const b = h('button', { class: 'sm' + (toggleOn(it) ? ' on' : ''), type: 'button', title: it.label }, h('span', { class: 'ico', html: icon(it.icon) }), it.label); b.onclick = () => toggleRun(it); return b; };
+  const lbl = (text, el) => h('label', { class: 'rlbl' }, text ? h('span', { text, style: { minWidth: '18px' } }) : '', el);
+  const COMBOS = {
+    textstyle: () => {
+      const d = app.doc;
+      const st = h('select', { class: 'rcombo', title: 'Estilo de texto', onchange: () => { d.setvar('TEXTSTYLE', st.value); app.ui.refresh(); } }, Object.keys(d.styles).map((n) => h('option', { value: n, selected: n === d.vars.TEXTSTYLE, text: n })));
+      const find = h('input', { class: 'rcombo', type: 'search', placeholder: 'Buscar texto', onkeydown: (e) => { e.stopPropagation(); if (e.key === 'Enter') run('FIND'); } });
+      const hgt = h('input', { class: 'rcombo', type: 'number', step: 'any', min: 0, title: 'Altura de texto', value: d.vars.TEXTSIZE, onchange: () => { if (+hgt.value > 0) d.setvar('TEXTSIZE', +hgt.value); } });
+      return h('div', { class: 'col', style: { gap: '2px' } }, st, find, hgt);
+    },
+    dimstyle: () => {
+      const d = app.doc;
+      const ds = h('select', { class: 'rcombo', title: 'Estilo de cota', onchange: () => { if (ds.value === 'edit') run('DIMSTYLE'); else { d.setDimStyle(ds.value); app.ui.refresh(); } } }, Object.keys(d.dimstyles || { [d.vars.DIMSTYLE]: 1 }).map((n) => h('option', { value: n, selected: n === d.vars.DIMSTYLE, text: n })), h('option', { value: 'edit', text: 'Administrar estilos de cota...' }));
+      const ly = h('select', { class: 'rcombo', title: 'Capa para las cotas' }, h('option', { text: 'Usar capa actual' }), Object.keys(d.layers).map((n) => h('option', { value: n, text: n })));
+      const row = h('div', { class: 'row', style: { gap: '1px' } }, S2('DIMLINEAR', 'Lineal', 'dimlinear', [S('DIMLINEAR', 'Lineal', 'dimlinear'), S('DIMALIGNED', 'Alineada', 'dimaligned'), S('DIMANGULAR', 'Angular', 'dimangular'), S('DIMRADIUS', 'Radio', 'dimradius'), S('DIMDIAMETER', 'Diámetro', 'dimdiameter'), S('DIMORDINATE', 'Por coordenadas', 'dimordinate')]), S2('DIMCONTINUE', 'Continua', 'dimcontinue', [S('DIMCONTINUE', 'Continua', 'dimcontinue'), S('DIMBASELINE', 'Línea base', 'dimbaseline')]));
+      return h('div', { class: 'col', style: { gap: '2px' } }, ds, ly, row);
+    },
+    views: () => {
+      const d = app.doc;
+      const vs = h('select', { class: 'rcombo', title: 'Vistas guardadas', onchange: () => { const v = d.views?.[vs.value]; if (v) { app.view.setCur({ ...app.view.cur, cx: v.cx, cy: v.cy, s: v.s }); app.view.redraw(); } } }, h('option', { value: '', text: 'Vista no guardada' }), Object.keys(d.views || {}).map((n) => h('option', { value: n, text: n })));
+      return h('div', { class: 'col', style: { gap: '2px' } }, vs, smBtn(S('VIEW', 'Nueva vista', 'view')), smBtn(S('VIEW', 'Administrador de vistas', 'view')));
+    },
+    exportwhat: () => h('div', { class: 'col', style: { gap: '2px' } },
+      h('select', { class: 'rcombo', title: 'Qué exportar' }, h('option', { text: app.doc.active === 'Model' ? 'Exportar: Pantalla' : 'Exportar: Presentación actual' }), h('option', { text: 'Exportar: Todas las presentaciones' })),
+      h('select', { class: 'rcombo', title: 'Configuración de página' }, h('option', { text: 'Configuración de página: Actual' }))),
+  };
+  const S2 = (cmd, label, ic, dd) => smBtn(S(cmd, label, ic, dd));
   rb.render = () => {
     closeDrop();
     tabsEl.innerHTML = ''; panels.innerHTML = '';
     const tabs = [...TABS];
-    if (app.doc.active !== 'Model' && !app.doc.blockEdit) tabs.splice(1, 0, LAYOUT_TAB);
+    if (app.doc.active !== 'Model' && !app.doc.blockEdit) tabs.push(LAYOUT_TAB);
     if (rb.ctx.has('bedit')) tabs.push(BEDIT_TAB);
     if (rb.ctx.has('hatch')) tabs.push(HATCH_TAB);
     if (!tabs.find((t) => t.id === rb.active)) rb.active = 'home';
@@ -224,14 +290,17 @@ export function createRibbon(app) {
       const body = h('div', { class: 'rp-body' });
       for (const it of p.items) {
         if (it.big !== undefined) body.append(bigBtn(it));
-        else if (it.col) body.append(h('div', { class: 'col' }, it.col.map(smBtn)));
+        else if (it.col) body.append(h('div', { class: 'col' }, it.col.map((x) => (x.toggle ? smToggle(x) : smBtn(x)))));
+        else if (it.combo && COMBOS[it.combo]) body.append(COMBOS[it.combo]());
         else if (it.combo === 'layer') body.append(layerCombo());
         else if (it.combo === 'props') body.append(propsCombos());
         else if (it.toggle) body.append(toggleBtn(it));
         else if (it.custom === 'hpat') body.append(hatchPat());
         else if (it.custom === 'hprops') body.append(hatchProps());
       }
-      panels.append(h('div', { class: 'rp' }, body, h('div', { class: 'rp-label', text: p.name })));
+      const lbl = h('div', { class: 'rp-label' + (p.more ? ' more' : ''), text: p.name });
+      if (p.more) lbl.onclick = () => showDrop(lbl, p.more);
+      panels.append(h('div', { class: 'rp' }, body, lbl));
     }
   };
   rb.showContext = (id) => { rb.ctx.add(id); rb.active = id; root.classList.remove('min'); rb.render(); };

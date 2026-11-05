@@ -35,10 +35,13 @@
       <div id="cmd">
         <div id="cmdhist"></div>
         <div id="cmdrow">
+          <span class="grip" aria-hidden="true"></span>
           <button class="tbtn" id="cmdX" title="Cancelar (Esc)"></button>
           <button class="tbtn" id="cmdCfg" title="Personalizar"></button>
+          <span class="cmdico" id="cmdRecent" title="Comandos recientes">&gt;_ ▾</span>
           <span id="cmdprompt"></span>
           <input id="cmdin" type="text" autocomplete="off" spellcheck="false" placeholder="Escriba un comando" aria-label="Línea de comandos">
+          <span class="cmdexp" id="cmdExp" title="Historial de comandos (F2)">▲</span>
         </div>
         <div id="ac" hidden></div>
       </div>
