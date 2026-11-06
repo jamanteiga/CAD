@@ -257,6 +257,199 @@ No hay reducción en ASME B16.9 para {0}. | Non hai redución en ASME B16.9 para
 El extremo pequeño debe ser menor que el grande. | O extremo pequeno debe ser menor có grande. | The small end must be smaller than the large end. | O extremo pequeno deve ser menor que o grande. | L'extrem petit ha de ser més petit que el gran.
 La derivación no puede ser mayor que el colector. | A derivación non pode ser maior có colector. | The branch cannot be larger than the run. | A derivação não pode ser maior que o coletor. | La derivació no pot ser més gran que el col·lector.
 ASME B16.11 no incluye este manguito en clase {0}. | ASME B16.11 non inclúe este manguito en clase {0}. | ASME B16.11 does not cover this coupling in Class {0}. | A ASME B16.11 não inclui esta união na classe {0}. | ASME B16.11 no inclou aquest maniguet en classe {0}.
+Abrazadera en U | Abrazadeira en U | U-bolt | Abraçadeira em U | Abraçadora en U
+Accesorio forjado ASME B16.11 | Accesorio forxado ASME B16.11 | ASME B16.11 forged fitting | Acessório forjado ASME B16.11 | Accessori forjat ASME B16.11
+Accionamiento | Accionamento | Operator | Acionamento | Accionament
+Actuador eléctrico | Actuador eléctrico | Electric actuator | Atuador elétrico | Actuador elèctric
+Actuador neumático | Actuador pneumático | Pneumatic actuator | Atuador pneumático | Actuador pneumàtic
+Agua (líquido) | Auga (líquido) | Water (liquid) | Água (líquido) | Aigua (líquid)
+Aislamiento | Illamento | Insulation | Isolamento | Aïllament
+Aislamiento térmico | Illamento térmico | Thermal insulation | Isolamento térmico | Aïllament tèrmic
+Altura / longitud de varilla (mm) | Altura / lonxitude de variña (mm) | Height / rod length (mm) | Altura / comprimento do varão (mm) | Alçada / longitud de vareta (mm)
+Altura total | Altura total | Overall height | Altura total | Alçada total
+Altura total aprox. | Altura total aprox. | Approx. overall height | Altura total aprox. | Alçada total aprox.
+Alzado a escala | Alzado a escala | Scaled elevation | Alçado à escala | Alçat a escala
+Anchura del símbolo (mm) | Anchura do símbolo (mm) | Symbol width (mm) | Largura do símbolo (mm) | Amplada del símbol (mm)
+Anillo RTJ octogonal (B16.20) | Anel RTJ octogonal (B16.20) | Octagonal RTJ ring (B16.20) | Anel RTJ octogonal (B16.20) | Anell RTJ octogonal (B16.20)
+Anillo espaciador | Anel espaciador | Paddle spacer | Anel espaçador | Anell espaiador
+Anillo espaciador (paddle spacer) | Anel espaciador (paddle spacer) | Paddle spacer | Anel espaçador (paddle spacer) | Anell espaiador (paddle spacer)
+Apoyos | Apoios | Supports | Apoios | Suports
+Aspiración | Aspiración | Suction | Aspiração | Aspiració
+Aspiración (NPS) | Aspiración (NPS) | Suction (NPS) | Aspiração (NPS) | Aspiració (NPS)
+Automática (sin escala) | Automática (sen escala) | Automatic (not to scale) | Automática (sem escala) | Automàtica (sense escala)
+Bola | Bóla | Ball | Esfera | Bola
+Bomba | Bomba | Pump | Bomba | Bomba
+Bomba centrífuga | Bomba centrífuga | Centrifugal pump | Bomba centrífuga | Bomba centrífuga
+Brida opuesta | Brida oposta | Mating flange | Flange oposta | Brida oposada
+Bridas | Bridas | Flanges | Flanges | Brides
+Bridas FF | Bridas FF | Flanged FF | Flangeadas FF | Brides FF
+Bridas RF | Bridas RF | Flanged RF | Flangeadas RF | Brides RF
+Bridas RTJ | Bridas RTJ | Flanged RTJ | Flangeadas RTJ | Brides RTJ
+Bridas de orificio | Bridas de orificio | Orifice flanges | Flanges de orifício | Brides d'orifici
+Bridas de orificio ASME B16.36 | Bridas de orificio ASME B16.36 | ASME B16.36 orifice flanges | Flanges de orifício ASME B16.36 | Brides d'orifici ASME B16.36
+Bridas en los extremos | Bridas nos extremos | Flanges at ends | Flanges nas extremidades | Brides als extrems
+Cara RTJ solo disponible en ASME B16.5. | Cara RTJ só dispoñible en ASME B16.5. | RTJ facing only available in ASME B16.5. | Face RTJ só disponível na ASME B16.5. | Cara RTJ només disponible a ASME B16.5.
+Codo 45° | Cóbado 45° | 45° elbow | Curva 45° | Colze 45°
+Codo 90° | Cóbado 90° | 90° elbow | Curva 90° | Colze 90°
+Colgador de muelle | Colgador de resorte | Spring hanger | Suporte de mola | Penjador de molla
+Colgador de varilla | Colgador de variña | Rod hanger | Suspensão por varão | Penjador de vareta
+Compuerta | Comporta | Gate | Cunha | Comporta
+Conjunto de bridas de orificio | Conxunto de bridas de orificio | Orifice flange union | Conjunto de flanges de orifício | Conjunt de brides d'orifici
+Derivación (olet) | Derivación (olet) | Branch (olet) | Derivação (olet) | Derivació (olet)
+Derivación MSS SP-97 | Derivación MSS SP-97 | MSS SP-97 branch connection | Derivação MSS SP-97 | Derivació MSS SP-97
+Despiece por spool | Despece por spool | Spool breakdown | Divisão em spools | Especejament per spool
+Dibujar espárragos | Debuxar espárragos | Draw stud bolts | Desenhar pernos | Dibuixar espàrrecs
+Dimensiones orientativas. | Dimensións orientativas. | Indicative dimensions. | Dimensões indicativas. | Dimensions orientatives.
+Disco ciego | Disco cego | Paddle blind | Disco cego | Disc cec
+Disco ciego (paddle blind) | Disco cego (paddle blind) | Paddle blind | Disco cego (paddle blind) | Disc cec (paddle blind)
+Envolvente orientativa: verifique con el plano del fabricante. | Envolvente orientativa: verifique co plano do fabricante. | Indicative envelope: check against the manufacturer's drawing. | Envolvente indicativa: verifique com o desenho do fabricante. | Envolupant orientativa: verifiqueu amb el plànol del fabricant.
+Escala de la isométrica | Escala da isométrica | Isometric scale | Escala da isométrica | Escala de la isomètrica
+Espesor | Espesor | Thickness | Espessura | Gruix
+Espesor de aislamiento (mm) | Espesor de illamento (mm) | Insulation thickness (mm) | Espessura do isolamento (mm) | Gruix d'aïllament (mm)
+Espesor del tubo (mm) | Espesor do tubo (mm) | Pipe wall (mm) | Espessura do tubo (mm) | Gruix del tub (mm)
+Espirometálica (B16.20) | Espirometálica (B16.20) | Spiral wound (B16.20) | Espirometálica (B16.20) | Espiromètal·lica (B16.20)
+Espuma elastomérica | Escuma elastomérica | Elastomeric foam | Espuma elastomérica | Escuma elastomèrica
+Espárrago | Espárrago | Stud bolt | Perno | Espàrrec
+Extremo para brida loca | Extremo para brida tola | Stub end | Extremidade para flange solta | Extrem per a brida boja
+Extremo para brida loca (stub end) | Extremo para brida tola (stub end) | Stub end | Extremidade para flange solta (stub end) | Extrem per a brida boja (stub end)
+Extremos | Extremos | Ends | Extremidades | Extrems
+Figura en ocho | Figura en oito | Spectacle blind | Figura em oito | Figura en vuit
+Figura en ocho (spectacle) | Figura en oito (spectacle) | Spectacle blind | Figura em oito (spectacle) | Figura en vuit (spectacle)
+Figura en ocho y discos ASME B16.48 | Figura en oito e discos ASME B16.48 | ASME B16.48 line blanks | Figura em oito e discos ASME B16.48 | Figura en vuit i discos ASME B16.48
+Filtro | Filtro | Strainer | Filtro | Filtre
+Filtro de cesta | Filtro de cesta | Basket strainer | Filtro de cesto | Filtre de cistella
+Filtro en Y | Filtro en Y | Y-strainer | Filtro em Y | Filtre en Y
+Fondos | Fondos | Heads | Fundos | Fons
+Forjados B16.11 | Forxados B16.11 | B16.11 Forged | Forjados B16.11 | Forjats B16.11
+Globo | Globo | Globe | Globo | Globus
+ISOMÉTRICA | ISOMÉTRICA | ISOMETRIC | ISOMÉTRICA | ISOMÈTRICA
+Instrumento | Instrumento | Instrument | Instrumento | Instrument
+Instrumento o accesorio de línea | Instrumento ou accesorio de liña | Instrument or line item | Instrumento ou acessório de linha | Instrument o accessori de línia
+Introduzca los puntos en planta y la cota Z de cada uno. Use Subir/Bajar para tramos verticales. | Introduza os puntos en planta e a cota Z de cada un. Use Subir/Baixar para tramos verticais. | Enter plan points and the Z elevation of each. Use Up/Down for vertical runs. | Introduza os pontos em planta e a cota Z de cada um. Use Subir/Descer para troços verticais. | Introduïu els punts en planta i la cota Z de cadascun. Feu servir Pujar/Baixar per a trams verticals.
+Isométrica | Isométrica | Isometric | Isométrica | Isomètrica
+Isométrica de tubería | Isométrica de tubaxe | Piping isometric | Isométrica de tubagem | Isomètrica de canonada
+Isométricas y listados | Isométricas e listaxes | Isometrics and Lists | Isométricas e listagens | Isomètriques i llistats
+Junta | Xunta | Gasket | Junta | Junta
+Junta y tornillería | Xunta e parafusaría | Gasket and Bolting | Junta e parafusaria | Junta i cargols
+Lana mineral | La mineral | Mineral wool | Lã mineral | Llana mineral
+Las bridas socket weld de ASME B16.5 llegan hasta NPS 3 (2½ en Class 1500). | As bridas socket weld de ASME B16.5 chegan ata NPS 3 (2½ en Class 1500). | ASME B16.5 socket weld flanges go up to NPS 3 (2½ in Class 1500). | As flanges socket weld da ASME B16.5 vão até NPS 3 (2½ na Class 1500). | Les brides socket weld d'ASME B16.5 arriben fins a NPS 3 (2½ en Class 1500).
+Latrolet (45°) | Latrolet (45°) | Latrolet (45°) | Latrolet (45°) | Latrolet (45°)
+Loca (lap joint) | Tola (lap joint) | Lap joint | Solta (lap joint) | Boja (lap joint)
+Longitud (mm) | Lonxitude (mm) | Length (mm) | Comprimento (mm) | Longitud (mm)
+Longitud de corte (mm) | Lonxitude de corte (mm) | Cut length (mm) | Comprimento de corte (mm) | Longitud de tall (mm)
+Longitud entre tangentes (mm) | Lonxitude entre tanxentes (mm) | Tangent-to-tangent length (mm) | Comprimento entre tangentes (mm) | Longitud entre tangents (mm)
+Longitud máx. de spool (m) | Lonxitude máx. de spool (m) | Max. spool length (m) | Comprimento máx. de spool (m) | Longitud màx. de spool (m)
+Macho | Macho | Plug | Macho | Mascle
+Manual (volante / palanca) | Manual (volante / panca) | Manual (handwheel / lever) | Manual (volante / alavanca) | Manual (volant / palanca)
+Manómetro con válvula | Manómetro con válvula | Pressure gauge with valve | Manómetro com válvula | Manòmetre amb vàlvula
+Mariposa | Bolboreta | Butterfly | Borboleta | Papallona
+Mirilla | Visor | Sight glass | Visor | Visor
+Norma de la brida | Norma da brida | Flange standard | Norma da flange | Norma de la brida
+Pieza | Peza | Piece | Peça | Peça
+Plana sin amianto (B16.21) | Plana sen amianto (B16.21) | Non-asbestos flat (B16.21) | Plana sem amianto (B16.21) | Plana sense amiant (B16.21)
+Potencia del motor (kW) | Potencia do motor (kW) | Motor power (kW) | Potência do motor (kW) | Potència del motor (kW)
+Proyección | Proxección | Projection | Projeção | Projecció
+Proyección desde la pared (mm) | Proxección desde a parede (mm) | Projection from wall (mm) | Projeção a partir da parede (mm) | Projecció des de la paret (mm)
+Purga (válvula y tapón) | Purga (válvula e tapón) | Drain (valve and plug) | Purga (válvula e tampão) | Purga (vàlvula i tap)
+Purgador termodinámico | Purgador termodinámico | Thermodynamic steam trap | Purgador termodinâmico | Purgador termodinàmic
+Recipiente | Recipiente | Vessel | Recipiente | Recipient
+Reducción de enchufe (MSS SP-95) | Redución de enchufe (MSS SP-95) | Swage nipple (MSS SP-95) | Redução de encaixe (MSS SP-95) | Reducció d'endoll (MSS SP-95)
+Retención | Retención | Check | Retenção | Retenció
+Retención de clapeta | Retención de clapeta | Swing check | Retenção de portinhola | Retenció de clapeta
+Retención de pistón | Retención de pistón | Lift check | Retenção de pistão | Retenció de pistó
+Roscada (NPT) | Roscada (NPT) | Threaded (NPT) | Roscada (NPT) | Roscada (NPT)
+Roscados NPT | Roscados NPT | NPT threaded | Roscados NPT | Roscats NPT
+Se dibuja a trazos sobre el contorno del tubo; la lista de materiales suma los metros por espesor. | Debúxase a trazos sobre o contorno do tubo; a lista de materiais suma os metros por espesor. | Drawn dashed around the pipe outline; the bill of materials totals metres by thickness. | Desenha-se a tracejado sobre o contorno do tubo; a lista de materiais soma os metros por espessura. | Es dibuixa a traços sobre el contorn del tub; la llista de materials suma els metres per gruix.
+Semielíptico DIN 28013 (Korbbogen) | Semielíptico DIN 28013 (Korbbogen) | Semi-elliptical DIN 28013 (Korbbogen) | Semielíptico DIN 28013 (Korbbogen) | Semiel·líptic DIN 28013 (Korbbogen)
+Separación máx. ASME B31.1 | Separación máx. ASME B31.1 | Max. span ASME B31.1 | Espaçamento máx. ASME B31.1 | Separació màx. ASME B31.1
+Servicio | Servizo | Service | Serviço | Servei
+Sin dividir | Sen dividir | Not split | Sem dividir | Sense dividir
+Socket weld (SW) | Socket weld (SW) | Socket weld (SW) | Socket weld (SW) | Socket weld (SW)
+Socket weld: clases 3000 y 6000. | Socket weld: clases 3000 e 6000. | Socket weld: Class 3000 and 6000. | Socket weld: classes 3000 e 6000. | Socket weld: classes 3000 i 6000.
+Soldar a tope (BW) | Soldar a tope (BW) | Butt weld (BW) | Soldar topo a topo (BW) | Soldar a tope (BW)
+Soporte | Soporte | Support | Suporte | Suport
+Soporte de tubería | Soporte de tubaxe | Pipe support | Suporte de tubagem | Suport de canonada
+Soportes por separación | Soportes por separación | Supports by Span | Suportes por espaçamento | Suports per separació
+Soportes según separación ASME B31.1 | Soportes segundo separación ASME B31.1 | Supports by ASME B31.1 span | Suportes segundo espaçamento ASME B31.1 | Suports segons separació ASME B31.1
+Soportes y equipos | Soportes e equipos | Supports and Equipment | Suportes e equipamentos | Suports i equips
+Símbolo P&ID | Símbolo P&ID | P&ID symbol | Símbolo P&ID | Símbol P&ID
+Símbolo P&ID (ISA 5.1) | Símbolo P&ID (ISA 5.1) | P&ID symbol (ISA 5.1) | Símbolo P&ID (ISA 5.1) | Símbol P&ID (ISA 5.1)
+Tabla 121.5 de ASME B31.1 (tubo STD). En la práctica, apoye también junto a válvulas, cambios de dirección y cargas concentradas. | Táboa 121.5 de ASME B31.1 (tubo STD). Na práctica, apoie tamén xunto a válvulas, cambios de dirección e cargas concentradas. | ASME B31.1 Table 121.5 (STD pipe). In practice, also support next to valves, changes of direction and concentrated loads. | Tabela 121.5 da ASME B31.1 (tubo STD). Na prática, apoie também junto a válvulas, mudanças de direção e cargas concentradas. | Taula 121.5 d'ASME B31.1 (tub STD). A la pràctica, suporteu també al costat de vàlvules, canvis de direcció i càrregues concentrades.
+Tapón hexagonal | Tapón hexagonal | Hex head plug | Tampão hexagonal | Tap hexagonal
+Termómetro bimetálico con vaina | Termómetro bimetálico con vaíña | Bimetal thermometer with thermowell | Termómetro bimetálico com bainha | Termòmetre bimetàl·lic amb beina
+Tipo 01: plana para soldar | Tipo 01: plana para soldar | Type 01: plate | Tipo 01: plana para soldar | Tipus 01: plana per soldar
+Tipo 05: ciega | Tipo 05: cega | Type 05: blind | Tipo 05: cega | Tipus 05: cega
+Tipo 11: cuello para soldar | Tipo 11: colo para soldar | Type 11: weld neck | Tipo 11: pescoço para soldar | Tipus 11: coll per soldar
+Tipo de soporte | Tipo de soporte | Support type | Tipo de suporte | Tipus de suport
+Torisférico DIN 28011 (Klöpper) | Torisférico DIN 28011 (Klöpper) | Torispherical DIN 28011 (Klöpper) | Torisférico DIN 28011 (Klöpper) | Torisfèric DIN 28011 (Klöpper)
+Tubería 3D | Tubaxe 3D | 3D Piping | Tubagem 3D | Canonada 3D
+Tubuladura | Tubuladura | Nozzle | Tubuladura | Tubuladura
+Tubuladura inferior | Tubuladura inferior | Bottom nozzle | Tubuladura inferior | Tubuladura inferior
+Tubuladura lateral | Tubuladura lateral | Side nozzle | Tubuladura lateral | Tubuladura lateral
+Tubuladura superior | Tubuladura superior | Top nozzle | Tubuladura superior | Tubuladura superior
+Unión bridada | Unión bridada | Flanged joint | União flangeada | Unió embridada
+Vaina termométrica | Vaíña termométrica | Thermowell | Bainha termométrica | Beina termomètrica
+Vapor, gas o aire | Vapor, gas ou aire | Steam, gas or air | Vapor, gás ou ar | Vapor, gas o aire
+Venteo (válvula y tapón) | Venteo (válvula e tapón) | Vent (valve and plug) | Respiro (válvula e tampão) | Ventilació (vàlvula i tap)
+Vidrio celular | Vidro celular | Cellular glass | Vidro celular | Vidre cel·lular
+Válvula | Válvula | Valve | Válvula | Vàlvula
+Válvulas | Válvulas | Valves | Válvulas | Vàlvules
+Zapata | Zapata | Shoe | Sapata | Sabata
+Zapata guiada | Zapata guiada | Guided shoe | Sapata guiada | Sabata guiada
+Anclaje | Ancoraxe | Anchor | Ancoragem | Ancoratge
+Ø exterior (mm) | Ø exterior (mm) | Outside Ø (mm) | Ø exterior (mm) | Ø exterior (mm)
+Disposición | Disposición | Arrangement | Disposição | Disposició
+Patas | Patas | Legs | Pernas | Potes
+Faldón | Faldón | Skirt | Saia | Faldó
+Cunas | Berces | Saddles | Berços | Bressols
+Ninguno | Ningún | None | Nenhum | Cap
+Derivación | Derivación | Branch | Derivação | Derivació
+Patrón | Patrón | Pattern | Padrão | Patró
+Largo (paso total) | Longo (paso total) | Long (full bore) | Longo (passagem total) | Llarg (pas total)
+Corto | Curto | Short | Curto | Curt
+Regular | Regular | Regular | Regular | Regular
+Corto (MSS SP-43) | Curto (MSS SP-43) | Short (MSS SP-43) | Curto (MSS SP-43) | Curt (MSS SP-43)
+Largo (ASME B16.9) | Longo (ASME B16.9) | Long (ASME B16.9) | Longo (ASME B16.9) | Llarg (ASME B16.9)
+Insertar brida igual enfrentada | Inserir brida igual enfrontada | Insert matching flange | Inserir flange igual oposta | Inserir brida igual encarada
+Línea | Liña | Line | Linha | Línia
+Niple | Niple | Nipple | Niple | Mugró
+Unión (MSS SP-83) | Unión (MSS SP-83) | Union (MSS SP-83) | União (MSS SP-83) | Unió (MSS SP-83)
+Unión | Unión | Union | União | Unió
+Reducción de enchufe | Redución de enchufe | Swage nipple | Redução de encaixe | Reducció d'endoll
+Válvula de compuerta | Válvula de comporta | Gate valve | Válvula de cunha | Vàlvula de comporta
+Accesorio forjado | Accesorio forxado | Forged fitting | Acessório forjado | Accessori forjat
+como globo | como globo | as globe | como globo | com a globus
+con 2 tuercas | con 2 porcas | with 2 nuts | com 2 porcas | amb 2 femelles
+eje a | eixe a | shaft at | eixo a | eix a
+espirometálica | espirometálica | spiral wound | espirometálica | espiromètal·lica
+espuma elastomérica | escuma elastomérica | elastomeric foam | espuma elastomérica | escuma elastomèrica
+espárrago | espárrago | stud bolt | perno | espàrrec
+forjada (API 602), aprox. | forxada (API 602), aprox. | forged (API 602), approx. | forjada (API 602), aprox. | forjada (API 602), aprox.
+impulsión | impulsión | discharge | descarga | impulsió
+lana mineral | la mineral | mineral wool | lã mineral | llana mineral
+loca | tola | lap joint | solta | boja
+ninguna | ningunha | none | nenhuma | cap
+piezas de tubo | pezas de tubo | pipe pieces | peças de tubo | peces de tub
+placa | placa | plate | placa | placa
+plana | plana | plate | plana | plana
+poliuretano | poliuretano | polyurethane | poliuretano | poliuretà
+proyección | proxección | projection | projeção | projecció
+roscada | roscada | threaded | roscada | roscada
+sobre | sobre | on | sobre | sobre
+tomas | tomas | taps | tomadas | preses
+tuercas | porcas | nuts | porcas | femelles
+vidrio celular | vidro celular | cellular glass | vidro celular | vidre cel·lular
+volumen aprox. | volume aprox. | approx. volume | volume aprox. | volum aprox.
+agua | auga | water | água | aigua
+en | en | on | em | en
+Separación máx. | Separación máx. | Max. span | Espaçamento máx. | Separació màx.
+Anillo espaciador (paddle spacer) | Anel espaciador (paddle spacer) | Paddle spacer | Anel espaçador (paddle spacer) | Anell espaiador (paddle spacer)
+No hay dimensión cara a cara para este tipo, clase y diámetro. | Non hai dimensión cara a cara para este tipo, clase e diámetro. | No face-to-face dimension for this type, class and size. | Não há dimensão face a face para este tipo, classe e diâmetro. | No hi ha dimensió cara a cara per a aquest tipus, classe i diàmetre.
+ASME B16.11 no incluye este diámetro en clase {0}. | ASME B16.11 non inclúe este diámetro en clase {0}. | ASME B16.11 does not cover this size in Class {0}. | A ASME B16.11 não inclui este diâmetro na classe {0}. | ASME B16.11 no inclou aquest diàmetre en classe {0}.
+ASME B16.36: bridas de orificio desde Class 300. | ASME B16.36: bridas de orificio desde Class 300. | ASME B16.36: orifice flanges from Class 300. | ASME B16.36: flanges de orifício a partir da Class 300. | ASME B16.36: brides d'orifici des de Class 300.
+ASME B16.47 serie A | ASME B16.47 serie A | ASME B16.47 Series A | ASME B16.47 série A | ASME B16.47 sèrie A
+ASME B16.48 no incluye este diámetro en clase {0}. | ASME B16.48 non inclúe este diámetro en clase {0}. | ASME B16.48 does not cover this size in Class {0}. | A ASME B16.48 não inclui este diâmetro na classe {0}. | ASME B16.48 no inclou aquest diàmetre en classe {0}.
+Derivación (olet) | Derivación (olet) | Branch (olet) | Derivação (olet) | Derivació (olet)
 Imagen PNG | Imaxe PNG | PNG image | Imagem PNG | Imatge PNG
 Poligonal | Poligonal | Polygonal | Poligonal | Poligonal
 `;
@@ -300,6 +493,25 @@ Specify weld end point | Indique el extremo de soldadura | Indique o extremo de 
 Specify direction | Indique la dirección | Indique a dirección | Indique a direção | Indiqueu la direcció
 Turn direction | Sentido del giro | Sentido do xiro | Sentido da curva | Sentit del gir
 Select piping objects | Designe los objetos de tubería | Designe os obxectos de tubaxe | Selecione os objetos de tubagem | Designeu els objectes de canonada
+Line number | Número de línea | Número de liña | Número da linha | Número de línia
+Select pipe axes and elbows to insulate | Designe los ejes de tubo y los codos que desea aislar | Designe os eixes de tubo e os cóbados que desexa illar | Selecione os eixos de tubo e as curvas a isolar | Designeu els eixos de tub i els colzes que voleu aïllar
+Select piping axes | Designe los ejes de tubería | Designe os eixes de tubaxe | Selecione os eixos de tubagem | Designeu els eixos de canonada
+Specify bottom tangent line center | Indique el centro de la línea de tangencia inferior | Indique o centro da liña de tanxencia inferior | Indique o centro da linha de tangência inferior | Indiqueu el centre de la línia de tangència inferior
+Specify branch side | Indique el lado de la derivación | Indique o lado da derivación | Indique o lado da derivação | Indiqueu el costat de la derivació
+Specify point on the pipe axis | Indique un punto en el eje del tubo | Indique un punto no eixe do tubo | Indique um ponto no eixo do tubo | Indiqueu un punt a l'eix del tub
+Specify point on the pipe axis or | Indique un punto en el eje del tubo o | Indique un punto no eixe do tubo ou | Indique um ponto no eixo do tubo ou | Indiqueu un punt a l'eix del tub o
+Specify point on the run pipe axis | Indique un punto en el eje del colector | Indique un punto no eixe do colector | Indique um ponto no eixo do coletor | Indiqueu un punt a l'eix del col·lector
+Specify vertical distance | Indique la distancia vertical | Indique a distancia vertical | Indique a distância vertical | Indiqueu la distància vertical
+Specify elevation Z | Indique la cota Z | Indique a cota Z | Indique a cota Z | Indiqueu la cota Z
+Select flange to joint | Designe la brida que desea unir | Designe a brida que desexa unir | Selecione a flange a unir | Designeu la brida que voleu unir
+Specify inlet face point | Indique el punto de la cara de entrada | Indique o punto da cara de entrada | Indique o ponto da face de entrada | Indiqueu el punt de la cara d'entrada
+Specify connection point | Indique el punto de conexión | Indique o punto de conexión | Indique o ponto de ligação | Indiqueu el punt de connexió
+Specify lap face point | Indique el punto de la cara de asiento | Indique o punto da cara de asento | Indique o ponto da face de assento | Indiqueu el punt de la cara d'assentament
+Specify orifice plate center | Indique el centro de la placa de orificio | Indique o centro da placa de orificio | Indique o centro da placa de orifício | Indiqueu el centre de la placa d'orifici
+Specify suction flange face point | Indique la cara de la brida de aspiración | Indique a cara da brida de aspiración | Indique a face da flange de aspiração | Indiqueu la cara de la brida d'aspiració
+Specify point on the vessel wall | Indique un punto en la pared del recipiente | Indique un punto na parede do recipiente | Indique um ponto na parede do recipiente | Indiqueu un punt a la paret del recipient
+Specify insertion point for the isometric | Indique el punto de inserción de la isométrica | Indique o punto de inserción da isométrica | Indique o ponto de inserção da isométrica | Indiqueu el punt d'inserció de la isomètrica
+Specify insertion point for the table or | Indique el punto de inserción de la tabla o | Indique o punto de inserción da táboa ou | Indique o ponto de inserção da tabela ou | Indiqueu el punt d'inserció de la taula o
 Layer name | Nombre de capa | Nome de capa | Nome da camada | Nom de capa
 Specify location of projected view | Indique la posición de la vista proyectada | Indique a posición da vista proxectada | Indique a posição da vista projetada | Indiqueu la posició de la vista projectada
 Select an edge | Designe una arista | Designe unha aresta | Selecione uma aresta | Designeu una aresta
@@ -313,6 +525,9 @@ const KW8 = `
 Left | Izquierda | Esquerda | Esquerda | Esquerra
 Right | Derecha | Dereita | Direita | Dreta
 Undo | desHacer | desFacer | anUlar | desFer
+Up | Subir | Subir | Subir | Pujar
+Down | Bajar | Baixar | Descer | Baixar
+up | arriba | arriba | cima | amunt
 Add vertex | Añadir vértice | Engadir vértice | Adicionar vértice | Afegir vèrtex
 Aerial | Aéreo | Aéreo | Aéreo | Aeri
 Closed cross | Cruz cerrada | Cruz pechada | Cruz fechada | Creu tancada
@@ -366,10 +581,22 @@ Simplified loads (guidance only): transmission, solar through glazing, occupants
 There are no comments. | No hay comentarios. | Non hai comentarios. | Não há comentários. | No hi ha comentaris.
 No piping components found. | No se han encontrado componentes de tubería. | Non se atoparon compoñentes de tubaxe. | Não foram encontrados componentes de tubagem. | No s'han trobat components de canonada.
 Segment too short for the elbow: mitred joint used. | Tramo demasiado corto para el codo: se usa unión a inglete. | Tramo demasiado curto para o cóbado: úsase unión a inglete. | Troço demasiado curto para a curva: usa-se união em meia-esquadria. | Tram massa curt per al colze: s'utilitza unió en biaix.
+Connected to the free end. | Conectado al extremo libre. | Conectado ao extremo libre. | Ligado à extremidade livre. | Connectat a l'extrem lliure.
+No pipe axes selected. | No se han designado ejes de tubo. | Non se designaron eixes de tubo. | Não foram selecionados eixos de tubo. | No s'han designat eixos de tub.
+Some segments are shorter than the elbows. | Algunos tramos son más cortos que los codos. | Algúns tramos son máis curtos cós cóbados. | Alguns troços são mais curtos que as curvas. | Alguns trams són més curts que els colzes.
+The selected object is not a piping component. | El objeto designado no es un componente de tubería. | O obxecto designado non é un compoñente de tubaxe. | O objeto selecionado não é um componente de tubagem. | L'objecte designat no és un component de canonada.
+There are no 3D piping lines. Draw them with MPIPE3D. | No hay líneas de tubería 3D. Dibújelas con TUBERIA3D. | Non hai liñas de tubaxe 3D. Debúxeas con TUBAXE3D. | Não há linhas de tubagem 3D. Desenhe-as com TUBAGEM3D. | No hi ha línies de canonada 3D. Dibuixeu-les amb CANONADA3D.
+This flange has no dimension data (insert it again with MFLANGE). | Esta brida no tiene datos dimensionales (insértela de nuevo con BRIDAASME). | Esta brida non ten datos dimensionais (insíraa de novo con BRIDAASME). | Esta flange não tem dados dimensionais (insira-a de novo com FLANGEASME). | Aquesta brida no té dades dimensionals (inseriu-la de nou amb BRIDAASME).
 No layers are reserved. | No hay capas reservadas. | Non hai capas reservadas. | Não há camadas reservadas. | No hi ha capes reservades.
 `;
 // Mensajes con valores: patrón, castellano, galego, português, català
 const MSGRE8 = [
+  [/^(\d+) support\(s\) placed\.$/, '$1 soporte(s) colocado(s).', '$1 soporte(s) colocado(s).', '$1 suporte(s) colocado(s).', '$1 suport(s) col·locat(s).'],
+  [/^(\d+) spool\(s\), (\d+) field weld\(s\)\.$/, '$1 spool(s), $2 soldadura(s) de campo.', '$1 spool(s), $2 soldadura(s) de campo.', '$1 spool(s), $2 soldadura(s) de campo.', '$1 spool(s), $2 soldadura(s) de camp.'],
+  [/^Flanged joint: (.+), (\d+) stud bolts (\S+) x (\d+) mm\.$/, 'Unión bridada: $1, $2 espárragos $3 × $4 mm.', 'Unión bridada: $1, $2 espárragos $3 × $4 mm.', 'União flangeada: $1, $2 pernos $3 × $4 mm.', 'Unió embridada: $1, $2 espàrrecs $3 × $4 mm.'],
+  [/^Insulation: ([\d.]+) m\.$/, 'Aislamiento: $1 m.', 'Illamento: $1 m.', 'Isolamento: $1 m.', 'Aïllament: $1 m.'],
+  [/^Isometric (\S+): (\d+) spool\(s\), (\d+) pipe piece\(s\), (\d+) weld\(s\)\.$/, 'Isométrica $1: $2 spool(s), $3 pieza(s) de tubo, $4 soldadura(s).', 'Isométrica $1: $2 spool(s), $3 peza(s) de tubo, $4 soldadura(s).', 'Isométrica $1: $2 spool(s), $3 peça(s) de tubo, $4 soldadura(s).', 'Isomètrica $1: $2 spool(s), $3 peça(ces) de tub, $4 soldadura(es).'],
+  [/^Line (\S+): ([\d.]+) m, (\d+) elbow\(s\)\. Use MISO for the isometric\.$/, 'Línea $1: $2 m, $3 codo(s). Use ISOMETRICA para la isométrica.', 'Liña $1: $2 m, $3 cóbado(s). Use ISOMETRICA para a isométrica.', 'Linha $1: $2 m, $3 curva(s). Use ISOMETRICA para a isométrica.', 'Línia $1: $2 m, $3 colze(s). Feu servir ISOMETRICA per a la isomètrica.'],
   [/^(.+): ([\d.]+) m, (\d+) elbow\(s\)\.$/, '$1: $2 m, $3 codo(s).', '$1: $2 m, $3 cóbado(s).', '$1: $2 m, $3 curva(s).', '$1: $2 m, $3 colze(s).'],
   [/^No (LR|SR) elbow in ASME B16\.9 for this size: mitred joints used\.$/, 'No hay codo $1 en ASME B16.9 para este diámetro: se usan uniones a inglete.', 'Non hai cóbado $1 en ASME B16.9 para este diámetro: úsanse unións a inglete.', 'Não há curva $1 na ASME B16.9 para este diâmetro: usam-se uniões em meia-esquadria.', 'No hi ha colze $1 a ASME B16.9 per a aquest diàmetre: s\'utilitzen unions en biaix.'],
   [/^Piping spec: (.+), Class (\S+) (\S+), (\S+) elbows\.$/, 'Especificación de tubería: $1, clase $2 $3, codos $4.', 'Especificación de tubaxe: $1, clase $2 $3, cóbados $4.', 'Especificação de tubagem: $1, classe $2 $3, curvas $4.', 'Especificació de canonada: $1, classe $2 $3, colzes $4.'],
@@ -409,6 +636,15 @@ const SENTRE8 = [
 ];
 // Nombres de comando: castellano, galego, português, català
 const CMD8 = {
+  MVALVE: ['VALVULA', 'VALVULA', 'VALVULA', 'VALVULA'], MVALVEGATE: ['VALVCOMPUERTA', 'VALVCOMPORTA', 'VALVCUNHA', 'VALVCOMPORTA'], MVALVEGLOBE: ['VALVGLOBO', 'VALVGLOBO', 'VALVGLOBO', 'VALVGLOBUS'], MVALVECHECK: ['VALVRETENCION', 'VALVRETENCION', 'VALVRETENCAO', 'VALVRETENCIO'],
+  MVALVEBALL: ['VALVBOLA', 'VALVBOLA', 'VALVESFERA', 'VALVBOLA'], MVALVEPLUG: ['VALVMACHO', 'VALVMACHO', 'VALVMACHO', 'VALVMASCLE'], MVALVEBFLY: ['VALVMARIPOSA', 'VALVBOLBORETA', 'VALVBORBOLETA', 'VALVPAPALLONA'],
+  MSTRAINER: ['FILTROY', 'FILTROY', 'FILTROY', 'FILTREY'], MSTRAINERB: ['FILTROCESTA', 'FILTROCESTA', 'FILTROCESTO', 'FILTRECISTELLA'], MSIGHTGLASS: ['MIRILLA', 'VISOR', 'VISOR', 'VISOR'],
+  MGASKET: ['JUNTA', 'XUNTA', 'JUNTA', 'JUNTA'], MFORGED: ['FORJADO', 'FORXADO', 'FORJADO', 'FORJAT'], MOLET: ['OLET', 'OLET', 'OLET', 'OLET'], MSTUBEND: ['PORTABRIDAS', 'PORTABRIDAS', 'PORTAFLANGE', 'PORTABRIDES'],
+  MORIFICE: ['BRIDAORIFICIO', 'BRIDAORIFICIO', 'FLANGEORIFICIO', 'BRIDAORIFICI'], MBLIND: ['FIGURAOCHO', 'FIGURAOITO', 'FIGURAOITO', 'FIGURAVUIT'],
+  MFLANGESW: ['BRIDASW', 'BRIDASW', 'FLANGESW', 'BRIDASW'], MFLANGETHD: ['BRIDAROSCADA', 'BRIDAROSCADA', 'FLANGEROSCADA', 'BRIDAROSCADA'], MFLANGELJ: ['BRIDALOCA', 'BRIDATOLA', 'FLANGESOLTA', 'BRIDABOJA'], MFLANGEEN: ['BRIDAEN1092', 'BRIDAEN1092', 'FLANGEEN1092', 'BRIDAEN1092'], MFLANGE47: ['BRIDAB1647', 'BRIDAB1647', 'FLANGEB1647', 'BRIDAB1647'],
+  MSUPPORT: ['SOPORTE', 'SOPORTE', 'SUPORTE', 'SUPORT'], MSPAN: ['SEPARACIONSOPORTES', 'SEPARACIONSOPORTES', 'ESPACAMENTOSUPORTES', 'SEPARACIOSUPORTS'], MPUMP: ['BOMBA', 'BOMBA', 'BOMBA', 'BOMBA'], MVESSEL: ['RECIPIENTE', 'RECIPIENTE', 'RECIPIENTE', 'RECIPIENT'],
+  MNOZZLE: ['TUBULADURA', 'TUBULADURA', 'TUBULADURA', 'TUBULADURA'], MINSTR: ['INSTRUMENTO', 'INSTRUMENTO', 'INSTRUMENTO', 'INSTRUMENT'], MINSUL: ['AISLAMIENTO', 'ILLAMENTO', 'ISOLAMENTO', 'AILLAMENT'],
+  MPIPE3D: ['TUBERIA3D', 'TUBAXE3D', 'TUBAGEM3D', 'CANONADA3D'], MISO: ['ISOMETRICA', 'ISOMETRICA', 'ISOMETRICA', 'ISOMETRICA'], MSPOOL: ['SPOOL', 'SPOOL', 'SPOOL', 'SPOOL'],
   MPIPE: ['TUBERIAMEC', 'TUBAXEMEC', 'TUBAGEMMEC', 'CANONADAMEC'], MSPEC: ['ESPECTUBERIA', 'ESPECTUBAXE', 'ESPECTUBAGEM', 'ESPECCANONADA'], MFLANGE: ['BRIDAASME', 'BRIDAASME', 'FLANGEASME', 'BRIDAASME'],
   MFLANGEWN: ['BRIDAWN', 'BRIDAWN', 'FLANGEWN', 'BRIDAWN'], MFLANGESO: ['BRIDASO', 'BRIDASO', 'FLANGESO', 'BRIDASO'], MFLANGELWN: ['BRIDALWN', 'BRIDALWN', 'FLANGELWN', 'BRIDALWN'], MFLANGEBL: ['BRIDACIEGA', 'BRIDACEGA', 'FLANGECEGA', 'BRIDACEGA'],
   MFLANGETABLE: ['TABLABRIDAS', 'TABOABRIDAS', 'TABELAFLANGES', 'TAULABRIDES'], MELBOW: ['CODO', 'COBADO', 'CURVA', 'COLZE'], MREDUCER: ['REDUCCION', 'REDUCION', 'REDUCAO', 'REDUCCIO'], MREDUCERECC: ['REDUCCIONEXC', 'REDUCIONEXC', 'REDUCAOEXC', 'REDUCCIOEXC'],

@@ -8,6 +8,7 @@ import { Cancel } from './engine.js';
 import { t as T } from '../core/i18n.js';
 import { pairsToLisp } from '../io/xdutil.js';
 import * as P from '../core/pipedata.js';
+import * as P2 from '../core/pipedata2.js';
 
 const IN = 25.4;
 const need = (v) => { if (v == null) throw new Cancel(); return v; };
@@ -84,6 +85,18 @@ export function flangeSide(fl, kind, face, pipe, o = {}) {
     xe = x0 + (fl.incl ? fl.Yso - fl.rfH : fl.Yso);
     out.push(...rectL(x1, -fl.X / 2, xe, fl.X / 2).slice(0, 3));
     bore = fl.Bso;
+  } else if (kind === 'SW' || kind === 'THD' || kind === 'LJ') {
+    xe = x0 + (fl.incl ? fl.Yso - fl.rfH : fl.Yso);
+    out.push(...rectL(x1, -fl.X / 2, xe, fl.X / 2).slice(0, 3));
+    if (kind === 'SW') { // enchufe: taladro B hasta la profundidad del enchufe y paso interior
+      const dep = xe - Math.max(0.6 * (xe - x0), 6), Bs = pipe.od + 1.2;
+      out.push(L(dep, Bs / 2, xe, Bs / 2, HID), L(dep, -Bs / 2, xe, -Bs / 2, HID), L(dep, -Bs / 2, dep, Bs / 2, HID));
+      out.push(L(0, pipe.id / 2, dep, pipe.id / 2, HID), L(0, -pipe.id / 2, dep, -pipe.id / 2, HID));
+    } else if (kind === 'THD') { // rosca NPT en todo el taladro (línea fina de fondo de rosca)
+      out.push(L(0, pipe.od / 2, xe, pipe.od / 2, HID), L(0, -pipe.od / 2, xe, -pipe.od / 2, HID), L(0, pipe.od / 2 - 1.5, xe, pipe.od / 2 - 1.5, HID), L(0, -pipe.od / 2 + 1.5, xe, -pipe.od / 2 + 1.5, HID));
+    } else bore = fl.Bso + 0.8;
+  } else if (kind === 'PL') {
+    bore = fl.Bpl || pipe.od + 1;
   } else if (kind === 'LWN') {
     xe = o.lwnL || 9 * IN;
     out.push(...rectL(x1, -fl.X / 2, xe, fl.X / 2).slice(0, 3));
@@ -98,7 +111,7 @@ export function flangeFront(fl, kind, face, pipe) {
   const c0 = { x: 0, y: 0 }, out = [circ(c0, fl.O / 2)];
   if (face === 'RF') out.push(circ(c0, fl.R / 2));
   if (face === 'RTJ') { out.push(circ(c0, fl.K / 2)); if (fl.P) out.push(circ(c0, fl.P / 2 - fl.F / 2), circ(c0, fl.P / 2 + fl.F / 2)); }
-  const bore = kind === 'WN' ? pipe.id : kind === 'SO' ? fl.Bso : kind === 'LWN' ? pipe.id : 0;
+  const bore = { WN: pipe.id, LWN: pipe.id, SO: fl.Bso, LJ: (fl.Bso || pipe.od) + 0.8, SW: pipe.id, THD: pipe.od, PL: fl.Bpl || pipe.od + 1 }[kind] || 0;
   if (bore) out.push(circ(c0, bore / 2));
   out.push(circ(c0, fl.BC / 2, AX));
   for (let k = 0; k < fl.n; k++) { const a = Math.PI / fl.n + k * 2 * Math.PI / fl.n, q = G.polar(c0, a, fl.BC / 2); out.push(circ(q, fl.hole / 2)); }
@@ -174,6 +187,7 @@ export function register(eng, app) {
     if (!d.ltypes.MEC_OCULTA) d.ltypes.MEC_OCULTA = { name: 'MEC_OCULTA', desc: 'Oculta __ __ __', pat: [4, -2] };
     d.ensureLayer('MEC_TUBERIA', { color: 4, lw: 35 }); d.ensureLayer('MEC_ACCESORIOS', { color: 3, lw: 35 }); d.ensureLayer('MEC_BRIDAS', { color: 2, lw: 35 });
     d.ensureLayer('MEC_EJES', { color: 1, ltype: 'MEC_EJE', lw: 13 }); d.ensureLayer('MEC_OCULTAS', { color: 8, ltype: 'MEC_OCULTA', lw: 13 });
+    for (const [n, col] of [['MEC_VALVULAS', 30], ['MEC_PID', 7], ['MEC_JUNTAS', 6], ['MEC_TORNILLERIA', 5], ['MEC_SOPORTES', 40], ['MEC_EQUIPOS', 150], ['MEC_INSTRUMENTOS', 210], ['MEC_AISLAMIENTO', 9], ['MEC_3D', 4], ['MEC_ISO', 7]]) d.ensureLayer(n, { color: col, lw: n === 'MEC_ISO' ? 50 : 25 });
   };
   const defBlock = (name, ents, desc) => {
     const d = doc(); if (d.blocks[name]) return name;
@@ -182,17 +196,39 @@ export function register(eng, app) {
     return name;
   };
   const tagMec = (e, info) => { e.mec = info; e.xd = { ...(e.xd || {}), MEC: pairsToLisp([[1000, info.desc], [1000, `kind=${info.kind}`], ...(info.len ? [[1040, info.len]] : [])]) }; return e; };
+  // puertos libres: extremos de ejes de tubo y extremos de accesorios ya colocados
+  const portsAll = () => {
+    const out = [];
+    for (const e of doc().space) {
+      if (!e.mec) continue;
+      if (e.mec.kind === 'PIPE' && e.type === 'LINE') { const u = G.norm(G.sub(e.p2, e.p1)); out.push({ p: e.p2, a: Math.atan2(u.y, u.x), od: e.mec.od }, { p: e.p1, a: Math.atan2(-u.y, -u.x), od: e.mec.od }); }
+      if (e.type === 'INSERT' && e.mec.lports) for (const q of e.mec.lports) { const x = q.x * e.sx, y = q.y * e.sy, r = e.rot || 0; out.push({ p: { x: e.p.x + x * Math.cos(r) - y * Math.sin(r), y: e.p.y + x * Math.sin(r) + y * Math.cos(r) }, a: Math.atan2(Math.sin(q.a) * Math.sign(e.sy), Math.cos(q.a) * Math.sign(e.sx)) + r, od: e.mec.od, face: !!q.face, fl: e.mec.fl || null, ent: e }); }
+    }
+    return out;
+  };
+  const nearPort = (p, face = false) => { const tol = Math.max(app.view.pickTol?.() || 5, 3); let best = null, bd = Infinity; for (const q of portsAll()) { if (!!q.face !== face) continue; const dd = G.dist(p, q.p); if (dd < Math.max(tol, (q.od || 0) * 0.35 * scale()) && dd < bd) { bd = dd; best = q; } } return best; };
   const place = async (c, name, info, o = {}) => {
     const d = doc(), k = scale(), sy = (o.mirror ? -1 : 1) * k;
-    const p = need(await c.getPoint(o.prompt || 'Specify insertion point:', { preview: (q) => [{ type: 'INSERT', name, p: q, sx: k, sy, rot: 0, layer: o.layer }] }));
-    const dir = await c.getPoint('Specify direction <0>:', { base: p, def: 'D0', preview: (q) => [{ type: 'INSERT', name, p, sx: k, sy, rot: Math.atan2(q.y - p.y, q.x - p.x), layer: o.layer }] });
-    const rot = isPt(dir) ? Math.atan2(dir.y - p.y, dir.x - p.x) : 0;
+    // o.attach: 'inlet' = el origen del bloque se conecta y el cuerpo sigue la dirección libre; 'weld' = el extremo
+    // de soldadura (x = len) se conecta y la cara queda hacia fuera
+    const auto = (p) => {
+      const q = o.attach !== 'none' && nearPort(p, !!o.toFace); if (!q) return null;
+      const cx = (o.conn?.x ?? (o.attach === 'weld' ? o.len || 0 : 0)) * k, rot = q.a + (o.attach === 'weld' ? Math.PI : 0);
+      return { p: { x: q.p.x - cx * Math.cos(rot), y: q.p.y - cx * Math.sin(rot) }, rot };
+    };
+    const p0 = need(await c.getPoint(o.prompt || 'Specify insertion point:', { preview: (q) => { const a = auto(q); return [{ type: 'INSERT', name, p: a ? a.p : q, sx: k, sy, rot: a ? a.rot : 0, layer: o.layer }]; } }));
+    const a0 = auto(p0); let p = p0, rot = 0;
+    if (a0) { p = a0.p; rot = a0.rot; c.print('Connected to the free end.'); }
+    else {
+      const dir = await c.getPoint('Specify direction <0>:', { base: p, def: 'D0', preview: (q) => [{ type: 'INSERT', name, p, sx: k, sy, rot: Math.atan2(q.y - p.y, q.x - p.x), layer: o.layer }] });
+      rot = isPt(dir) ? Math.atan2(dir.y - p.y, dir.x - p.x) : 0;
+    }
     d.begin(o.cmd || 'MEC');
     const e = app.blocks.insertBlock(name, p, k, sy, rot, {}, d.space);
     e.layer = o.layer; tagMec(e, info);
+    if (o.ports?.length) { e.mec.lports = o.ports; e.mec.od = info.od || null; }
     d.end(); redraw(); return e;
   };
-
   // ---------- diálogo de selección (listas dependientes y vista previa)
   const h = (tag, a = {}, ...ch) => { const el = document.createElement(tag); for (const [k, v] of Object.entries(a)) { if (k === 'text') el.textContent = v; else if (k === 'style') Object.assign(el.style, v); else if (k.startsWith('on')) el[k] = v; else el.setAttribute(k, v); } for (const c of ch.flat()) if (c != null && c !== '') el.append(c); return el; };
   const sel = (opts, v) => { const s = h('select', { class: 'fld' }); for (const o of opts) { const [val, lab] = Array.isArray(o) ? o : [o, o]; const op = h('option', { value: val, text: lab }); if (String(val) === String(v)) op.selected = true; s.append(op); } return s; };
@@ -250,30 +286,67 @@ export function register(eng, app) {
   const mecInfo = (kind, desc, extra = {}) => ({ kind, desc, ...extra });
 
   // ---------- BRIDAS
-  const FL_KIND = [['WN', 'Cuello para soldar (WN)'], ['SO', 'Plana deslizante (SO)'], ['LWN', 'Cuello largo (LWN)'], ['BL', 'Ciega']];
+  const FL_KIND = [['WN', 'Cuello para soldar (WN)'], ['SO', 'Plana deslizante (SO)'], ['LWN', 'Cuello largo (LWN)'], ['SW', 'Socket weld (SW)'], ['THD', 'Roscada (NPT)'], ['LJ', 'Loca (lap joint)'], ['BL', 'Ciega']];
+  const FL_KIND47 = [['WN', 'Cuello para soldar (WN)'], ['BL', 'Ciega']];
+  const FL_KINDEN = [['WN', 'Tipo 11: cuello para soldar'], ['PL', 'Tipo 01: plana para soldar'], ['BL', 'Tipo 05: ciega']];
   const FACE = [['RF', 'Cara con resalte (RF)'], ['FF', 'Cara plana (FF)'], ['RTJ', 'Junta de anillo (RTJ)']];
   const VIEW = [['side', 'Lateral (alzado)'], ['front', 'Frontal']];
+  const FSTD = [['B16.5', 'ASME B16.5 (½"–24")'], ['B16.47A', 'ASME B16.47 serie A (26"–60")'], ['EN1092', 'EN 1092-1 (PN 10–40)']];
+  const KTXT = () => ({ WN: 'WN', SO: 'SO', LWN: 'LWN', SW: 'SW', THD: T('roscada'), LJ: T('loca'), BL: T('Ciega'), PL: T('plana') });
+  // brida B16.47 serie A o EN 1092-1 con la misma estructura que flangeOf
+  const flangeOfX = (v) => {
+    if (v.fstd === 'B16.47A') {
+      const r = P2.B1647A[v.cls]?.[v.nps47]; if (!r) return null;
+      const [O, C, Cb, Y, X, R, BC, hole, n, bolt] = r, od = v.nps47 * IN;
+      const t = +v.t47 || 9.53;
+      return { fl: { cls: v.cls, O, C: v.kind === 'BL' ? Cb : C, BC, n, bolt, hole, X, Y, R, rfH: v.cls === '150' || v.cls === '300' ? 1.6 : 6.4, incl: v.cls === '150' || v.cls === '300', Yso: null, Bso: null }, pipe: { std: 'B1647', od, t, id: od - 2 * t, nps: String(v.nps47), size: `NPS ${v.nps47}"` }, std: 'ASME B16.47 A' };
+    }
+    if (v.fstd === 'EN1092') {
+      const r = P2.EN1092X[v.pn]?.[v.dn]; if (!r) return null;
+      const [D, C1, C2, H2, N1, B1, d1, K, Lh, n, bolt] = r;
+      const row = P.EN_PIPE.find((x) => x[0] === +v.dn), t = +v.t || row[2][Math.min(2, row[2].length - 1)];
+      return { fl: { cls: 'PN' + v.pn, O: D, C: v.kind === 'WN' ? C2 : C1, BC: K, n, bolt, hole: Lh, X: N1, Y: H2, R: d1, rfH: 2, incl: true, Bpl: B1 }, pipe: { std: 'EN', od: row[1], t, id: row[1] - 2 * t, dn: row[0], size: `DN${row[0]}`, nps: DN_NPS[row[0]] }, std: 'EN 1092-1' };
+    }
+    return null;
+  };
   const flangeBuild = (v) => {
-    const pipe = pipeOf(v), fl = flangeOf(v.cls, pipe.nps);
-    if (!fl) throw new Error(T('No existe brida de clase {0} para {1} en ASME B16.5.', v.cls, pipe.size));
-    if (v.kind === 'SO' && fl.Yso == null) throw new Error(T('ASME B16.5 no incluye bridas SO de clase {0} en {1}.', v.cls, pipe.size));
-    if (v.face === 'RTJ' && !fl.ring) throw new Error(T('No hay anillo RTJ normalizado para clase {0} en {1}.', v.cls, pipe.size));
+    let fl, pipe, std = 'ASME B16.5';
+    if (v.fstd === 'B16.47A' || v.fstd === 'EN1092') {
+      const x = flangeOfX(v); if (!x) throw new Error(T('Diámetro no disponible.'));
+      ({ fl, pipe, std } = x);
+      if (v.face === 'RTJ') throw new Error(T('Cara RTJ solo disponible en ASME B16.5.'));
+    } else {
+      pipe = pipeOf(v); fl = flangeOf(v.cls, pipe.nps);
+      if (!fl) throw new Error(T('No existe brida de clase {0} para {1} en ASME B16.5.', v.cls, pipe.size));
+      if (['SO', 'SW', 'THD', 'LJ'].includes(v.kind) && fl.Yso == null) throw new Error(T('ASME B16.5 no incluye bridas SO de clase {0} en {1}.', v.cls, pipe.size));
+      if (v.kind === 'SW' && (P.fr(pipe.nps) > 3 || (+v.cls >= 1500 && P.fr(pipe.nps) > 2.5))) throw new Error(T('Las bridas socket weld de ASME B16.5 llegan hasta NPS 3 (2½ en Class 1500).'));
+      if (v.face === 'RTJ' && !fl.ring) throw new Error(T('No hay anillo RTJ normalizado para clase {0} en {1}.', v.cls, pipe.size));
+    }
+    const face = v.kind === 'LJ' ? 'FF' : v.face;
     const lwnL = (+v.lwn || 9) * IN;
-    const g = v.view === 'front' ? flangeFront(fl, v.kind, v.face, pipe) : flangeSide(fl, v.kind, v.face, pipe, { lwnL });
-    const kindTxt = { WN: 'WN', SO: 'SO', LWN: 'LWN', BL: T('Ciega') }[v.kind];
-    const desc = `${T('Brida')} ${kindTxt} ${v.face} Cl.${v.cls} ${pipe.size}${v.kind === 'WN' || v.kind === 'LWN' ? (pipe.std === 'ASME' ? ' Sch ' + pipe.sch : ' e=' + pipe.t) : ''} ASME B16.5${v.kind === 'LWN' ? ` L=${r1(lwnL, 0)}` : ''}`;
-    const info = `Ø ${r1(fl.O)} · C ${r1(fl.C)} · ${T('círculo')} ${r1(fl.BC)}\n${fl.n} × ${fl.bolt}" (${T('taladro')} Ø${r1(fl.hole)})` + (v.kind === 'WN' ? `\nX ${r1(fl.X)} · Y ${r1(fl.Y)}` : v.kind === 'SO' ? `\nX ${r1(fl.X)} · Y ${r1(fl.Yso)} · B ${r1(fl.Bso)}` : '') + (v.face === 'RTJ' ? `\nR-${fl.ring}: P ${r1(fl.P, 2)} · F ${r1(fl.F, 2)} · E ${r1(fl.Eg, 2)} · K≈${r1(fl.K)}` : `\nRF Ø${r1(fl.R)} × ${fl.rfH}`);
-    const name = `MEC_BRIDA_${v.kind}_${v.face}_CL${v.cls}_${pipe.std === 'ASME' ? 'NPS' + pipe.nps + '_' + pipe.sch : 'EN' + pipe.od + 'x' + pipe.t}_${v.view === 'front' ? 'F' : 'L'}${v.kind === 'LWN' ? '_' + (+v.lwn || 9) : ''}`.replace(/[^\w.-]/g, '_');
-    return { ents: g.ents, info, desc, name, fl, pipe, len: g.len };
+    const g = v.view === 'front' ? flangeFront(fl, v.kind, face, pipe) : flangeSide(fl, v.kind, face, pipe, { lwnL });
+    const clsTxt = v.fstd === 'EN1092' ? fl.cls : 'Cl.' + fl.cls;
+    const desc = `${T('Brida')} ${KTXT()[v.kind]} ${face} ${clsTxt} ${pipe.size}${v.kind === 'WN' || v.kind === 'LWN' ? (pipe.std === 'ASME' ? ' Sch ' + pipe.sch : ' e=' + pipe.t) : ''} ${std}${v.kind === 'LWN' ? ` L=${r1(lwnL, 0)}` : ''}`;
+    const info = `Ø ${r1(fl.O)} · C ${r1(fl.C)} · ${T('círculo')} ${r1(fl.BC)}\n${fl.n} × ${fl.bolt}${v.fstd === 'EN1092' ? '' : '"'} (${T('taladro')} Ø${r1(fl.hole)})` + (v.kind === 'WN' ? `\nX ${r1(fl.X)} · Y ${r1(fl.Y)}` : ['SO', 'SW', 'THD', 'LJ'].includes(v.kind) ? `\nX ${r1(fl.X)} · Y ${r1(fl.Yso)}${fl.Bso ? ' · B ' + r1(fl.Bso) : ''}` : '') + (face === 'RTJ' ? `\nR-${fl.ring}: P ${r1(fl.P, 2)} · F ${r1(fl.F, 2)} · E ${r1(fl.Eg, 2)} · K≈${r1(fl.K)}` : face === 'RF' ? `\nRF Ø${r1(fl.R)} × ${fl.rfH}` : '');
+    const sz = pipe.std === 'ASME' ? 'NPS' + pipe.nps + '_' + (pipe.sch || '') : 'EN' + pipe.od + 'x' + pipe.t;
+    const name = `MEC_BRIDA_${(v.fstd || 'B16.5').replace('.', '')}_${v.kind}_${face}_${fl.cls}_${sz}_${v.view === 'front' ? 'F' : 'L'}${v.kind === 'LWN' ? '_' + (+v.lwn || 9) : ''}`.replace(/[^\w.-]/g, '_');
+    const len = g.len || 0;
+    return { ents: g.ents, info, desc, name, fl, pipe, len, ports: v.view === 'front' ? [] : [{ x: 0, y: 0, a: Math.PI, face: true }, ...(v.kind === 'BL' ? [] : [{ x: len, y: 0, a: 0 }])] };
   };
   app.mec = { pipeOf, flangeOf, flangeBuild, spec };
   R('MFLANGE', async (c, args) => {
     const s = spec();
-    const v = args?.vals || await chooser('Brida ASME B16.5', [
-      { k: 'kind', l: 'Tipo', v: args?.kind || s.kind, opts: () => FL_KIND },
-      { k: 'face', l: 'Cara', v: s.face, opts: (x) => (x.kind === 'BL' ? FACE : FACE) },
-      { k: 'cls', l: 'Clase', v: s.cls, opts: () => CLASSES.map((k) => [k, 'Class ' + k]) },
-      ...pipeFields(s, null),
+    const v = args?.vals || await chooser('Brida', [
+      { k: 'fstd', l: 'Norma de la brida', v: args?.fstd || s.fstd || 'B16.5', opts: () => FSTD },
+      { k: 'kind', l: 'Tipo', v: args?.kind || s.kind, opts: (x) => (x.fstd === 'B16.47A' ? FL_KIND47 : x.fstd === 'EN1092' ? FL_KINDEN : FL_KIND) },
+      { k: 'face', l: 'Cara', v: s.face, when: (x) => x.kind !== 'LJ', opts: (x) => (x.fstd === 'B16.5' ? FACE : FACE.slice(0, 2)) },
+      { k: 'cls', l: 'Clase', v: s.cls, when: (x) => x.fstd !== 'EN1092', opts: (x) => (x.fstd === 'B16.47A' ? ['150', '300', '600'] : CLASSES).map((k) => [k, 'Class ' + k]) },
+      { k: 'pn', l: 'PN', v: s.pn || '16', when: (x) => x.fstd === 'EN1092', opts: () => ['10', '16', '25', '40'].map((k) => [k, 'PN ' + k]) },
+      { k: 'dn', l: 'DN', v: s.dn || 100, when: (x) => x.fstd === 'EN1092', opts: (x) => Object.keys(P2.EN1092X[x.pn] || {}).map((k) => [k, 'DN ' + k]) },
+      { k: 't', l: 'Espesor del tubo (mm)', v: s.t, when: (x) => x.fstd === 'EN1092' && x.kind === 'WN', opts: (x) => ENT_OPTS({ od: (P.EN_PIPE.find((r) => r[0] === +x.dn) || P.EN_PIPE[0])[1] }) },
+      { k: 'nps47', l: 'Diámetro (NPS)', v: s.nps47 || 30, when: (x) => x.fstd === 'B16.47A', opts: (x) => Object.keys(P2.B1647A[x.cls] || P2.B1647A['150']).map((k) => [k, k + '"']) },
+      { k: 't47', l: 'Espesor del tubo (mm)', v: s.t47 || 9.53, when: (x) => x.fstd === 'B16.47A' && x.kind === 'WN', opts: () => [[9.53, 'STD 9,53'], [12.7, 'XS 12,7'], [15.88, '15,88'], [19.05, '19,05'], [25.4, '25,4']] },
+      ...pipeFields(s, null).map((f) => ({ ...f, when: (x) => x.fstd !== 'EN1092' && x.fstd !== 'B16.47A' && (!f.when || f.when(x)) })),
       { k: 'lwn', l: 'Longitud LWN (pulgadas)', v: s.lwn || 9, when: (x) => x.kind === 'LWN', opts: () => [[9, '9"'], [12, '12"'], [16, '16"']] },
       { k: 'view', l: 'Vista', v: s.view, opts: () => VIEW },
     ], flangeBuild);
@@ -281,9 +354,11 @@ export function register(eng, app) {
     const b = flangeBuild(v);
     const d = doc(); d.begin('MFLANGE'); defBlock(b.name, b.ents, b.desc); d.end();
     c.print(b.desc + '\n' + b.info.replace(/\n/g, ' · '));
-    await place(c, b.name, mecInfo('FLANGE', b.desc), { layer: 'MEC_BRIDAS', cmd: 'MFLANGE', prompt: 'Specify gasket face point:' });
+    await place(c, b.name, mecInfo('FLANGE', b.desc, { fl: { cls: b.fl.cls, nps: b.pipe.nps, std: v.fstd || 'B16.5', face: v.kind === 'LJ' ? 'FF' : v.face, O: b.fl.O, C: b.fl.C, BC: b.fl.BC, n: b.fl.n, bolt: b.fl.bolt, hole: b.fl.hole, R: b.fl.R, rfH: b.fl.rfH, incl: b.fl.incl, ring: b.fl.ring || null, od: b.pipe.od, id: b.pipe.id }, od: b.pipe.od }), { layer: 'MEC_BRIDAS', cmd: 'MFLANGE', prompt: 'Specify gasket face point:', ports: b.ports, attach: 'weld', len: b.len });
   }, { alias: ['BRIDAASME', 'MBRIDA'] });
-  for (const [cmd, kind] of [['MFLANGEWN', 'WN'], ['MFLANGESO', 'SO'], ['MFLANGELWN', 'LWN'], ['MFLANGEBL', 'BL']]) R(cmd, (c) => eng.commands.MFLANGE.fn(c, { kind }));
+  for (const [cmd, kind] of [['MFLANGEWN', 'WN'], ['MFLANGESO', 'SO'], ['MFLANGELWN', 'LWN'], ['MFLANGEBL', 'BL'], ['MFLANGESW', 'SW'], ['MFLANGETHD', 'THD'], ['MFLANGELJ', 'LJ']]) R(cmd, (c) => eng.commands.MFLANGE.fn(c, { kind, fstd: 'B16.5' }));
+  R('MFLANGEEN', (c) => eng.commands.MFLANGE.fn(c, { fstd: 'EN1092', kind: 'WN' }));
+  R('MFLANGE47', (c) => eng.commands.MFLANGE.fn(c, { fstd: 'B16.47A', kind: 'WN' }));
 
   // ---------- CODOS
   const elbowBuild = (v) => {
@@ -297,7 +372,8 @@ export function register(eng, app) {
     const desc = `${T('Codo')} ${ang}° ${v.elbow === 'SR' ? T('radio corto') : T('radio largo')} ${pipe.size} ${pipe.std === 'ASME' ? 'Sch ' + pipe.sch : 'e=' + pipe.t} ${std}`;
     const info = `R ${r1(R0)} · ${T('centro a cara')} ${r1(ang === 180 ? 2 * R0 : cte)}${ang === 180 ? ' (' + T('centro a centro') + ')' : ''}`;
     const name = `MEC_CODO${ang}_${v.elbow}_${pipe.std === 'ASME' ? 'NPS' + pipe.nps + '_' + pipe.sch : 'EN' + pipe.od + 'x' + pipe.t}${v.hid === '1' ? '_H' : ''}`.replace(/[^\w.-]/g, '_');
-    return { ents: g.ents, info, desc, name, R: R0 };
+    const aa = ang * Math.PI / 180;
+    return { ents: g.ents, info, desc, name, R: R0, od: pipe.od, ports: [{ x: 0, y: 0, a: Math.PI }, { x: R0 * Math.sin(aa), y: R0 - R0 * Math.cos(aa), a: aa }] };
   };
   R('MELBOW', async (c) => {
     const s = spec();
@@ -311,7 +387,7 @@ export function register(eng, app) {
     const b = elbowBuild(v), d = doc(); d.begin('MELBOW'); defBlock(b.name, b.ents, b.desc); d.end();
     c.print(b.desc + ' · ' + b.info);
     const side = await c.getKw('Turn direction [Left/Right] <Left>:', 'Left');
-    await place(c, b.name, mecInfo('ELBOW', b.desc), { layer: 'MEC_ACCESORIOS', cmd: 'MELBOW', mirror: side === 'Right', prompt: 'Specify inlet end point:' });
+    await place(c, b.name, mecInfo('ELBOW', b.desc, { od: b.od, R: b.R, ang: +v.ang * Math.PI / 180 }), { layer: 'MEC_ACCESORIOS', cmd: 'MELBOW', mirror: side === 'Right', prompt: 'Specify inlet end point:', ports: b.ports, attach: 'inlet' });
   }, { alias: ['CODO', 'MCODO'] });
 
   // ---------- REDUCCIONES
@@ -324,7 +400,7 @@ export function register(eng, app) {
     const std = big.std === 'EN' ? 'EN 10253' : 'ASME B16.9';
     const desc = `${T('Reducción')} ${ecc ? T('excéntrica') : T('concéntrica')} ${big.size} × ${small.size} ${big.std === 'ASME' ? 'Sch ' + big.sch : 'e=' + big.t} ${std}`;
     const name = `MEC_RED_${v.rtype}${ecc ? '_' + v.flat : ''}_${big.std === 'ASME' ? 'NPS' + big.nps + 'x' + small.nps + '_' + big.sch : 'EN' + big.od + 'x' + small.od}`.replace(/[^\w.-]/g, '_');
-    return { ents: g.ents, info: `H ${r1(H * IN)} · Ø ${r1(big.od)} → ${r1(small.od)}` + (ecc ? ` · ${T('excentricidad')} ${r1((big.od - small.od) / 2)}` : ''), desc, name };
+    return { ents: g.ents, info: `H ${r1(H * IN)} · Ø ${r1(big.od)} → ${r1(small.od)}` + (ecc ? ` · ${T('excentricidad')} ${r1((big.od - small.od) / 2)}` : ''), desc, name, od: big.od, ports: [{ x: 0, y: 0, a: Math.PI }, { x: H * IN, y: g.outOff, a: 0 }] };
   };
   R('MREDUCER', async (c, args) => {
     const s = spec();
@@ -339,7 +415,7 @@ export function register(eng, app) {
     if (!v) return; save(v);
     const b = reducerBuild(v), d = doc(); d.begin('MREDUCER'); defBlock(b.name, b.ents, b.desc); d.end();
     c.print(b.desc + ' · ' + b.info);
-    await place(c, b.name, mecInfo('REDUCER', b.desc), { layer: 'MEC_ACCESORIOS', cmd: 'MREDUCER', prompt: 'Specify large end point:' });
+    await place(c, b.name, mecInfo('REDUCER', b.desc, { od: b.od }), { layer: 'MEC_ACCESORIOS', cmd: 'MREDUCER', prompt: 'Specify large end point:', ports: b.ports, attach: 'inlet' });
   }, { alias: ['REDUCCION', 'MREDUCCION'] });
   R('MREDUCERECC', (c) => eng.commands.MREDUCER.fn(c, { rtype: 'ECC' }));
 
@@ -355,7 +431,7 @@ export function register(eng, app) {
     const what = cross ? T('Cruz') : T('Te');
     const desc = `${what} ${br === run ? T('igual') : T('reducida')} ${run.size}${br === run ? '' : ' × ' + br.size} ${run.std === 'ASME' ? 'Sch ' + run.sch : 'e=' + run.t} ${std}`;
     const name = `MEC_${cross ? 'CRUZ' : 'TE'}_${run.std === 'ASME' ? 'NPS' + run.nps + (br === run ? '' : 'x' + br.nps) + '_' + run.sch : 'EN' + run.od + (br === run ? '' : 'x' + br.od)}`.replace(/[^\w.-]/g, '_');
-    return { ents: g.ents, info: `C ${r1(C)} · M ${r1(M)}${br === run ? '' : ' (' + T('aprox.') + ')'}`, desc, name };
+    return { ents: g.ents, info: `C ${r1(C)} · M ${r1(M)}${br === run ? '' : ' (' + T('aprox.') + ')'}`, desc, name, od: run.od, C, ports: [{ x: -C, y: 0, a: Math.PI }, { x: C, y: 0, a: 0 }, { x: 0, y: M, a: Math.PI / 2 }, ...(cross ? [{ x: 0, y: -M, a: -Math.PI / 2 }] : [])] };
   };
   for (const [cmd, cross, alias] of [['MTEE', false, ['TE', 'MTE']], ['MCROSS', true, ['CRUZ', 'MCRUZ']]]) {
     R(cmd, async (c) => {
@@ -370,7 +446,7 @@ export function register(eng, app) {
       if (!v) return; save(v);
       const b = teeBuild(v, cross), d = doc(); d.begin(cmd); defBlock(b.name, b.ents, b.desc); d.end();
       c.print(b.desc + ' · ' + b.info);
-      await place(c, b.name, mecInfo(cross ? 'CROSS' : 'TEE', b.desc), { layer: 'MEC_ACCESORIOS', cmd, prompt: 'Specify center point:' });
+      await place(c, b.name, mecInfo(cross ? 'CROSS' : 'TEE', b.desc, { od: b.od }), { layer: 'MEC_ACCESORIOS', cmd, prompt: 'Specify center point:', ports: b.ports, attach: 'inlet', conn: { x: -b.C } });
     }, { alias });
   }
 
@@ -378,14 +454,14 @@ export function register(eng, app) {
   const capBuild = (v) => {
     const pipe = pipeOf(v), i = bwIdx(pipe.nps), Ec = P.BW.cap[i] * IN;
     const desc = `${T('Casquete')} ${pipe.size} ${pipe.std === 'ASME' ? 'Sch ' + pipe.sch : 'e=' + pipe.t} ${pipe.std === 'EN' ? 'EN 10253' : 'ASME B16.9'}`;
-    return { ents: capEnts(pipe.od, Ec).ents, info: `E ${r1(Ec)}`, desc, name: `MEC_CAP_${pipe.std === 'ASME' ? 'NPS' + pipe.nps + '_' + pipe.sch : 'EN' + pipe.od}`.replace(/[^\w.-]/g, '_') };
+    return { od: pipe.od, ports: [{ x: 0, y: 0, a: Math.PI }], ents: capEnts(pipe.od, Ec).ents, info: `E ${r1(Ec)}`, desc, name: `MEC_CAP_${pipe.std === 'ASME' ? 'NPS' + pipe.nps + '_' + pipe.sch : 'EN' + pipe.od}`.replace(/[^\w.-]/g, '_') };
   };
   R('MCAP', async (c) => {
     const s = spec();
     const v = await chooser('Casquete ASME B16.9', pipeFields(s, P.BWN), capBuild);
     if (!v) return; save(v);
     const b = capBuild(v), d = doc(); d.begin('MCAP'); defBlock(b.name, b.ents, b.desc); d.end();
-    await place(c, b.name, mecInfo('CAP', b.desc), { layer: 'MEC_ACCESORIOS', cmd: 'MCAP', prompt: 'Specify weld end point:' });
+    await place(c, b.name, mecInfo('CAP', b.desc, { od: b.od }), { layer: 'MEC_ACCESORIOS', cmd: 'MCAP', prompt: 'Specify weld end point:', ports: b.ports, attach: 'inlet' });
   }, { alias: ['CASQUETE', 'MCASQUETE'] });
 
   // ---------- MANGUITOS (B16.11)
@@ -415,7 +491,7 @@ export function register(eng, app) {
     if (!v) return; save(v);
     const b = couplingBuild(v), d = doc(); d.begin('MCOUPLING'); defBlock(b.name, b.ents, b.desc); d.end();
     c.print(b.desc + ' · ' + b.info);
-    await place(c, b.name, mecInfo('COUPLING', b.desc), { layer: 'MEC_ACCESORIOS', cmd: 'MCOUPLING', prompt: 'Specify end point:' });
+    await place(c, b.name, mecInfo('COUPLING', b.desc), { layer: 'MEC_ACCESORIOS', cmd: 'MCOUPLING', prompt: 'Specify end point:', attach: 'none' });
   }, { alias: ['MANGUITO', 'MMANGUITO'] });
 
   // ---------- TUBERÍA (trazado con codos automáticos)
@@ -501,7 +577,7 @@ export function register(eng, app) {
         defBlock(name, g.ents, desc); void vv;
         const start = G.sub(pts[bd.i], G.mul(bd.a, bd.tl));
         const e = app.blocks.insertBlock(name, start, k, bd.left ? k : -k, Math.atan2(bd.a.y, bd.a.x), {}, d.space);
-        e.layer = 'MEC_ACCESORIOS'; tagMec(e, { kind: 'ELBOW', desc });
+        e.layer = 'MEC_ACCESORIOS'; tagMec(e, { kind: 'ELBOW', desc, R: R0 / k, ang: bd.ang, od: pipe.od });
       }
     }
     d.end(); redraw();
@@ -522,10 +598,10 @@ export function register(eng, app) {
     for (const e of ents) {
       const m = mecOf(e); if (!m) continue;
       const r = rows.get(m.desc) || { desc: m.desc, kind: m.kind, n: 0, len: 0, kg: 0 };
-      if (m.kind === 'PIPE') { r.len += m.len || 0; if (m.od) r.kg += pipeKgM(m.od, m.t) * (m.len || 0) / 1000; } else r.n++;
+      if (m.kind === 'PIPE' || m.kind === 'INSUL') { r.len += m.len || 0; if (m.od && m.kind === 'PIPE') r.kg += pipeKgM(m.od, m.t) * (m.len || 0) / 1000; } else r.n += m.qty || 1;
       rows.set(m.desc, r);
     }
-    const order = ['PIPE', 'FLANGE', 'ELBOW', 'TEE', 'CROSS', 'REDUCER', 'CAP', 'COUPLING'];
+    const order = ['PIPE', 'FLANGE', 'STUBEND', 'ORIFICE', 'BLIND', 'GASKET', 'BOLT', 'VALVE', 'STRAINER', 'ELBOW', 'TEE', 'CROSS', 'REDUCER', 'CAP', 'COUPLING', 'FORGED', 'OLET', 'SUPPORT', 'INSTRUMENT', 'EQUIPMENT', 'INSUL'];
     return [...rows.values()].sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind) || a.desc.localeCompare(b.desc));
   };
   R('MBOM', async (c) => {
@@ -533,7 +609,7 @@ export function register(eng, app) {
     if (!s.length) s = [...doc().space];
     const rows = app.mecBom(s);
     if (!rows.length) { c.print('No piping components found.'); return; }
-    const cells = [[T('Pos.'), T('Descripción'), T('Cant.'), T('Ud.'), T('Peso (kg)')], ...rows.map((r, i) => [i + 1, r.desc, r.kind === 'PIPE' ? r1(r.len / 1000, 2) : r.n, r.kind === 'PIPE' ? 'm' : T('ud'), r.kind === 'PIPE' ? r1(r.kg, 1) : ''])];
+    const cells = [[T('Pos.'), T('Descripción'), T('Cant.'), T('Ud.'), T('Peso (kg)')], ...rows.map((r, i) => [i + 1, r.desc, r.kind === 'PIPE' || r.kind === 'INSUL' ? r1(r.len / 1000, 2) : r.n, r.kind === 'PIPE' || r.kind === 'INSUL' ? 'm' : T('ud'), r.kind === 'PIPE' ? r1(r.kg, 1) : ''])];
     for (const r of cells.slice(1)) c.print(r.join('  '));
     const p = await c.getPoint('Specify insertion point for the table or [None] <None>:', { def: 'None' });
     if (isPt(p)) {
@@ -565,4 +641,5 @@ export function register(eng, app) {
     e.layer = d.clayer; e.color = 256; e.style = d.vars.TEXTSTYLE;
     d.add(e); d.end(); redraw();
   }, { alias: ['TABLABRIDAS'] });
+  app.mecKit = { chooser, place, defBlock, tagMec, pipeFields, save, spec, ensureLayers, scale, NPS_OPTS, EN_OPTS, ENT_OPTS, SCH_OPTS, FACE, mecInfo, drawPrev, portsAll, nearPort, flangeBuild, elbowBuild, redraw, newTable };
 }

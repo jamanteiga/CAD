@@ -30,6 +30,8 @@ import * as V8D from './cmd/v8d.js';
 import * as V8E from './cmd/v8e.js';
 import * as V8F from './cmd/v8f.js';
 import * as Mech from './cmd/mech.js';
+import * as Mech2 from './cmd/mech2.js';
+import * as Mech3 from './cmd/mech3.js';
 import { installGL } from './view/glfast.js';
 import { createHelp } from './ui/helpcards.js';
 import { Lisp } from './lisp/lisp.js';
@@ -112,6 +114,8 @@ V8D.register(app.cmd, app);
 V8E.register(app.cmd, app);
 V8F.register(app.cmd, app);
 Mech.register(app.cmd, app);
+Mech2.register(app.cmd, app);
+Mech3.register(app.cmd, app);
 installGL(View, app);
 app.help = createHelp(app);
 { // F1: ficha del comando activo, o la referencia general

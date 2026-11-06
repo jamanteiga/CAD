@@ -19,7 +19,7 @@ export default async (page, t) => {
   await setSpec({ kind: 'WN', face: 'RF', cls: '300', nps: '4', sch: '40' });
   await type('_MFLANGE'); const info = await dlgOk(); await type('0,0', '');
   const ins = await ev(() => { const e = webcad.doc.model.at(-1); const b = webcad.E.entBBox(e, webcad.doc); return [e.type, e.name, e.layer, e.mec?.kind, Math.round(b.y2 - b.y1), Math.round(b.x2 - b.x1)]; });
-  t.eq(ins.slice(0, 5), ['INSERT', 'MEC_BRIDA_WN_RF_CL300_NPS4_40_L', 'MEC_BRIDAS', 'FLANGE', 254], 'MFLANGE inserta la brida WN Cl.300 NPS 4 (Ø 254)');
+  t.eq(ins.slice(0, 5), ['INSERT', 'MEC_BRIDA_B165_WN_RF_300_NPS4_40_L', 'MEC_BRIDAS', 'FLANGE', 254], 'MFLANGE inserta la brida WN Cl.300 NPS 4 (Ø 254)');
   t.ok(/8 × 3\/4"/.test(info) && /X 146/.test(info), `ficha de la brida: ${info.replace(/\n/g, ' | ')}`);
   t.ok(Math.abs(ins[5] - (85.9 + 12)) < 1, `longitud a través del cubo Y = 85,9 mm (${ins[5] - 12})`);
 
