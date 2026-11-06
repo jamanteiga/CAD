@@ -149,6 +149,114 @@ Centrar verticalmente | Centrar verticalmente | Center Vertically | Centrar vert
 Restablecer posición de texto | Restablecer posición do texto | Reset Text Position | Repor posição do texto | Restablir la posició del text
 Cota continua | Cota continua | Continue Dimension | Cota contínua | Cota contínua
 Cota de línea base | Cota de liña base | Baseline Dimension | Cota de linha de base | Cota de línia base
+Mecánica | Mecánica | Mechanical | Mecânica | Mecànica
+Tubería | Tubaxe | Piping | Tubagem | Canonada
+Especificación | Especificación | Specification | Especificação | Especificació
+Especificación de tubería | Especificación de tubaxe | Piping specification | Especificação de tubagem | Especificació de canonada
+Brida | Brida | Flange | Flange | Brida
+Bridas ASME B16.5 | Bridas ASME B16.5 | ASME B16.5 Flanges | Flanges ASME B16.5 | Brides ASME B16.5
+Brida ASME B16.5 | Brida ASME B16.5 | ASME B16.5 flange | Flange ASME B16.5 | Brida ASME B16.5
+Cuello para soldar (WN) | Colo para soldar (WN) | Weld neck (WN) | Pescoço para soldar (WN) | Coll per soldar (WN)
+Plana deslizante (SO) | Plana deslizante (SO) | Slip-on (SO) | Plana deslizante (SO) | Plana lliscant (SO)
+Cuello largo (LWN) | Colo longo (LWN) | Long weld neck (LWN) | Pescoço longo (LWN) | Coll llarg (LWN)
+Ciega | Cega | Blind | Cega | Cega
+Cara | Cara | Facing | Face | Cara
+Cara con resalte (RF) | Cara con resalte (RF) | Raised face (RF) | Face com ressalto (RF) | Cara amb ressalt (RF)
+Cara plana (FF) | Cara plana (FF) | Flat face (FF) | Face plana (FF) | Cara plana (FF)
+Junta de anillo (RTJ) | Xunta de anel (RTJ) | Ring type joint (RTJ) | Junta de anel (RTJ) | Junta d'anell (RTJ)
+Clase | Clase | Class | Classe | Classe
+Clase de bridas | Clase de bridas | Flange class | Classe das flanges | Classe de brides
+Norma del tubo | Norma do tubo | Pipe standard | Norma do tubo | Norma del tub
+Diámetro (NPS) | Diámetro (NPS) | Size (NPS) | Diâmetro (NPS) | Diàmetre (NPS)
+Serie (schedule) | Serie (schedule) | Schedule | Série (schedule) | Sèrie (schedule)
+Diámetro exterior (mm) | Diámetro exterior (mm) | Outside diameter (mm) | Diâmetro exterior (mm) | Diàmetre exterior (mm)
+Espesor (mm) | Espesor (mm) | Wall thickness (mm) | Espessura (mm) | Gruix (mm)
+Longitud LWN (pulgadas) | Lonxitude LWN (polgadas) | LWN length (inches) | Comprimento LWN (polegadas) | Longitud LWN (polzades)
+Lateral (alzado) | Lateral (alzado) | Side (elevation) | Lateral (alçado) | Lateral (alçat)
+Frontal | Frontal | Front | Frontal | Frontal
+Codo | Cóbado | Elbow | Curva | Colze
+Codo ASME B16.9 | Cóbado ASME B16.9 | ASME B16.9 elbow | Curva ASME B16.9 | Colze ASME B16.9
+Radio largo (1,5 D) | Raio longo (1,5 D) | Long radius (1.5 D) | Raio longo (1,5 D) | Radi llarg (1,5 D)
+Radio corto (1 D) | Raio curto (1 D) | Short radius (1 D) | Raio curto (1 D) | Radi curt (1 D)
+radio largo | raio longo | long radius | raio longo | radi llarg
+radio corto | raio curto | short radius | raio curto | radi curt
+de radio largo | de raio longo | long radius | de raio longo | de radi llarg
+de radio corto | de raio curto | short radius | de raio curto | de radi curt
+Sin codo (inglete) | Sen cóbado (inglete) | No elbow (mitre) | Sem curva (meia-esquadria) | Sense colze (biaix)
+Codos en los quiebros | Cóbados nos cambios de dirección | Elbows at bends | Curvas nas mudanças de direção | Colzes als canvis de direcció
+Codos | Cóbados | Elbows | Curvas | Colzes
+Mostrar espesor (ocultas) | Mostrar espesor (ocultas) | Show wall (hidden lines) | Mostrar espessura (ocultas) | Mostrar gruix (ocultes)
+Representación | Representación | Representation | Representação | Representació
+Doble línea | Dobre liña | Double line | Linha dupla | Doble línia
+Unifilar | Unifilar | Single line | Unifilar | Unifilar
+Reducción | Redución | Reducer | Redução | Reducció
+Reducción ASME B16.9 | Redución ASME B16.9 | ASME B16.9 reducer | Redução ASME B16.9 | Reducció ASME B16.9
+Reducción concéntrica | Redución concéntrica | Concentric Reducer | Redução concêntrica | Reducció concèntrica
+Reducción excéntrica | Redución excéntrica | Eccentric Reducer | Redução excêntrica | Reducció excèntrica
+Concéntrica | Concéntrica | Concentric | Concêntrica | Concèntrica
+Excéntrica | Excéntrica | Eccentric | Excêntrica | Excèntrica
+concéntrica | concéntrica | concentric | concêntrica | concèntrica
+excéntrica | excéntrica | eccentric | excêntrica | excèntrica
+excentricidad | excentricidade | eccentricity | excentricidade | excentricitat
+Generatriz plana | Xeratriz plana | Flat side | Geratriz plana | Generatriu plana
+Abajo (FOB) | Abaixo (FOB) | Bottom (FOB) | Em baixo (FOB) | A baix (FOB)
+Arriba (FOT) | Arriba (FOT) | Top (FOT) | Em cima (FOT) | A dalt (FOT)
+Extremo pequeño (NPS) | Extremo pequeno (NPS) | Small end (NPS) | Extremo pequeno (NPS) | Extrem petit (NPS)
+Extremo pequeño Ø (mm) | Extremo pequeno Ø (mm) | Small end Ø (mm) | Extremo pequeno Ø (mm) | Extrem petit Ø (mm)
+Espesor extremo pequeño (mm) | Espesor extremo pequeno (mm) | Small end wall (mm) | Espessura do extremo pequeno (mm) | Gruix extrem petit (mm)
+Te | Te | Tee | Tê | Te
+Te ASME B16.9 | Te ASME B16.9 | ASME B16.9 tee | Tê ASME B16.9 | Te ASME B16.9
+Cruz | Cruz | Cross | Cruzeta | Creu
+Cruz ASME B16.9 | Cruz ASME B16.9 | ASME B16.9 cross | Cruzeta ASME B16.9 | Creu ASME B16.9
+Igual | Igual | Equal | Igual | Igual
+Reducida | Reducida | Reducing | Reduzida | Reduïda
+igual | igual | equal | igual | igual
+reducida | reducida | reducing | reduzida | reduïda
+Derivación (NPS) | Derivación (NPS) | Branch (NPS) | Derivação (NPS) | Derivació (NPS)
+Derivación Ø (mm) | Derivación Ø (mm) | Branch Ø (mm) | Derivação Ø (mm) | Derivació Ø (mm)
+Espesor derivación (mm) | Espesor derivación (mm) | Branch wall (mm) | Espessura da derivação (mm) | Gruix derivació (mm)
+Casquete | Casquete | Cap | Tampão | Casquet
+Casquete ASME B16.9 | Casquete ASME B16.9 | ASME B16.9 cap | Tampão ASME B16.9 | Casquet ASME B16.9
+Manguito | Manguito | Coupling | Uniões | Maniguet
+Medio manguito | Medio manguito | Half coupling | Meia união | Mig maniguet
+Manguito ASME B16.11 | Manguito ASME B16.11 | ASME B16.11 coupling | União ASME B16.11 | Maniguet ASME B16.11
+Completo socket weld | Completo socket weld | Full coupling, socket weld | Completa socket weld | Complet socket weld
+Medio socket weld | Medio socket weld | Half coupling, socket weld | Meia socket weld | Mig socket weld
+Completo roscado NPT | Completo roscado NPT | Full coupling, NPT threaded | Completa roscada NPT | Complet roscat NPT
+Medio roscado NPT | Medio roscado NPT | Half coupling, NPT threaded | Meia roscada NPT | Mig roscat NPT
+roscado NPT | roscado NPT | NPT threaded | roscada NPT | roscat NPT
+Tubo | Tubo | Pipe | Tubo | Tub
+Accesorios | Accesorios | Fittings | Acessórios | Accessoris
+Listados | Listaxes | Lists | Listagens | Llistats
+Tabla de bridas | Táboa de bridas | Flange Table | Tabela de flanges | Taula de brides
+Tabla de bridas ASME B16.5 | Táboa de bridas ASME B16.5 | ASME B16.5 flange table | Tabela de flanges ASME B16.5 | Taula de brides ASME B16.5
+Pos. | Pos. | Item | Pos. | Pos.
+Cant. | Cant. | Qty | Qtd. | Quant.
+Ud. | Ud. | Unit | Un. | Ut.
+ud | ud | pcs | un | ut
+Peso (kg) | Peso (kg) | Weight (kg) | Peso (kg) | Pes (kg)
+Taladros | Furados | Holes | Furos | Forats
+taladro | furado | hole | furo | forat
+círculo | círculo | bolt circle | círculo | cercle
+Círculo | Círculo | Bolt circle | Círculo | Cercle
+centro a cara | centro a cara | center to face | centro a face | centre a cara
+centro a centro | centro a centro | center to center | centro a centro | centre a centre
+cortado | cortado | cut | cortada | tallat
+interior | interior | inside | interior | interior
+aprox. | aprox. | approx. | aprox. | aprox.
+mín. | mín. | min. | mín. | mín.
+diámetros | diámetros | sizes | diâmetros | diàmetres
+Diámetro no disponible. | Diámetro non dispoñible. | Size not available. | Diâmetro não disponível. | Diàmetre no disponible.
+Sin brida B16.5 para este diámetro y clase | Sen brida B16.5 para este diámetro e clase | No B16.5 flange for this size and class | Sem flange B16.5 para este diâmetro e classe | Sense brida B16.5 per a aquest diàmetre i classe
+No existe brida de clase {0} para {1} en ASME B16.5. | Non existe brida de clase {0} para {1} en ASME B16.5. | ASME B16.5 has no Class {0} flange for {1}. | Não existe flange de classe {0} para {1} na ASME B16.5. | No hi ha brida de classe {0} per a {1} a ASME B16.5.
+ASME B16.5 no incluye bridas SO de clase {0} en {1}. | ASME B16.5 non inclúe bridas SO de clase {0} en {1}. | ASME B16.5 has no Class {0} slip-on flange in {1}. | A ASME B16.5 não inclui flanges SO de classe {0} em {1}. | ASME B16.5 no inclou brides SO de classe {0} en {1}.
+No hay anillo RTJ normalizado para clase {0} en {1}. | Non hai anel RTJ normalizado para clase {0} en {1}. | No standard RTJ ring for Class {0} in {1}. | Não há anel RTJ normalizado para classe {0} em {1}. | No hi ha anell RTJ normalitzat per a classe {0} en {1}.
+No hay codo {0} de {1} en ASME B16.9. | Non hai cóbado {0} de {1} en ASME B16.9. | ASME B16.9 has no {0} elbow in {1}. | Não há curva {0} de {1} na ASME B16.9. | No hi ha colze {0} de {1} a ASME B16.9.
+ASME B16.9 no define codos de 45° de radio corto. | ASME B16.9 non define cóbados de 45° de raio curto. | ASME B16.9 does not cover 45° short radius elbows. | A ASME B16.9 não define curvas de 45° de raio curto. | ASME B16.9 no defineix colzes de 45° de radi curt.
+No hay reducción en ASME B16.9 para {0}. | Non hai redución en ASME B16.9 para {0}. | ASME B16.9 has no reducer for {0}. | Não há redução na ASME B16.9 para {0}. | No hi ha reducció a ASME B16.9 per a {0}.
+El extremo pequeño debe ser menor que el grande. | O extremo pequeno debe ser menor có grande. | The small end must be smaller than the large end. | O extremo pequeno deve ser menor que o grande. | L'extrem petit ha de ser més petit que el gran.
+La derivación no puede ser mayor que el colector. | A derivación non pode ser maior có colector. | The branch cannot be larger than the run. | A derivação não pode ser maior que o coletor. | La derivació no pot ser més gran que el col·lector.
+ASME B16.11 no incluye este manguito en clase {0}. | ASME B16.11 non inclúe este manguito en clase {0}. | ASME B16.11 does not cover this coupling in Class {0}. | A ASME B16.11 não inclui esta união na classe {0}. | ASME B16.11 no inclou aquest maniguet en classe {0}.
 Imagen PNG | Imaxe PNG | PNG image | Imagem PNG | Imatge PNG
 Poligonal | Poligonal | Polygonal | Poligonal | Poligonal
 `;
@@ -185,6 +293,13 @@ Specify section thickness | Indique el espesor de la sección | Indique o espeso
 Starting number | Número inicial | Número inicial | Número inicial | Número inicial
 Enter duct axis elevation (mm) | Indique la cota del eje del conducto (mm) | Indique a cota do eixe do conduto (mm) | Indique a cota do eixo da conduta (mm) | Indiqueu la cota de l'eix del conducte (mm)
 Enter mline editing option | Indique una opción de edición de multilínea | Indique unha opción de edición de multiliña | Indique uma opção de edição de multilinha | Indiqueu una opció d'edició de multilínia
+Specify gasket face point | Indique el punto de la cara de junta | Indique o punto da cara de xunta | Indique o ponto da face de junta | Indiqueu el punt de la cara de junta
+Specify inlet end point | Indique el extremo de entrada | Indique o extremo de entrada | Indique o extremo de entrada | Indiqueu l'extrem d'entrada
+Specify large end point | Indique el extremo grande | Indique o extremo grande | Indique o extremo grande | Indiqueu l'extrem gran
+Specify weld end point | Indique el extremo de soldadura | Indique o extremo de soldadura | Indique o extremo de soldadura | Indiqueu l'extrem de soldadura
+Specify direction | Indique la dirección | Indique a dirección | Indique a direção | Indiqueu la direcció
+Turn direction | Sentido del giro | Sentido do xiro | Sentido da curva | Sentit del gir
+Select piping objects | Designe los objetos de tubería | Designe os obxectos de tubaxe | Selecione os objetos de tubagem | Designeu els objectes de canonada
 Layer name | Nombre de capa | Nome de capa | Nome da camada | Nom de capa
 Specify location of projected view | Indique la posición de la vista proyectada | Indique a posición da vista proxectada | Indique a posição da vista projetada | Indiqueu la posició de la vista projectada
 Select an edge | Designe una arista | Designe unha aresta | Selecione uma aresta | Designeu una aresta
@@ -195,6 +310,9 @@ Specify a point on desired side | Indique un punto en el lado que desea conserva
 // Opciones: English | castellano | galego | português | català
 const KW8 = `
 3points | 3puntos | 3puntos | 3pontos | 3punts
+Left | Izquierda | Esquerda | Esquerda | Esquerra
+Right | Derecha | Dereita | Direita | Dreta
+Undo | desHacer | desFacer | anUlar | desFer
 Add vertex | Añadir vértice | Engadir vértice | Adicionar vértice | Afegir vèrtex
 Aerial | Aéreo | Aéreo | Aéreo | Aeri
 Closed cross | Cruz cerrada | Cruz pechada | Cruz fechada | Creu tancada
@@ -246,10 +364,15 @@ Only vertical (profile) edges of extruded solids can be edited. | Solo se pueden
 Select two different multilines. | Designe dos multilíneas distintas. | Designe dúas multiliñas distintas. | Selecione duas multilinhas diferentes. | Designeu dues multilínies diferents.
 Simplified loads (guidance only): transmission, solar through glazing, occupants, lighting, equipment and ventilation. | Cargas simplificadas (orientativas): transmisión, radiación solar por huecos, ocupantes, iluminación, equipos y ventilación. | Cargas simplificadas (orientativas): transmisión, radiación solar por ocos, ocupantes, iluminación, equipos e ventilación. | Cargas simplificadas (indicativas): transmissão, radiação solar pelos vãos, ocupantes, iluminação, equipamentos e ventilação. | Càrregues simplificades (orientatives): transmissió, radiació solar pels buits, ocupants, il·luminació, equips i ventilació.
 There are no comments. | No hay comentarios. | Non hai comentarios. | Não há comentários. | No hi ha comentaris.
+No piping components found. | No se han encontrado componentes de tubería. | Non se atoparon compoñentes de tubaxe. | Não foram encontrados componentes de tubagem. | No s'han trobat components de canonada.
+Segment too short for the elbow: mitred joint used. | Tramo demasiado corto para el codo: se usa unión a inglete. | Tramo demasiado curto para o cóbado: úsase unión a inglete. | Troço demasiado curto para a curva: usa-se união em meia-esquadria. | Tram massa curt per al colze: s'utilitza unió en biaix.
 No layers are reserved. | No hay capas reservadas. | Non hai capas reservadas. | Não há camadas reservadas. | No hi ha capes reservades.
 `;
 // Mensajes con valores: patrón, castellano, galego, português, català
 const MSGRE8 = [
+  [/^(.+): ([\d.]+) m, (\d+) elbow\(s\)\.$/, '$1: $2 m, $3 codo(s).', '$1: $2 m, $3 cóbado(s).', '$1: $2 m, $3 curva(s).', '$1: $2 m, $3 colze(s).'],
+  [/^No (LR|SR) elbow in ASME B16\.9 for this size: mitred joints used\.$/, 'No hay codo $1 en ASME B16.9 para este diámetro: se usan uniones a inglete.', 'Non hai cóbado $1 en ASME B16.9 para este diámetro: úsanse unións a inglete.', 'Não há curva $1 na ASME B16.9 para este diâmetro: usam-se uniões em meia-esquadria.', 'No hi ha colze $1 a ASME B16.9 per a aquest diàmetre: s\'utilitzen unions en biaix.'],
+  [/^Piping spec: (.+), Class (\S+) (\S+), (\S+) elbows\.$/, 'Especificación de tubería: $1, clase $2 $3, codos $4.', 'Especificación de tubaxe: $1, clase $2 $3, cóbados $4.', 'Especificação de tubagem: $1, classe $2 $3, curvas $4.', 'Especificació de canonada: $1, classe $2 $3, colzes $4.'],
   [/^(.+): (\d+) object\(s\) imported with attributes\.$/, '$1: $2 objeto(s) importado(s) con atributos.', '$1: $2 obxecto(s) importado(s) con atributos.', '$1: $2 objeto(s) importado(s) com atributos.', '$1: $2 objecte(s) importat(s) amb atributs.'],
   [/^(.+): (\d+) object\(s\) imported\.$/, '$1: $2 objeto(s) importado(s).', '$1: $2 obxecto(s) importado(s).', '$1: $2 objeto(s) importado(s).', '$1: $2 objecte(s) importat(s).'],
   [/^(\d+) region\(s\) created\.$/, '$1 región(es) creada(s).', '$1 rexión(s) creada(s).', '$1 região(ões) criada(s).', '$1 regió(ns) creada(es).'],
@@ -286,6 +409,10 @@ const SENTRE8 = [
 ];
 // Nombres de comando: castellano, galego, português, català
 const CMD8 = {
+  MPIPE: ['TUBERIAMEC', 'TUBAXEMEC', 'TUBAGEMMEC', 'CANONADAMEC'], MSPEC: ['ESPECTUBERIA', 'ESPECTUBAXE', 'ESPECTUBAGEM', 'ESPECCANONADA'], MFLANGE: ['BRIDAASME', 'BRIDAASME', 'FLANGEASME', 'BRIDAASME'],
+  MFLANGEWN: ['BRIDAWN', 'BRIDAWN', 'FLANGEWN', 'BRIDAWN'], MFLANGESO: ['BRIDASO', 'BRIDASO', 'FLANGESO', 'BRIDASO'], MFLANGELWN: ['BRIDALWN', 'BRIDALWN', 'FLANGELWN', 'BRIDALWN'], MFLANGEBL: ['BRIDACIEGA', 'BRIDACEGA', 'FLANGECEGA', 'BRIDACEGA'],
+  MFLANGETABLE: ['TABLABRIDAS', 'TABOABRIDAS', 'TABELAFLANGES', 'TAULABRIDES'], MELBOW: ['CODO', 'COBADO', 'CURVA', 'COLZE'], MREDUCER: ['REDUCCION', 'REDUCION', 'REDUCAO', 'REDUCCIO'], MREDUCERECC: ['REDUCCIONEXC', 'REDUCIONEXC', 'REDUCAOEXC', 'REDUCCIOEXC'],
+  MTEE: ['TE', 'TE', 'TE', 'TE'], MCROSS: ['CRUZ', 'CRUZ', 'CRUZETA', 'CREU'], MCAP: ['CASQUETE', 'CASQUETE', 'TAMPAO', 'CASQUET'], MCOUPLING: ['MANGUITO', 'MANGUITO', 'UNIAO', 'MANIGUET'], MBOM: ['LISTAMEC', 'LISTAMEC', 'LISTAMEC', 'LLISTAMEC'],
   MLEDIT: ['EDITARLM', 'EDITARLM', 'EDITARLM', 'EDITALM'], POINTCLOUDSECTION: ['SECCIONNUBE', 'SECCIONNUBE', 'SECCAONUVEM', 'SECCIONUVOL'],
   FILLETEDGE: ['EMPALMEARISTA', 'EMPALMEARESTA', 'CONCORDARARESTA', 'ARRODONIRARESTA'], CHAMFEREDGE: ['CHAFLANARISTA', 'CHAFRANARESTA', 'CHANFROARESTA', 'XAMFRANARESTA'],
   SLICE: ['CORTE', 'CORTE', 'CORTE', 'TALL'], SECTION: ['SECCION', 'SECCION', 'SECCAO', 'SECCIO'], VIEWBASE: ['VISTABASE', 'VISTABASE', 'VISTABASE', 'VISTABASE'],

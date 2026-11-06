@@ -3,6 +3,21 @@ const B = 'var(--ic-blue)', Y = 'var(--ic-yellow)', Rr = 'var(--ic-red)', Gn = '
 const s = (body) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
 const dot = (x, y, c = B) => `<rect x="${x - 1.6}" y="${y - 1.6}" width="3.2" height="3.2" fill="${c}" stroke="none"/>`;
 export const ICONS = {
+  // ---- mecánica (tubería)
+  mpipe: s(`<path d="M2 9h20M2 15h20"/><path d="M2 12h20" stroke="${Rr}" stroke-dasharray="3 1.5 1 1.5" stroke-width="1"/>`),
+  mflange: s(`<path d="M6 3v18h3V3zM9 8l5 2v4l-5 2"/><path d="M14 10h8M14 14h8"/><path d="M7.5 6v2M7.5 16v2" stroke="${B}"/>`),
+  mflangeso: s(`<path d="M6 3v18h3V3zM9 8h4v8H9"/><path d="M11 10h11M11 14h11"/>`),
+  mflangebl: s(`<path d="M8 3v18h4V3z"/><path d="M8 6h4M8 18h4" stroke="${B}"/>`),
+  mflangertj: s(`<path d="M6 3v18h3V3zM9 8l5 2v4l-5 2"/><path d="M5 9l1 1-1 1M5 13l1 1-1 1" stroke="${B}"/>`),
+  melbow: s(`<path d="M3 15h4a8 8 0 0 0 8-8V3M3 21h4A14 14 0 0 0 21 7V3"/><path d="M3 18h4a11 11 0 0 0 11-11V3" stroke="${Rr}" stroke-width="1" stroke-dasharray="3 1.5"/>`),
+  mreducer: s(`<path d="M2 5h5l10 4h5M2 19h5l10-4h5M2 5v14M22 9v6"/>`),
+  mreducerecc: s(`<path d="M2 5h5l10 6h5M2 19h20M2 5v14M22 11v8"/>`),
+  mtee: s(`<path d="M2 14h20M2 20h20M2 14v6M22 14v6M9 14V3h6v11M9 3h6"/>`),
+  mcross: s(`<path d="M2 9h7V2h6v7h7v6h-7v7H9v-7H2z"/>`),
+  mcoupling: s(`<path d="M7 6h10v12H7z"/><path d="M2 9h5M2 15h5M17 9h5M17 15h5"/><path d="M10 6v12M14 6v12" stroke="${B}" stroke-dasharray="2 1.5"/>`),
+  mcap: s(`<path d="M3 6h9a6 6 0 0 1 0 12H3"/><path d="M3 6v12"/>`),
+  mbom: s(`<path d="M5 3h14v18H5z"/><path d="M8 8h8M8 12h8M8 16h5"/>${dot(17, 17, Y)}`),
+  mspec: s(`<path d="M4 4h16v16H4z"/><path d="M4 10h16M10 10v10" stroke="${B}"/><path d="M7 7h6"/>`),
   // ---- restricciones
   cHoriz: s(`<path d="M4 15h16"/>${dot(4, 15)}${dot(20, 15)}<path d="M8 9h8" stroke="${B}"/>`),
   cVert: s(`<path d="M10 4v16"/>${dot(10, 4)}${dot(10, 20)}<path d="M16 8v8" stroke="${B}"/>`),

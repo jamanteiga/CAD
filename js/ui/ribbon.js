@@ -147,6 +147,16 @@ export const TABS = [
   mep.panels.find((p) => p.name === 'Tuberías').items.push(COL(S('PIPECALC', 'Pérdida de carga y NPSH', 'ductcalc'), S('FLANGE', 'Brida EN 1092-1', 'circle')));
   mep.panels.splice(2, 0, { name: 'Presión y P&ID', items: [B('PEDSHEET', 'Hoja PED', 'list'), COL(S('PIDTAG', 'Etiquetar P&ID', 'tcount'), S('PIDLIST', 'Lista de válvulas', 'table'))] });
 }
+// ---- ficha Mecánica: tubería y accesorios ASME/EN
+{
+  const i = TABS.findIndex((t) => t.id === 'mep');
+  TABS.splice(i + 1, 0, { id: 'mech', name: 'Mecánica', panels: [
+    { name: 'Tubería', items: [B('MPIPE', 'Tubería', 'mpipe'), COL(S('MSPEC', 'Especificación', 'mspec'), S('MCOUPLING', 'Manguito', 'mcoupling'), S('MCAP', 'Casquete', 'mcap'))] },
+    { name: 'Bridas ASME B16.5', items: [B('MFLANGE', 'Brida', 'mflange', [S('MFLANGEWN', 'Cuello para soldar (WN)', 'mflange'), S('MFLANGESO', 'Plana deslizante (SO)', 'mflangeso'), S('MFLANGELWN', 'Cuello largo (LWN)', 'mflange'), S('MFLANGEBL', 'Ciega', 'mflangebl')]), COL(S('MFLANGEWN', 'Cuello para soldar (WN)', 'mflange'), S('MFLANGESO', 'Plana deslizante (SO)', 'mflangeso'), S('MFLANGEBL', 'Ciega', 'mflangebl')), COL(S('MFLANGELWN', 'Cuello largo (LWN)', 'mflange'), S('MFLANGETABLE', 'Tabla de bridas', 'table'))] },
+    { name: 'Accesorios', items: [B('MELBOW', 'Codo', 'melbow'), COL(S('MREDUCER', 'Reducción concéntrica', 'mreducer'), S('MREDUCERECC', 'Reducción excéntrica', 'mreducerecc')), COL(S('MTEE', 'Te', 'mtee'), S('MCROSS', 'Cruz', 'mcross'))] },
+    { name: 'Listados', items: [B('MBOM', 'Lista de materiales', 'mbom')] },
+  ] });
+}
 const LAYOUT_TAB = { id: 'layout', name: 'Presentación', ctx: true, panels: [
   { name: 'Presentación', items: [B('LAYOUT _N', 'Nueva', 'layout'), B('PAGESETUP', 'Configurar página', 'pagesetup')] },
   { name: 'Ventanas de presentación', items: [B('MVIEW', 'Insertar vista', 'mview', [S('MVIEW', 'Rectangular', 'mview'), S('MVIEW _P', 'Poligonal', 'mview')]), COL(S('MSPACE', 'Espacio modelo', 'mspace'), S('PSPACE', 'Espacio papel', 'layout'), S('MVIEW _LOCK', 'Bloquear', 'laylck'))] },
