@@ -316,6 +316,7 @@ export function register(eng, app) {
     }
     return out;
   };
+  eng.dimBreakPoints = breakPoints;
   R('DIMBREAK', async (c) => {
     let k = 'auto';
     const r = await c.ask({ kind: 'entity', prompt: 'Select dimension to add/remove break or [Multiple]:', filter: (e) => e.type === 'DIMENSION' });
@@ -338,7 +339,7 @@ export function register(eng, app) {
       d.begin('DIMBREAK'); d.mod(e, (x) => (x.brkm = [...(x.brkm || []), [pr(p1), pr(p2)]])); d.end();
     } else {
       d.begin('DIMBREAK'); let n = 0;
-      for (const e of dims) d.mod(e, (x) => { if (k === 'remove') { delete x.brk; delete x.brkm; } else { x.brk = breakPoints(x); n += x.brk.length; } });
+      for (const e of dims) d.mod(e, (x) => { if (k === 'remove') { delete x.brk; delete x.brkm; delete x.brkAuto; } else { x.brk = breakPoints(x); x.brkAuto = true; n += x.brk.length; } });
       d.end(); c.print(`${dims.length} object(s) modified.`);
     }
     redraw();

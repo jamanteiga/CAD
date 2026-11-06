@@ -11,6 +11,7 @@ const APP = 'WEBCAD';
 // claves internas que no se guardan en XDATA
 const SKIP = new Set(['hid', 'layer', 'color', 'ltype', 'lw', 'lts', 'tc', 'visible']);
 
+import { lispToPairs, pairsToLisp } from './xdutil.js';
 export function writeDXF2000(doc, opts = {}) {
   const out = [];
   const fmt = (v) => (Number.isInteger(v) ? String(v) : String(+(+v).toFixed(12)));
@@ -119,6 +120,12 @@ export function writeDXF2000(doc, opts = {}) {
   // APPID
   table('APPID', fixed.appidTable, 2);
   rec('APPID', fixed.appidTable, 'AcDbRegAppTableRecord', 'ACAD'); rec('APPID', fixed.appidTable, 'AcDbRegAppTableRecord', APP);
+  {
+    // aplicaciones registradas por los datos extendidos de usuario, vínculos y ldata
+    const apps = new Set(Object.keys(doc.regapps || {}).map((x) => x.toUpperCase()));
+    for (const e of doc.allEntsDeep()) { for (const a of Object.keys(e.xd || {})) apps.add(a.toUpperCase()); if (e.url) apps.add('PE_URL'); if (e.ldata) apps.add('WEBCAD_LDATA'); }
+    for (const a of apps) if (a !== 'ACAD' && a !== APP) rec('APPID', fixed.appidTable, 'AcDbRegAppTableRecord', a);
+  }
   w(0, 'ENDTAB');
   // DIMSTYLE
   table('DIMSTYLE', fixed.dimTable, 2, true);
@@ -158,6 +165,7 @@ export function writeDXF2000(doc, opts = {}) {
       w(8, e.layer || '0');
       const lt = (e.ltype || 'BYLAYER').toUpperCase(); if (lt !== 'BYLAYER') w(6, lcap(lt));
       if (typeof e.color === 'number' && e.color !== 256) w(62, e.color);
+      if (e.transp > 0) w(440, 0x02000000 | Math.round(255 * (1 - Math.min(90, e.transp) / 100)));
       else if (typeof e.color === 'string') { w(62, rgbAci(e.color)); w(420, parseInt(e.color.slice(1), 16)); }
       if (e.tc) w(420, parseInt(e.tc.slice(1), 16));
       if (e.lw != null && e.lw !== -1) w(370, e.lw);
@@ -296,6 +304,22 @@ export function writeDXF2000(doc, opts = {}) {
     }
     if (e.type === 'HATCH' && e._wipe) xdata({ wipeout: true });
     else if (e.type === 'HATCH' && e.assoc) xdata({ assoc: e.assoc });
+    userXd(e);
+  };
+  // datos extendidos de usuario (regapps), hipervínculos (PE_URL) y ldata
+  const userXd = (e) => {
+    if (out.slice(-14).includes('SEQEND')) return;
+    if (e.url) { w(1001, 'PE_URL'); w(1000, e.url); w(1002, '{'); w(1000, e.urlDesc || ''); w(1002, '{'); w(1071, 1); w(1002, '}'); w(1002, '}'); }
+    for (const [app, txt] of Object.entries(e.xd || {})) {
+      const pairs = lispToPairs(txt); if (!pairs.length) continue;
+      w(1001, app.toUpperCase());
+      for (const [c, v] of pairs) {
+        if (c === 1001) continue;
+        if (Array.isArray(v)) { w(c, +v[0] || 0); w(c + 10, +v[1] || 0); w(c + 20, +v[2] || 0); }
+        else if (c >= 1000 && c < 1072) w(c, typeof v === 'string' && c === 1000 ? esc(v).slice(0, 255) : v);
+      }
+    }
+    if (e.ldata) { w(1001, 'WEBCAD_LDATA'); for (const ch of chunks(JSON.stringify(e.ldata))) w(1000, ch); }
   };
 
   // ---------------- BLOCKS
@@ -349,6 +373,10 @@ export function writeDXF2000(doc, opts = {}) {
   w(0, 'DICTIONARY'); w(5, fixed.root); w(330, 0); w(100, 'AcDbDictionary'); w(281, 1);
   w(3, 'ACAD_GROUP'); w(350, fixed.groupDict); w(3, 'ACAD_LAYOUT'); w(350, fixed.layoutDict); w(3, 'ACAD_MLINESTYLE'); w(350, fixed.mlsDict);
   w(3, 'DWGPROPS'); w(350, propsH); w(3, 'WEBCAD_DATA'); w(350, dataH);
+  // diccionarios con nombre creados por LISP/ActiveX (namedobjdict)
+  const userDicts = Object.entries(doc.dicts || {}).filter(([n, D_]) => D_ && D_.items && !/^ACAD_/.test(n));
+  const udH = userDicts.map(() => H());
+  userDicts.forEach(([n], i) => { w(3, n); w(350, udH[i]); });
   w(0, 'DICTIONARY'); w(5, fixed.groupDict); w(330, fixed.root); w(100, 'AcDbDictionary'); w(281, 1);
   for (const n of Object.keys(groups)) { w(3, n); w(350, groupH[n]); }
   // presentaciones
@@ -380,6 +408,18 @@ export function writeDXF2000(doc, opts = {}) {
   const custom = Object.entries(pr.custom || {});
   for (let i = 0; i < 10; i++) w(300 + i, custom[i] ? `${custom[i][0]}=${custom[i][1]}` : '=');
   w(40, 0); w(41, 0); w(42, 0); w(43, 0); w(44, 0); w(45, 0); w(90, custom.length);
+  const writeDict = (D_, h, owner) => {
+    const items = Object.entries(D_.items || {}), ih = items.map(() => H());
+    w(0, 'DICTIONARY'); w(5, h); w(330, owner); w(100, 'AcDbDictionary'); w(281, 1);
+    items.forEach(([k], i) => { w(3, k); w(350, ih[i]); });
+    items.forEach(([, it], i) => {
+      if (it.type === 'DICTIONARY') return writeDict(it, ih[i], h);
+      w(0, 'XRECORD'); w(5, ih[i]); w(330, h); w(100, 'AcDbXrecord'); w(280, 1);
+      if (it.type === 'LDATA') { for (const ch of chunks(String(it.data || ''))) w(1, ch); return; }
+      for (const [c, v] of lispToPairs(it.data)) { if (c < 0 || c === 5 || c === 100 || c === 330) continue; if (Array.isArray(v)) { w(c, +v[0] || 0); w(c + 10, +v[1] || 0); w(c + 20, +v[2] || 0); } else w(c, typeof v === 'string' ? esc(v) : v); }
+    });
+  };
+  userDicts.forEach(([, D_], i) => writeDict(D_, udH[i], fixed.root));
   // datos propios de WebCAD (restricciones, vistas, presentaciones, tablas de estilos…)
   const extra = JSON.stringify({ v: 1, props: pr, constraints: doc.constraints || [], markups: doc.markups || [], views: doc.views || {}, layouts: layouts.map((l) => ({ name: l.name, paper: l.paper, w: l.w, h: l.h, ctb: l.ctb })), plotStyles: doc.plotStyles, vars: pick(doc.vars, ['SNAPUNIT', 'GRIDUNIT', 'OSMODE', 'POLARANG', 'HPNAME', 'HPSCALE', 'FILLETRAD', 'INSUNITS']), dimstyle: doc.dimstyle, dataLinks: doc.dataLinks });
   w(0, 'XRECORD'); w(5, dataH); w(330, fixed.root); w(100, 'AcDbXrecord'); w(280, 1);

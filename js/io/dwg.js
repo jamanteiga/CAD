@@ -26,7 +26,23 @@ async function loadLib(log) {
   throw new Error('No se pudo cargar el lector DWG (libredwg-web): ' + (lastErr?.message || lastErr));
 }
 
+// v8: se intenta primero en un Web Worker; si el navegador no lo permite, se lee en el hilo principal
+function readInWorker(buffer, log) {
+  if (typeof Worker === 'undefined' || typeof document === 'undefined') return Promise.reject(new Error('sin Worker'));
+  return new Promise((ok, ko) => {
+    let w;
+    try { w = new Worker(new URL('./dwg-worker.js', import.meta.url), { type: 'module' }); } catch (e) { ko(e); return; }
+    const to = setTimeout(() => { w.terminate(); ko(new Error('tiempo de espera agotado')); }, 180000);
+    w.onmessage = (ev) => { clearTimeout(to); w.terminate(); if (ev.data.error) ko(Object.assign(new Error(ev.data.error), { fromWorker: true })); else ok(ev.data.db); };
+    w.onerror = (ev) => { clearTimeout(to); w.terminate(); ev.preventDefault?.(); ko(new Error(ev.message || 'error del Worker')); };
+    log?.('Leyendo DWG en segundo plano...');
+    w.postMessage({ buf: buffer, base: document.baseURI, id: 1 }, [buffer]);
+  });
+}
 export async function readDWG(buffer, name, log) {
+  const copy = buffer.slice(0);
+  try { const db = await readInWorker(buffer, log); return fromDatabase(db, name); } catch (e) { if (e.fromWorker && /no se pudo leer/i.test(e.message)) throw e; log?.('Lector DWG en el hilo principal (' + e.message + ')'); }
+  buffer = copy;
   const { mod, inst } = await loadLib(log);
   const ptr = inst.dwg_read_data(buffer, mod.Dwg_File_Type.DWG);
   if (ptr == null) throw new Error('El archivo DWG no se pudo leer (versión no soportada o archivo dañado).');

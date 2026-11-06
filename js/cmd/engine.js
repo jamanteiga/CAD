@@ -391,6 +391,7 @@ export class Engine {
   clearSel(redraw = true) { this.sel = []; this.grips = []; this.gripDrag = null; if (redraw) { this.view?.redrawOverlay(); this.ui?.refresh?.(); } }
   setSel(arr) { this.sel = arr.filter((e) => this.doc.isVisible(e)); this.updateGrips(); this.ui?.refresh?.(); this.view.redrawOverlay(); }
   updateGrips() {
+    this.hotGrips = [];
     this.grips = [];
     if (!this.doc.vars.GRIPS) return;
     const ents = this.sel.slice(0, 100);
@@ -418,10 +419,10 @@ export class Engine {
         if (hg !== this.hoverGrip) {
           this.hoverGrip = hg; clearTimeout(this._gmT);
           // pinzamientos multifunción: al parar el cursor sobre uno aparece su menú
-          if (hg && (hg.vi != null || hg.si != null || hg.le)) this._gmT = setTimeout(() => { if (this.hoverGrip === hg && !this.req && !this.gripDrag) this.ui?.gripMenu?.(hg, info.sx, info.sy); }, 550);
+          if (hg && (hg.vi != null || hg.si != null || hg.le || hg.dimText || hg.dimLine)) this._gmT = setTimeout(() => { if (this.hoverGrip === hg && !this.req && !this.gripDrag) this.ui?.gripMenu?.(hg, info.sx, info.sy); }, 550);
         }
       }
-      if (before !== this.hover) this.view.redrawOverlay();
+      if (before !== this.hover) { this.hoverT = performance.now(); clearTimeout(this._rtT); if (this.hover && !req) this._rtT = setTimeout(() => this.view.redrawOverlay(), 650); this.view.redrawOverlay(); }
     } else if (this.hover) { this.hover = null; }
   }
   pointerDown(info) {
@@ -443,7 +444,9 @@ export class Engine {
     if (this.win) return this.finishWindow(info);
     if (!req) {
       const g = this.gripAt(info.sx, info.sy);
-      if (g) return this.startGrip(g);
+      // Mayús + clic: varios pinzamientos activos que se estiran a la vez
+      if (g && info.shift && !g.kind?.startsWith('d')) { this.hotGrips ||= []; const i = this.hotGrips.indexOf(g); if (i >= 0) this.hotGrips.splice(i, 1); else this.hotGrips.push(g); this.view.redrawOverlay(); return; }
+      if (g) { if (this.hotGrips?.length && !this.hotGrips.includes(g)) this.hotGrips = []; return this.startGrip(g); }
     }
     const e = this.view.pickAt(info.raw);
     if (e && !req && info.ctrl && e.url && this.app.openHyperlink) { this.app.openHyperlink(e); return; }
@@ -555,6 +558,12 @@ export class Engine {
     if (act === 'del') { if (e.pts.length <= 2) return; d.begin('GRIP_REMOVEVERTEX'); d.touch(e); e.pts.splice(g.vi, 1); E.invalidate(e); d.end(); this.updateGrips(); this.view.redraw(); return; }
     if (act === 'arc') return one((x, p) => E.setSegThrough(x, g.si, p));
     if (act === 'line') { d.begin('GRIP_TOLINE'); d.touch(e); e.pts[g.si] = { ...e.pts[g.si], b: 0 }; E.invalidate(e); d.end(); this.updateGrips(); this.view.redraw(); return; }
+    if (act === 'dimTextOnly') return one((x, p) => { x.tp = p; });
+    if (act === 'dimWithLine') return one((x, p) => { delete x.tp; x.dp = p; });
+    if (act === 'dimReset') { d.begin('GRIP_DIMTEXT'); d.touch(e); delete e.tp; E.invalidate(e); d.end(); this.updateGrips(); this.view.redraw(); return; }
+    if (act === 'dimAbove' || act === 'dimCenter') { d.begin('GRIP_DIMTEXT'); d.touch(e); e.st = { ...(e.st || {}), dimtad: act === 'dimAbove' ? 1 : 0 }; delete e.tp; E.invalidate(e); d.end(); this.updateGrips(); this.view.redraw(); return; }
+    if (act === 'dimContinue') { this.sel = []; this.lastDim = e; return this.run('DIMCONTINUE'); }
+    if (act === 'dimBaseline') { this.sel = []; this.lastDim = e; return this.run('DIMBASELINE'); }
     if (act === 'lengthen') { const fix = g.le === 1 ? 'p2' : 'p1', mov = g.le === 1 ? 'p1' : 'p2'; const dir = G.norm(G.sub(e[mov], e[fix])); return one((x, p) => { x[mov] = G.add(x[fix], G.mul(dir, Math.max(1e-9, G.dot(G.sub(p, x[fix]), dir)))); }); }
   }
   startGrip(g) {
@@ -563,7 +572,7 @@ export class Engine {
       this.updateGrips(); this.view.redraw(); return;
     }
     if (g.kind === 'dvis' || g.kind === 'dlook') return this.ui?.visMenu?.(g);
-    this.gripDrag = { grip: g, base: g.p, mode: 0 };
+    this.gripDrag = { grip: g, base: g.p, mode: 0, multi: this.hotGrips?.length > 1 && this.hotGrips.includes(g) ? this.hotGrips.slice() : null };
     this.ui?.cmdline?.setPrompt?.(tKnown('** ESTIRAR **') + '\n' + tKnown('Precise punto de estiramiento (Espacio = siguiente modo, Esc = cancelar):'));
     this.view.redrawOverlay();
   }
@@ -589,6 +598,7 @@ export class Engine {
     const gd = this.gripDrag, g = gd.grip;
     if (gd.mode === 0) {
       if (gd.only) return [g];
+      if (gd.multi) return gd.multi;
       const same = this.grips.filter((x) => x === g || (!g.kind?.startsWith('d') && !x.kind?.startsWith('d') && G.eq(x.p, g.p, 1e-9)));
       return same;
     }
@@ -598,6 +608,13 @@ export class Engine {
     const gd = this.gripDrag; if (!gd) return null;
     if (gd.mode === 0) {
       const out = [];
+      if (gd.multi) {
+        // un clon por entidad con todos sus pinzamientos activos desplazados
+        const d0 = G.sub(p, gd.base), byEnt = new Map();
+        for (const g of gd.multi) { if (!byEnt.has(g.ent)) byEnt.set(g.ent, E.cloneEnt(g.ent)); g.set(byEnt.get(g.ent), G.add(g.p, d0)); }
+        for (const c of byEnt.values()) { E.invalidate(c); c._ghost = false; out.push(c); }
+        return out;
+      }
       for (const g of this.gripTargets()) { const c = E.cloneEnt(g.ent); if (g.kind?.startsWith('d')) { c.name = g.ent.name; E.dynSetFromPoint(c, this.doc, g, p); } else g.set(c, p); E.invalidate(c); c._ghost = false; out.push(c); }
       return out;
     }
@@ -609,7 +626,8 @@ export class Engine {
     const targets = gd.mode === 0 ? this.gripTargets() : null, m = gd.mode === 0 ? null : this.gripXform(p);
     this.gripDrag = null;
     this.doc.begin('GRIP_' + ['STRETCH', 'MOVE', 'ROTATE', 'SCALE', 'MIRROR'][gd.mode]);
-    if (targets) for (const g of targets) { this.doc.touch(g.ent); g.set(g.ent, p); E.invalidate(g.ent); }
+    if (targets && gd.multi) { const d0 = G.sub(p, gd.base); const pts = gd.multi.map((g) => G.add(g.p, d0)); gd.multi.forEach((g, i) => { this.doc.touch(g.ent); g.set(g.ent, pts[i]); E.invalidate(g.ent); }); this.hotGrips = []; }
+    else if (targets) for (const g of targets) { this.doc.touch(g.ent); if (g.kind?.startsWith('d')) E.dynSetFromPoint(g.ent, this.doc, g, p); else g.set(g.ent, p); E.invalidate(g.ent); }
     else for (const e of this.sel) { this.doc.touch(e); E.transformEnt(e, m, { mirrtext: this.doc.vars.MIRRTEXT }); }
     this.doc.end();
     this.updateGrips(); this.ui?.cmdline?.setPrompt?.(''); this.view.redraw(); this.ui?.refresh?.();

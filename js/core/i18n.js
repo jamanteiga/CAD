@@ -7,6 +7,7 @@ import * as PT from './lang-pt.js';
 import * as CA from './lang-ca.js';
 import { UI, UI_RE } from './ui-strings.js';
 import { applyV7 } from './i18n-v7.js';
+import { applyV8 } from './i18n-v8.js';
 import { TXT_PTCA, RE_PTCA } from './ui-ptca.js';
 
 export const LANGS = { es: 'Castellano', gl: 'Galego', pt: 'Português', ca: 'Català', en: 'English' };
@@ -474,6 +475,7 @@ export const ALIAS_ES = {
   IN: 'INSERT', CA: 'LAYER', TL: 'LINETYPE', EN: 'PAN', AC: 'DIMLINEAR', AA: 'AREA', PR: 'PROPERTIES', DR: 'DRAWORDER', RG: 'REGEN', DB: 'BEDIT',
 };
 applyV7({ UI, TXT_PTCA, KW, SENT, MSG, MSG_RE, CMD_ES, GL, PT, CA });
+applyV8({ UI, TXT_PTCA, KW, SENT, SENT_RE, MSG, MSG_RE, CMD_ES, GL, PT, CA });
 // nombre en castellano para mostrar (eco y ayuda)
 const revName = (map) => { const m = {}; for (const [k, en] of Object.entries(map)) if (!m[en] && !k.startsWith('-')) m[en] = k; return m; };
 export const ES_NAME = revName(CMD_ES);

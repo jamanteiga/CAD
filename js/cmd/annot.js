@@ -294,8 +294,9 @@ function c_hatch(eng, app, doc) {
     if (e.type === 'SOLID') return e.pts.map((p) => ({ ...p, b: 0 }));
     return null;
   };
+  eng.hatchLoopFrom = loopFrom;
   const run = async (c, dash) => {
-    const o = eng.hatchOpts;
+    const o = eng.hatchOpts, hsrc = [];
     o.pattern = doc().vars.HPNAME || o.pattern; o.scale = doc().vars.HPSCALE || o.scale; o.angle = doc().vars.HPANG || 0;
     app.ui?.ribbon?.showContext?.('hatch');
     try {
@@ -319,22 +320,22 @@ function c_hatch(eng, app, doc) {
         if (p === 'seTtings') { const r = await app.ui.dlg.hatch(o); if (r) Object.assign(o, r); continue; }
         if (p === 'Select objects') {
           const s = await c.select('Select objects:', { noPickfirst: true });
-          for (const e of s) { const l = loopFrom(e); if (l) loops.push(l); }
+          for (const e of s) { const l = loopFrom(e); if (l) { loops.push(l); hsrc.push({ h: e.hid }); } }
           continue;
         }
         if (isPt(p)) {
           c.print('Selecting everything...\nAnalyzing the selected data...');
           const ls = findBoundary(app, p);
           if (!ls) { c.print('Valid hatch boundary not found.'); continue; }
-          loops.push(...ls);
+          loops.push(...ls); hsrc.push({ seed: { x: p.x, y: p.y }, n: ls.length });
           app.view.redrawOverlay();
         }
       }
       if (!loops.length) {
-        if (c.pickfirst?.length) { for (const e of c.pickfirst) { const l = loopFrom(e); if (l) loops.push(l); } }
+        if (c.pickfirst?.length) { for (const e of c.pickfirst) { const l = loopFrom(e); if (l) { loops.push(l); hsrc.push({ h: e.hid }); } } }
         if (!loops.length) return;
       }
-      doc().add(mkHatch(loops));
+      doc().add({ ...mkHatch(loops), ...(doc().vars.HPASSOC !== 0 && hsrc.length && hsrc.reduce((a, x) => a + (x.n || 1), 0) === loops.length ? { hsrc } : {}) });
       doc().vars.HPNAME = o.pattern; doc().vars.HPSCALE = o.scale; doc().vars.HPANG = o.angle;
     } finally { app.ui?.ribbon?.hideContext?.('hatch'); }
   };

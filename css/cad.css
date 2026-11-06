@@ -359,3 +359,25 @@ table.kv input { width: 100%; background: var(--bg-field); border: 1px solid var
 .v3d-bar label { display: flex; gap: 3px; align-items: center; }
 .v3d-hint { position: absolute; left: 8px; bottom: 8px; font-size: 11px; color: #456; background: #fff9; padding: 2px 6px; border-radius: 3px; pointer-events: none; }
 #status .stb.rec { color: #e53935; font-weight: 700; }
+
+/* ---- v8: información ampliada de la cinta */
+.rtip { position: fixed; z-index: 200; max-width: 320px; background: var(--bg-ribbon, #f7f7f7); color: var(--fg, #222); border: 1px solid #0004; box-shadow: 0 4px 14px #0003; padding: 8px 10px; font-size: 12px; border-radius: 3px; pointer-events: none; }
+.rtip-t { font-weight: 700; margin-bottom: 4px; }
+.rtip-d { margin-bottom: 6px; line-height: 1.35; }
+.rtip-c { display: flex; gap: 6px; margin-bottom: 4px; }
+.rtip-k { font-family: Consolas, monospace; background: #0001; padding: 0 4px; border-radius: 2px; }
+.rtip-k.en { opacity: .7; }
+.rtip-f { opacity: .65; font-style: italic; border-top: 1px solid #0002; padding-top: 4px; }
+
+/* v8 — modo tableta: objetivos táctiles más grandes */
+body.tablet #ribbon button.big { min-width: 60px; padding: 6px 8px; }
+body.tablet #ribbon button.big .ico { width: 38px; height: 38px; }
+body.tablet #ribbon button.sm { min-height: 34px; padding: 4px 10px; font-size: 13px; }
+body.tablet #ribbon button.sm .ico { width: 22px; height: 22px; }
+body.tablet .dropmenu .it, body.tablet .ctxmenu .it { min-height: 40px; font-size: 15px; display: flex; align-items: center; }
+body.tablet #statusbar button, body.tablet .stb { min-width: 38px; min-height: 34px; }
+body.tablet #cmdin { font-size: 16px; min-height: 34px; }
+body.tablet .dlg .btn, body.tablet .dlg .fld { min-height: 38px; font-size: 15px; }
+body.tablet #host .cv-over { touch-action: none; }
+.helpcard h3 { font-size: 16px; }
+.helpcard p { margin: 6px 0; line-height: 1.45; }

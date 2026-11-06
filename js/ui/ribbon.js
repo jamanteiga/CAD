@@ -129,6 +129,24 @@ export const TABS = [
     { name: 'Exportar', items: [B('STLOUT', 'Exportar STL', 'printer3d', [S('STLOUT', 'STL', 'printer3d'), S('OBJOUT', 'OBJ', 'printer3d')])] },
   ] });
 }
+// ---- funciones v8: multilíneas, sólidos, vistas 2D, instalaciones, SIG/DWG, colaboración en tiempo real
+{
+  const tab = (id) => TABS.find((t) => t.id === id), panel = (id, name) => tab(id).panels.find((p) => p.name === name);
+  panel('home', 'Dibujo').more.push(S('MLEDIT', 'Editar multilínea', 'mline'));
+  const sol = panel('3d', 'Edición de sólidos');
+  sol.items.push(COL(S('SLICE', 'Corte', 'subtract'), S('SECTION', 'Sección', 'region'), S('CONVTOMESH', 'Convertir en malla', 'box')), COL(S('FILLETEDGE', 'Empalmar arista', 'fillet'), S('CHAMFEREDGE', 'Achaflanar arista', 'chamfer')));
+  tab('3d').panels.splice(2, 0, { name: 'Vistas de dibujo', items: [B('VIEWBASE', 'Vista base', 'view')] });
+  const ex = panel('3d', 'Exportar'); ex.name = 'Importar y exportar';
+  ex.items = [B('IFCIMPORT', 'Importar IFC/STEP', 'open'), B('STLOUT', 'Exportar', 'printer3d', [S('STLOUT', 'STL', 'printer3d'), S('OBJOUT', 'OBJ', 'printer3d'), S('STEPOUT', 'STEP', 'printer3d'), S('IFCOUT', 'IFC', 'printer3d')])];
+  panel('3d', 'Nubes de puntos').items.push(COL(S('POINTCLOUDSECTION', 'Sección de nube', 'region')));
+  tab('insert').panels.splice(4, 0, { name: 'SIG y DWG', items: [B('GISIMPORT', 'Importar SHP/GeoJSON', 'geo'), COL(S('DWGOUT', 'Guardar como DWG', 'save'), S('DWGCONVERTER', 'Conversor DWG', 'options'))] });
+  tab('collab').panels.splice(0, 0, { name: 'Tiempo real', items: [B('COLLAB', 'Colaborar en directo', 'share'), COL(S('LAYERCLAIM', 'Reservar capa', 'laylck'), S('COMMENT', 'Comentar', 'markup'), S('COMMENTS', 'Comentarios', 'markups'))] });
+  panel('view', 'Interfaz').items.push(B('TOUCHMODE', 'Modo tableta', 'cmdline'));
+  const mep = tab('mep');
+  mep.panels.find((p) => p.name === 'Conductos').items.push(COL(S('DUCTELEV', 'Cota de conducto', 'duct'), S('DUCT3D', 'Conductos 3D', 'box'), S('DUCTISO', 'Isométrica', 'iso')), COL(S('DUCTBOM', 'Lista de materiales', 'table'), S('ROOMLOADS', 'Cargas térmicas', 'ductcalc')));
+  mep.panels.find((p) => p.name === 'Tuberías').items.push(COL(S('PIPECALC', 'Pérdida de carga y NPSH', 'ductcalc'), S('FLANGE', 'Brida EN 1092-1', 'circle')));
+  mep.panels.splice(2, 0, { name: 'Presión y P&ID', items: [B('PEDSHEET', 'Hoja PED', 'list'), COL(S('PIDTAG', 'Etiquetar P&ID', 'tcount'), S('PIDLIST', 'Lista de válvulas', 'table'))] });
+}
 const LAYOUT_TAB = { id: 'layout', name: 'Presentación', ctx: true, panels: [
   { name: 'Presentación', items: [B('LAYOUT _N', 'Nueva', 'layout'), B('PAGESETUP', 'Configurar página', 'pagesetup')] },
   { name: 'Ventanas de presentación', items: [B('MVIEW', 'Insertar vista', 'mview', [S('MVIEW', 'Rectangular', 'mview'), S('MVIEW _P', 'Poligonal', 'mview')]), COL(S('MSPACE', 'Espacio modelo', 'mspace'), S('PSPACE', 'Espacio papel', 'layout'), S('MVIEW _LOCK', 'Bloquear', 'laylck'))] },
@@ -166,13 +184,13 @@ export function createRibbon(app) {
   panels.addEventListener('wheel', (e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { panels.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
 
   const bigBtn = (it) => {
-    const b = h('button', { class: 'big', type: 'button', title: it.label + (it.big ? ` (${dispCmd(it.big)})` : '') }, h('span', { class: 'ico', html: icon(it.icon) }), h('span', {}, it.label), it.dd ? h('span', { html: icon('caret'), style: { width: '10px', height: '10px', marginTop: '1px' } }) : '');
+    const b = h('button', { class: 'big', type: 'button', 'data-cmd': it.big || '', title: it.label + (it.big ? ` (${dispCmd(it.big)})` : '') }, h('span', { class: 'ico', html: icon(it.icon) }), h('span', {}, it.label), it.dd ? h('span', { html: icon('caret'), style: { width: '10px', height: '10px', marginTop: '1px' } }) : '');
     b.onclick = (e) => { if (it.dd && e.offsetY > b.clientHeight - 16) return showDrop(b, it.dd); if (it.big === '' && it.label.startsWith('Cerrar')) return app.cmd.submit(''); if (it.big === '' && it.label === 'Designar puntos') return; run(it.big); };
     if (it.dd) b.oncontextmenu = (e) => { e.preventDefault(); showDrop(b, it.dd); };
     return b;
   };
   const smBtn = (it) => {
-    const b = h('button', { class: 'sm' + (it.label ? '' : ' iconly'), type: 'button', title: it.label || dispCmd(it.cmd) }, h('span', { class: 'ico', html: icon(it.icon) }), it.label || '', it.dd ? h('span', { html: icon('caret'), style: { width: '9px', height: '9px' } }) : '');
+    const b = h('button', { class: 'sm' + (it.label ? '' : ' iconly'), type: 'button', 'data-cmd': it.cmd || '', title: it.label || dispCmd(it.cmd) }, h('span', { class: 'ico', html: icon(it.icon) }), it.label || '', it.dd ? h('span', { html: icon('caret'), style: { width: '9px', height: '9px' } }) : '');
     b.onclick = (e) => { if (it.dd && (e.offsetX > b.clientWidth - 12 || !it.label)) { if (!it.label && e.offsetX < b.clientWidth - 12) return run(it.cmd); return showDrop(b, it.dd); } run(it.cmd); };
     return b;
   };

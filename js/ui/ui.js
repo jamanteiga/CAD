@@ -137,6 +137,8 @@ export function createUI(app) {
     if (g.vi != null) { items.push(['Añadir vértice', () => eng.gripAction(g, 'add')]); if (g.ent.pts.length > 2) items.push(['Eliminar vértice', () => eng.gripAction(g, 'del')]); }
     else if (g.si != null) { items.push(['Añadir vértice', () => eng.gripAction(g, 'add')]); items.push(g.arcSeg ? ['Convertir en línea', () => eng.gripAction(g, 'line')] : ['Convertir en arco', () => eng.gripAction(g, 'arc')]); }
     else if (g.le) items.push(['Alargar', () => eng.gripAction(g, 'lengthen')]);
+    else if (g.dimText) items.splice(0, 1, ['Mover con línea de cota', () => eng.gripAction(g, 'stretch')], ['Mover solo texto', () => eng.gripAction(g, 'dimTextOnly')], ['Encima de línea de cota', () => eng.gripAction(g, 'dimAbove')], ['Centrar verticalmente', () => eng.gripAction(g, 'dimCenter')], ['Restablecer posición de texto', () => eng.gripAction(g, 'dimReset')]);
+    else if (g.dimLine) items.push(['Cota continua', () => eng.gripAction(g, 'dimContinue')], ['Cota de línea base', () => eng.gripAction(g, 'dimBaseline')]);
     ui.popup(r.left + sx + 10, r.top + sy + 10, items);
   };
   ui.contextMenu = (info) => {
@@ -272,7 +274,7 @@ export function createUI(app) {
       else if (/\.(mnu|mns)$/i.test(f.name)) ui.menu12.loadMNU(await f.text(), f.name);
       else if (/\.(dwg|dxf|wcad|json)$/i.test(f.name)) { ui.start.hide(); await app.io.openFile(f); }
       else if (/\.(png|jpe?g|gif|bmp|webp)$/i.test(f.name) && app.attachImage) { const r = host.getBoundingClientRect(), p = app.view.toWorld(e.clientX - r.left, e.clientY - r.top); const data = await new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(f); }); await app.attachImage(f.name, data, p, 100 / app.view.cur.s * 3); }
-      else if (/\.(xyz|pts|ply|las_txt|csv)$/i.test(f.name) && app.attachCloud) await app.attachCloud(f);
+      else if (/\.(xyz|pts|ply|las|csv)$/i.test(f.name) && app.attachCloud) await app.attachCloud(f);
     }
   });
   return ui;

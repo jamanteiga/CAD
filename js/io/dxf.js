@@ -8,6 +8,7 @@ import { layoutBase } from '../core/i18n.js';
 const D2R = Math.PI / 180;
 
 // ============ LECTURA
+import { pairsToLisp } from './xdutil.js';
 export function parseDXF(text) {
   const lines = text.split(/\r\n|\r|\n/);
   const pairs = [];
@@ -191,6 +192,26 @@ function xd(g) {
   for (let k = i + 1; k < g.length && g[k][0] !== 1001; k++) if (g[k][0] === 1000) s += g[k][1];
   try { return JSON.parse(s); } catch (_) { return null; }
 }
+// datos extendidos de otras aplicaciones -> e.xd (texto LISP), vínculos PE_URL y ldata
+function userXd(g, e) {
+  let app = null, pairs = [];
+  const flush = () => {
+    if (!app) return;
+    if (app === 'PE_URL') { const s = pairs.filter((p) => p[0] === 1000).map((p) => p[1]); if (s[0]) { e.url = s[0]; if (s[1]) e.urlDesc = s[1]; } }
+    else if (app === 'WEBCAD_LDATA') { try { e.ldata = JSON.parse(pairs.filter((p) => p[0] === 1000).map((p) => p[1]).join('')); } catch (_) { /* dañado */ } }
+    else if (app !== 'WEBCAD' && app !== 'ACAD' && pairs.length) (e.xd ||= {})[app] = pairsToLisp(pairs);
+    app = null; pairs = [];
+  };
+  for (let k = 0; k < g.length; k++) {
+    const c = g[k][0];
+    if (c === 1001) { flush(); app = g[k][1].trim().toUpperCase(); continue; }
+    if (!app || c < 1000) continue;
+    if (c >= 1010 && c <= 1013) { pairs.push([c, [+g[k][1], +(g[k + 1]?.[1] || 0), +(g[k + 2]?.[1] || 0)]]); k += 2; continue; }
+    const v = g[k][1].trim();
+    pairs.push([c, (c >= 1040 && c <= 1042) || c === 1070 || c === 1071 ? +v : v]);
+  }
+  flush();
+}
 // objetos: diccionarios, grupos, propiedades y datos propios
 function readObjects(doc, objs) {
   const byH = {};
@@ -210,6 +231,10 @@ function readObjects(doc, objs) {
         const x = o[1]; const custom = {};
         for (let c = 300; c < 310; c++) { const v = gv(x, c); if (v && v !== '=' && v.includes('=')) { const [a, ...b] = v.split('='); custom[a] = b.join('='); } }
         doc.props = { ...(doc.props || {}), title: gv(x, 2) || '', subject: gv(x, 3) || '', author: gv(x, 4) || '', comments: gv(x, 6) || '', keywords: gv(x, 7) || '', lastSavedBy: gv(x, 8) || '', revision: gv(x, 9) || '', custom };
+      } else if (o[0] === 'DICTIONARY' && !/^ACAD_|^AcDb|^DWGPROPS$|^WEBCAD/.test(name) && g === objs.find(([t]) => t === 'DICTIONARY')?.[1]) {
+        // diccionario con nombre de usuario (namedobjdict)
+        const readD = (dg, depth = 0) => { const D_ = { type: 'DICTIONARY', items: {} }; for (const [k, hh] of dictEntries(dg)) { const it = byH[hh]; if (!it) continue; if (it[0] === 'DICTIONARY' && depth < 8) D_.items[k] = readD(it[1], depth + 1); else if (it[0] === 'XRECORD') { const ps = it[1].filter((p) => ![5, 100, 102, 330, 360, 280].includes(p[0])); D_.items[k] = { type: 'XRECORD', data: pairsToLisp(ps.map((p) => [p[0], /^-?\d+(\.\d+)?(e[-+]?\d+)?$/i.test(p[1].trim()) && p[0] >= 10 ? +p[1] : p[1].trim()])) }; } } return D_; };
+        doc.dicts ||= {}; doc.dicts[name] = readD(o[1]);
       } else if (name === 'WEBCAD_DATA' && o[0] === 'XRECORD') {
         try {
           const d = JSON.parse(o[1].filter((p) => p[0] === 300).map((p) => p[1]).join(''));
@@ -260,6 +285,8 @@ function common(g) {
   if (+(gv(g, 60) || 0) === 1) e.visible = false;
   const h = gv(g, 5); if (h) e.hid = h.toUpperCase();
   const x = xd(g); if (x) e._xd = x;
+  const tr = gv(g, 440); if (tr != null) { const a = (+tr) & 0xff; if ((+tr) & 0x02000000) { const t = Math.round((1 - a / 255) * 100); if (t > 0) e.transp = t; } }
+  userXd(g, e);
   return e;
 }
 const ocsFlip = (g) => +(gv(g, 230) ?? 1) < 0;

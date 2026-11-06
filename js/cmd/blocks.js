@@ -212,6 +212,12 @@ export function register(eng, app) {
       c.print('Specify objects to stretch');
       const ids = await pickActionObjs(c);
       (p.actions ||= []).push({ type: 'stretch', frame, ids });
+    } else if (t === 'Array') {
+      c.print('Specify objects for Array action');
+      const ids = await pickActionObjs(c);
+      const cs = need(await c.getDist('Enter the distance between columns:', { def: Math.max(1, G.dist(p.p1, p.p2) / 2) }));
+      const rs = p.type === 'xy' ? need(await c.getDist('Enter the distance between rows:', { def: cs })) : 0;
+      (p.actions ||= []).push({ type: 'array', ids, cs, rs });
     } else {
       const ids = await pickActionObjs(c);
       (p.actions ||= []).push({ type: t.toLowerCase(), ids });
@@ -233,7 +239,12 @@ export function register(eng, app) {
       const p = { type: ty, name: nm, p1, p2, inc: inc || 0, actions: [] };
       if (ty === 'linear') { const vs = await c.getString('Enter value set (comma-separated) <none>:', { def: '', spaces: true }); const vals = String(vs || '').split(/[;,\s]+/).map(Number).filter((x) => Number.isFinite(x) && x > 0); if (vals.length) p.vals = vals.sort((a, b) => a - b); }
       be.params.push(p);
-      await askAction(c, p, ty === 'linear' ? ['Stretch', 'Move', 'Scale'] : ['Stretch', 'Move']);
+      await askAction(c, p, ty === 'linear' ? ['Stretch', 'Move', 'Scale', 'Array'] : ty === 'xy' ? ['Stretch', 'Move', 'Array'] : ['Stretch', 'Move']);
+    } else if (t === 'Alignment') {
+      const p1 = need(await c.getPoint('Specify base point of alignment or [Name]:'));
+      const p2 = need(await c.getPoint('Alignment direction:', { base: p1 }));
+      be.params.push({ type: 'alignment', name: `Alignment${n}`, p1, p2 });
+      c.print('The block will align to nearby objects when the alignment grip is moved.');
     } else if (t === 'Lookup') {
       const loc = need(await c.getPoint('Specify parameter location or [Name/Label/Description/Palette]:'));
       const nm = (await c.getString(`Enter parameter label <Lookup${n}>:`, { def: `Lookup${n}` })) || `Lookup${n}`;
@@ -277,7 +288,8 @@ export function register(eng, app) {
     const p = be.params.find((x) => x.name.toUpperCase() === String(nm).toUpperCase());
     if (!p) { c.print('Parameter not found.'); return; }
     doc().touchTables();
-    if (p.type === 'linear') await askAction(c, p, ['Stretch', 'Move', 'Scale']);
+    if (p.type === 'linear') await askAction(c, p, ['Stretch', 'Move', 'Scale', 'Array']);
+    else if (p.type === 'xy' || p.type === 'polar') await askAction(c, p, p.type === 'xy' ? ['Stretch', 'Move', 'Array'] : ['Stretch', 'Move']);
     else if (p.type === 'rotation') (p.actions ||= []).push({ type: 'rotate', ids: await pickActionObjs(c) });
     else if (p.type === 'flip') (p.actions ||= []).push({ type: 'flip', ids: await pickActionObjs(c) });
   });

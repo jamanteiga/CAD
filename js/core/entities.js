@@ -289,8 +289,20 @@ export function applyDynamic(blk, dyn) {
   // tablas de consulta: la fila elegida fija los valores de otros parámetros
   dyn = { ...dyn };
   for (const p of blk.params || []) if (p.type === 'lookup') { const row = (p.rows || []).find((r) => r.label === dyn[p.name]); if (row) Object.assign(dyn, row.values || {}); }
+  // acción de matriz: repite los objetos según la distancia del parámetro
+  const actArray = (ac, dx, dy) => {
+    const src = byId(ac.ids), cs = ac.cs || 1, rs = ac.rs || 1;
+    const nc = Math.max(1, Math.floor(Math.abs(dx) / cs + 1e-9) + 1), nr = dy == null ? 1 : Math.max(1, Math.floor(Math.abs(dy) / rs + 1e-9) + 1);
+    const ux = ac.dir || { x: Math.sign(dx) || 1, y: 0 }, uy = { x: 0, y: Math.sign(dy || 1) };
+    for (let i = 0; i < Math.min(nc, 500); i++) for (let j = 0; j < Math.min(nr, 500); j++) {
+      if (!i && !j) continue;
+      const off = G.add(G.mul(ux, i * cs), G.mul(uy, j * rs));
+      for (const s0 of src) { const c = cloneEnt(s0); delete c.bid; transformEnt(c, M.tr(off.x, off.y)); ents.push(c); }
+    }
+  };
   const actStretch = (p, delta, k) => {
     for (const ac of p.actions || []) {
+      if (ac.type === 'array') { actArray(ac, (p.type === 'xy' ? (p.p2.x - p.p1.x) : 0) + delta.x, p.type === 'xy' ? (p.p2.y - p.p1.y) + delta.y : null); continue; }
       if (ac.type === 'stretch') for (const ent of byId(ac.ids)) moveEntPoints(ent, ac.frame, delta);
       else if (ac.type === 'move') for (const ent of byId(ac.ids)) { transformEnt(ent, M.tr(delta.x, delta.y)); invalidate(ent); }
       else if (ac.type === 'scale' && k != null) for (const ent of byId(ac.ids)) { transformEnt(ent, M.scale(k, p.p1)); invalidate(ent); }
@@ -309,6 +321,7 @@ export function applyDynamic(blk, dyn) {
         if (ac.type === 'stretch') for (const ent of byId(ac.ids)) moveEntPoints(ent, ac.frame, delta);
         else if (ac.type === 'move') for (const ent of byId(ac.ids)) { transformEnt(ent, M.tr(delta.x, delta.y)); invalidate(ent); }
         else if (ac.type === 'scale') { const k = base > 0 ? v / base : 1; for (const ent of byId(ac.ids)) { transformEnt(ent, M.scale(k, p.p1)); invalidate(ent); } }
+        else if (ac.type === 'array') actArray({ ...ac, dir }, v, null);
       }
     } else if (p.type === 'rotation') {
       const da = v - (p.a0 || 0);
@@ -339,6 +352,7 @@ export function dynGrips(e, doc) {
     else if (p.type === 'xy' && v) out.push({ kind: 'dxy', param: p, p: M.apply(m, G.add(p.p1, { x: v.x, y: v.y })) });
     else if (p.type === 'polar' && v) out.push({ kind: 'dpol', param: p, p: M.apply(m, G.polar(p.p1, v.a, v.d)) });
     else if (p.type === 'lookup') out.push({ kind: 'dlook', param: p, p: M.apply(m, p.p || blk.base) });
+    else if (p.type === 'alignment') out.push({ kind: 'dalign', param: p, p: M.apply(m, p.p1) });
   }
   return out;
 }
@@ -356,7 +370,29 @@ export function dynSetFromPoint(e, doc, grip, wp) {
   } else if (p.type === 'rotation') e.dyn[p.name] = G.ang(p.c, lp);
   else if (p.type === 'xy') { let x = lp.x - p.p1.x, y = lp.y - p.p1.y; if (p.inc > 0) { x = Math.round(x / p.inc) * p.inc; y = Math.round(y / p.inc) * p.inc; } e.dyn[p.name] = { x, y }; }
   else if (p.type === 'polar') { let d = G.dist(p.p1, lp); if (p.inc > 0) d = Math.round(d / p.inc) * p.inc; e.dyn[p.name] = { d, a: G.ang(p.p1, lp) }; }
+  else if (p.type === 'alignment') alignInsert(e, doc, blk, p, wp);
   invalidate(e);
+}
+
+// parámetro de alineación: el bloque se gira para alinearse con el objeto más próximo al punto
+export function alignInsert(e, doc, blk, p, wp) {
+  const space = doc.space || doc.model || [];
+  let best = null, bd = Infinity;
+  for (const o of space) {
+    if (o === e || o.type === 'TEXT' || o.type === 'MTEXT') continue;
+    for (const pr of localPrims(o, doc)) {
+      const q = G.primNearest(pr, wp); if (!q) continue; const d = G.dist(q, wp);
+      if (d < bd) { bd = d; best = { q, pr }; }
+    }
+  }
+  const sz = Math.max(1e-6, G.dist(p.p1, p.p2) * (e.sx || 1));
+  const m0 = insertMatrix(e, blk), cur = M.apply(m0, p.p1);
+  if (!best || bd > sz * 3) { const d = G.sub(wp, cur); e.p = G.add(e.p, d); return; }
+  const t = best.pr.k === 'L' ? G.ang(best.pr.a, best.pr.b) : G.ang(best.pr.c, best.q) + Math.PI / 2;
+  const rot = G.normA(t - G.ang(p.p1, p.p2));
+  e.rot = rot;
+  const m1 = insertMatrix(e, blk), now = M.apply(m1, p.p1);
+  e.p = G.add(e.p, G.sub(best.q, now));
 }
 
 // ---------- cotas: geometría generada
@@ -712,7 +748,7 @@ export function entGrips(e, doc) {
     case 'HATCH': if (e.loops[0]) e.loops[0].forEach((v, i) => add(v, (x, p) => (x.loops[0][i] = { x: p.x, y: p.y, b: x.loops[0][i].b || 0 }))); break;
     case 'DUCT': e.pts.forEach((v, i) => add(v, (x, p) => { x.pts[i] = { x: p.x, y: p.y }; })); break;
     case 'TABLE': add(e.p, (x, p) => (x.p = p)); break;
-    case 'DIMENSION': for (const k of ['p1', 'p2', 'c', 'dp', 'jc', 'jp']) if (e[k]) add(e[k], (x, p) => (x[k] = p)); if (e.p1) add(textAnchorOfDim(e, doc), (x, p) => (x.tp = p)); break;
+    case 'DIMENSION': for (const k of ['p1', 'p2', 'c', 'dp', 'jc', 'jp']) if (e[k]) { add(e[k], (x, p) => (x[k] = p)); if (k === 'dp') g[g.length - 1].dimLine = true; } if (e.p1) { add(textAnchorOfDim(e, doc), (x, p) => (x.tp = p)); g[g.length - 1].dimText = true; } break;
     case 'VIEWPORT': {
       const c = e.c; add(c, (x, p) => (x.c = p));
       [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => add({ x: c.x + sx * e.w / 2, y: c.y + sy * e.h / 2 }, (x, p) => { x.w = Math.max(1, Math.abs(p.x - x.c.x) * 2); x.h = Math.max(1, Math.abs(p.y - x.c.y) * 2); }));

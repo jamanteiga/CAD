@@ -540,7 +540,7 @@ export function register(eng, app) {
       const r = await c.ask({ kind: 'point', wantsPoint: true, prompt: 'Specify an option [Select/Advanced options] <Internal point>:' });
       if (r == null || r === '') break;
       if (r === 'Select') { const s = await c.select('Select objects:', { filter: (e) => !!loopOf(e) || e.type === 'REGION' }); for (const e of s) { if (e.type === 'REGION') loops.push(...e.loops); else loops.push(loopOf(e)); } break; }
-      if (isPt(r)) { const pts = findBoundary(app, r); if (pts) { loops.push(pts.map((p) => ({ x: p.x, y: p.y, b: 0 }))); c.print('Boundary found.'); } else c.print('Valid hatch boundary not found.'); }
+      if (isPt(r)) { const ls = findBoundary(app, r); if (ls?.length) { loops.push(...ls.map((l) => l.map((p) => ({ x: p.x, y: p.y, b: p.b || 0 })))); c.print('Boundary found.'); } else c.print('Valid hatch boundary not found.'); }
     }
     if (!loops.length) return;
     d.begin('SUPERHATCH');

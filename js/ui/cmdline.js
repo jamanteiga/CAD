@@ -106,6 +106,7 @@ export function createCmdline(app) {
       return;
     }
     if (e.key === ' ' && app.cmd.gripDrag && !inp.value) { e.preventDefault(); app.cmd.cycleGripMode(); }
+    if (e.key === 'Control' && app.cmd.gripDrag && !e.repeat) { e.preventDefault(); app.cmd.cycleGripMode(); }
   });
   inp.addEventListener('blur', () => setTimeout(hideAC, 150));
   cl.setPrompt('');

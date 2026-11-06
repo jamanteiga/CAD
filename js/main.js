@@ -23,6 +23,14 @@ import * as Refs from './cmd/refs.js';
 import * as Layers2 from './cmd/layers2.js';
 import * as Prod2 from './cmd/prod2.js';
 import * as Solid3D from './cmd/solid3d.js';
+import * as V8A from './cmd/v8a.js';
+import * as V8B from './cmd/v8b.js';
+import * as V8C from './cmd/v8c.js';
+import * as V8D from './cmd/v8d.js';
+import * as V8E from './cmd/v8e.js';
+import * as V8F from './cmd/v8f.js';
+import { installGL } from './view/glfast.js';
+import { createHelp } from './ui/helpcards.js';
 import { Lisp } from './lisp/lisp.js';
 import { createIO } from './io/io.js';
 import { createUI } from './ui/ui.js';
@@ -96,6 +104,18 @@ Refs.register(app.cmd, app);
 Layers2.register(app.cmd, app);
 Prod2.register(app.cmd, app);
 Solid3D.register(app.cmd, app);
+V8A.register(app.cmd, app);
+V8B.register(app.cmd, app);
+V8C.register(app.cmd, app);
+V8D.register(app.cmd, app);
+V8E.register(app.cmd, app);
+V8F.register(app.cmd, app);
+installGL(View, app);
+app.help = createHelp(app);
+{ // F1: ficha del comando activo, o la referencia general
+  const H = app.cmd.commands.HELP;
+  app.cmd.register('HELP', async () => { const a = app.cmd.active; if (a && a !== 'HELP' && app.help.card(a).exists) return app.help.show(a); return app.ui.dlg.help(); }, { alias: ['?'], transparent: true, keepSel: true, ...(H ? { transparent: H.transparent, keepSel: H.keepSel } : {}) });
+}
 app.ui.applyLayout();
 app.ui.translateStatic();
 

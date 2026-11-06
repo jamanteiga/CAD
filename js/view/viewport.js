@@ -392,7 +392,7 @@ export class View {
       const gs = this.app.settings.gripSize || 6;
       for (const g of eng.grips) {
         const s = this.toScreen(g.p); const x = s.x * r, y = s.y * r, h = gs * r / 2 + 0.5;
-        const hot = eng.gripDrag && eng.gripDrag.grip === g, near = eng.hoverGrip === g;
+        const hot = (eng.gripDrag && eng.gripDrag.grip === g) || eng.hotGrips?.includes(g), near = eng.hoverGrip === g;
         c.fillStyle = hot ? '#ff5a3c' : near ? '#ffb347' : g.kind?.startsWith('d') ? '#7fdcd0' : g.kind === 'mid' ? '#3fbfb2' : '#14a196';
         c.strokeStyle = dark ? '#0b1b1d' : '#ffffff'; c.lineWidth = 1;
         c.beginPath();
@@ -429,6 +429,7 @@ export class View {
     }
     this.app.drawConstraints?.(c, this, dark);
     this.app.drawCompare?.(c, this, dark);
+    if (eng.hover && !eng.req && !eng.gripDrag && !eng.hover.url && performance.now() - (eng.hoverT || 0) > 600) this.app.drawRollover?.(c, this, eng.hover, dark);
     this.app.drawMarkups?.(c, this, dark);
     // cursor
     if (this.mouse.in) this.drawCursor(c, dark);

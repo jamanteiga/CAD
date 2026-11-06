@@ -20,6 +20,7 @@ export function meshOf(e) {
   const v = [], f = [];
   const add = (x, y, z) => (v.push([x, y, z]), v.length - 1);
   const z0 = e.z0 || 0;
+  if (e.kind === 'mesh') { for (const poly of e.polys || []) f.push(poly.map((p) => add(p[0], p[1], p[2]))); return { v, f }; }
   if (e.kind === 'sphere') {
     const n = 24, m = 12, c = e.c, r = e.r, zc = z0 + r;
     for (let j = 0; j <= m; j++) { const phi = Math.PI * j / m; for (let i = 0; i < n; i++) { const th = 2 * Math.PI * i / n; add(c.x + r * Math.sin(phi) * Math.cos(th), c.y + r * Math.sin(phi) * Math.sin(th), zc + r * Math.cos(phi)); } }
@@ -63,7 +64,18 @@ export function meshVolume(m) {
   for (const f of m.f) for (let i = 1; i < f.length - 1; i++) tri(m.v[f[0]], m.v[f[i]], m.v[f[i + 1]]);
   return V;
 }
+// aristas vivas de una malla proyectadas en planta
+export function featureEdges(m, angDeg = 20) {
+  const key = (p) => `${p[0].toFixed(6)},${p[1].toFixed(6)},${p[2].toFixed(6)}`;
+  const nrm = (f) => { let n = [0, 0, 0]; for (let i = 0; i < f.length; i++) { const p = m.v[f[i]], q = m.v[f[(i + 1) % f.length]]; n[0] += (p[1] - q[1]) * (p[2] + q[2]); n[1] += (p[2] - q[2]) * (p[0] + q[0]); n[2] += (p[0] - q[0]) * (p[1] + q[1]); } const l = Math.hypot(...n) || 1; return n.map((x) => x / l); };
+  const E2 = new Map();
+  m.f.forEach((f, fi) => { const n = nrm(f); for (let i = 0; i < f.length; i++) { const a = m.v[f[i]], b = m.v[f[(i + 1) % f.length]]; const ka = key(a), kb = key(b); const k = ka < kb ? ka + '|' + kb : kb + '|' + ka; const o = E2.get(k); if (o) o.n.push(n); else E2.set(k, { a, b, n: [n] }); } });
+  const cmax = Math.cos(angDeg * Math.PI / 180), out = [];
+  for (const { a, b, n } of E2.values()) if (n.length < 2 || n[0][0] * n[1][0] + n[0][1] * n[1][1] + n[0][2] * n[1][2] < cmax) out.push([a, b]);
+  return out;
+}
 const solidOutline = (e) => {
+  if (e.kind === 'mesh') { const out = []; const seen = new Set(); for (const [a, b] of featureEdges(meshOf(e))) { if (Math.hypot(a[0] - b[0], a[1] - b[1]) < 1e-9) continue; const k = [a[0], a[1], b[0], b[1]].map((x) => x.toFixed(5)); const kk = k[0] + k[1] < k[2] + k[3] ? k.join() : [k[2], k[3], k[0], k[1]].join(); if (seen.has(kk)) continue; seen.add(kk); out.push({ type: 'LINE', p1: { x: a[0], y: a[1] }, p2: { x: b[0], y: b[1] } }); } return out; }
   if (e.kind === 'sphere') return [{ type: 'CIRCLE', c: e.c, r: e.r }];
   if (e.kind === 'revolve') { const m = meshOf(e); const pts = m.v.map(([x, y]) => ({ x, y })); const bb = G.bbNew(); for (const p of pts) G.bbAdd(bb, p); return [{ type: 'LWPOLYLINE', pts: [{ x: bb.x1, y: bb.y1 }, { x: bb.x2, y: bb.y1 }, { x: bb.x2, y: bb.y2 }, { x: bb.x1, y: bb.y2 }].map((p) => ({ ...p, b: 0 })), closed: true }, ...e.prof.map((l) => ({ type: 'LWPOLYLINE', pts: l.map((p) => ({ ...p })), closed: true }))]; }
   const out = e.prof.map((l) => ({ type: 'LWPOLYLINE', pts: l.map((p) => ({ x: p.x, y: p.y, b: p.b || 0 })), closed: true }));
@@ -72,10 +84,17 @@ const solidOutline = (e) => {
 };
 E.GEN['3DSOLID'] = {
   pts: ['c'], loops: ['prof'], arrs: ['axis'], lens: ['r', 'h'],
-  xform(e, m, o) { if (o.s !== 1) e.z0 = (e.z0 || 0) * o.s; },
+  xform(e, m, o) {
+    if (o.s !== 1) e.z0 = (e.z0 || 0) * o.s;
+    if (e.polys) e.polys = e.polys.map((f) => { const g = f.map((p) => { const q = G.M.apply(m, { x: p[0], y: p[1] }); return [q.x, q.y, p[2] * o.s]; }); return o.mir ? g.reverse() : g; });
+  },
   ents(e) { return solidOutline(e).map((x) => ({ ...x, layer: e.layer })); },
   volume(e) { return Math.abs(meshVolume(meshOf(e))); },
-  inside(e, p) { if (e.kind === 'sphere') return G.dist(p, e.c) <= e.r; return e.prof?.[0] ? G.ptInPoly(p, ring(e.prof[0])) : false; },
+  inside(e, p) {
+    if (e.kind === 'sphere') return G.dist(p, e.c) <= e.r;
+    if (e.kind === 'mesh') return (e.polys || []).some((f) => f.length > 2 && G.ptInPoly(p, f.map((q) => ({ x: q[0], y: q[1] }))));
+    return e.prof?.[0] ? G.ptInPoly(p, ring(e.prof[0])) : false;
+  },
 };
 
 // ======================= NUBES DE PUNTOS =======================
@@ -103,7 +122,11 @@ export function parseCloud(text, name) {
     if (/\.pts$/i.test(name) && p.length >= 7) r = p.slice(4, 7); else if (p.length >= 6) r = p.slice(3, 6);
     if (r && r.every((v) => isFinite(v))) { if (r.every((v) => v <= 1) && r.some((v) => v > 0 && v < 1)) r = r.map((v) => v * 255); rgb.push(...r.map((v) => Math.max(0, Math.min(255, Math.round(v))))); hasRgb = true; } else rgb.push(200, 200, 200);
   }
-  const n = xyz.length / 3;
+  return buildCloud(name, xyz, hasRgb ? rgb : null);
+}
+// construye la nube serializable a partir de coordenadas (x,y,z…) y colores opcionales (r,g,b…)
+export function buildCloud(name, xyz, rgb) {
+  const n = Math.floor(xyz.length / 3);
   // origen local para conservar la precisión en coordenadas UTM grandes
   let ox = 0, oy = 0, oz = 0;
   if (n) { ox = Math.floor(xyz[0]); oy = Math.floor(xyz[1]); oz = Math.floor(xyz[2]); }
@@ -113,7 +136,28 @@ export function parseCloud(text, name) {
     f[k * 3] = x - ox; f[k * 3 + 1] = y - oy; f[k * 3 + 2] = z - oz;
     if (x < bb.x1) bb.x1 = x; if (x > bb.x2) bb.x2 = x; if (y < bb.y1) bb.y1 = y; if (y > bb.y2) bb.y2 = y; if (z < bb.z1) bb.z1 = z; if (z > bb.z2) bb.z2 = z;
   }
-  return { name, n, xyz: b64(new Uint8Array(f.buffer)), rgb: hasRgb ? b64(Uint8Array.from(rgb)) : null, bb, ox, oy, oz };
+  return { name, n, xyz: b64(new Uint8Array(f.buffer)), rgb: rgb ? b64(Uint8Array.from(rgb)) : null, bb, ox, oy, oz };
+}
+// LAS 1.0-1.4 binario sin comprimir (formatos de punto 0-10); diezma por encima de maxPts
+export function parseLAS(buf, name, maxPts = 3000000) {
+  const dv = new DataView(buf);
+  if (String.fromCharCode(dv.getUint8(0), dv.getUint8(1), dv.getUint8(2), dv.getUint8(3)) !== 'LASF') throw new Error('No es un archivo LAS');
+  const minor = dv.getUint8(25), off = dv.getUint32(96, true), fmt = dv.getUint8(104) & 0x3f, rlen = dv.getUint16(105, true);
+  if (dv.getUint8(104) & 0x80) throw new Error('LAZ comprimido: descomprímalo a LAS');
+  let n = dv.getUint32(107, true);
+  if (minor >= 4 && dv.byteLength > 255) { const n64 = Number(dv.getBigUint64(247, true)); if (n64) n = n64; }
+  n = Math.min(n, Math.floor((buf.byteLength - off) / rlen));
+  const sx = dv.getFloat64(131, true), sy = dv.getFloat64(139, true), sz = dv.getFloat64(147, true), ox = dv.getFloat64(155, true), oy = dv.getFloat64(163, true), oz = dv.getFloat64(171, true);
+  const rgbOff = { 2: 20, 3: 28, 5: 28, 7: 30, 8: 30, 10: 30 }[fmt];
+  const step = Math.max(1, Math.ceil(n / maxPts)), xyz = [], rgb = rgbOff ? [] : null;
+  let k16 = 1;
+  if (rgbOff) { let mx = 0; for (let i = 0; i < Math.min(n, 2000); i++) { const o = off + i * rlen + rgbOff; mx = Math.max(mx, dv.getUint16(o, true), dv.getUint16(o + 2, true), dv.getUint16(o + 4, true)); } k16 = mx > 255 ? 256 : 1; }
+  for (let i = 0; i < n; i += step) {
+    const o = off + i * rlen;
+    xyz.push(dv.getInt32(o, true) * sx + ox, dv.getInt32(o + 4, true) * sy + oy, dv.getInt32(o + 8, true) * sz + oz);
+    if (rgb) rgb.push(...[0, 2, 4].map((d) => Math.min(255, Math.round(dv.getUint16(o + rgbOff + d, true) / k16))));
+  }
+  return buildCloud(name, xyz, rgb);
 }
 const ramp = (t) => { t = Math.max(0, Math.min(1, t)); const r = Math.round(255 * Math.min(1, Math.max(0, 1.5 - Math.abs(4 * t - 3)))), g = Math.round(255 * Math.min(1, Math.max(0, 1.5 - Math.abs(4 * t - 2)))), b = Math.round(255 * Math.min(1, Math.max(0, 1.5 - Math.abs(4 * t - 1)))); return [r, g, b]; };
 E.GEN.POINTCLOUD = {
@@ -422,8 +466,8 @@ export function register(eng, app) {
 
   // ---------- nubes de puntos
   const attachCloud = async (f, p = { x: 0, y: 0 }) => {
-    const text = await f.text();
-    const cl = parseCloud(text, f.name);
+    let cl;
+    try { cl = /\.las$/i.test(f.name) ? parseLAS(await f.arrayBuffer(), f.name) : parseCloud(await f.text(), f.name); } catch (err) { app.log(`${f.name}: ${err.message}`); return null; }
     if (!cl.n) { app.log(`${f.name}: no point data.`); return null; }
     const d = doc(); d.begin('POINTCLOUDATTACH'); d.touchTables();
     const id = f.name.replace(/\.[^.]+$/, '').replace(/[^\w-]+/g, '_') + '_' + Math.random().toString(36).slice(2, 6);
@@ -435,7 +479,7 @@ export function register(eng, app) {
   };
   app.attachCloud = attachCloud;
   app.cloudFromText = (name, text) => attachCloud({ name, text: async () => text });
-  R('POINTCLOUDATTACH', async () => { const f = await app.io.pickFile('.xyz,.txt,.csv,.pts,.ply'); if (f) await attachCloud(f); }, { alias: ['PCATTACH', 'POINTCLOUD'] });
+  R('POINTCLOUDATTACH', async () => { const f = await app.io.pickFile('.xyz,.txt,.csv,.pts,.ply,.las'); if (f) await attachCloud(f); }, { alias: ['PCATTACH', 'POINTCLOUD'] });
   R('POINTCLOUDCOLORMAP', async (c) => {
     const s = await c.select('Select point cloud:', { filter: (e) => e.type === 'POINTCLOUD' }); if (!s.length) return;
     const k = await c.getKw('Enter color mode [Rgb/Elevation/Object] <Rgb>:', 'Rgb'); if (k == null) return;
@@ -463,7 +507,7 @@ export function register(eng, app) {
       { k: 'x', l: 'Punto de diseño X', v: g.dp.x, t: 'number' }, { k: 'y', l: 'Punto de diseño Y', v: g.dp.y, t: 'number' },
       { k: 'north', l: 'Ángulo del norte (°)', v: G.deg(g.north || 0), t: 'number' },
       { k: 'unit', l: 'Unidades del dibujo', v: g.unit, t: 'select', opts: [{ v: 1, l: 'Metros' }, { v: 0.001, l: 'Milímetros' }, { v: 0.01, l: 'Centímetros' }, { v: 1000, l: 'Kilómetros' }, { v: 0.3048, l: 'Pies' }] },
-      { k: 'map', l: 'Mapa en línea', v: g.map || 'off', t: 'select', opts: [{ v: 'off', l: 'Desactivado' }, { v: 'road', l: 'Callejero (OpenStreetMap)' }] },
+      { k: 'map', l: 'Mapa en línea', v: g.map || 'off', t: 'select', opts: [{ v: 'off', l: 'Desactivado' }, { v: 'road', l: 'Callejero (OpenStreetMap)' }, { v: 'aerial', l: 'Aéreo (Esri World Imagery)' }] },
     ]);
     if (!r) return;
     d.begin('GEOGRAPHICLOCATION'); d.touchTables();
@@ -472,8 +516,8 @@ export function register(eng, app) {
   }, { alias: ['GEO', 'GEOLOCATION'] });
   R('GEOMAP', async (c) => {
     const d = doc(); if (!d.ext.geo) { c.print('The drawing is not geolocated. Use GEOGRAPHICLOCATION.'); return; }
-    const k = await c.getKw('Enter an option [Road/Off] <Road>:', 'Road'); if (k == null) return;
-    d.begin('GEOMAP'); d.touchTables(); d.ext.geo.map = k === 'Off' ? 'off' : 'road'; d.end(); redraw();
+    const k = await c.getKw('Enter an option [Aerial/Road/Off] <Road>:', 'Road'); if (k == null) return;
+    d.begin('GEOMAP'); d.touchTables(); d.ext.geo.map = k === 'Off' ? 'off' : k === 'Aerial' ? 'aerial' : 'road'; d.end(); redraw();
   });
   R('GEOREMOVE', async () => { const d = doc(); d.begin('GEOREMOVE'); d.touchTables(); d.ext.geo = null; d.end(); redraw(); });
   R('GEOMARKLATLONG', async (c) => {
@@ -490,7 +534,7 @@ export function register(eng, app) {
     const d = doc(), g = d.ext?.geo; if (!g || d.active !== 'Model') return;
     const r = view.dpr, bb = view.worldBB(v);
     view.setWorld(ctx, v);
-    if (g.map === 'road') {
+    if (g.map === 'road' || g.map === 'aerial') {
       const mpp = (g.unit || 1) / v.s, cosl = Math.cos(G.rad(g.lat));
       const z = Math.max(0, Math.min(19, Math.round(Math.log2(156543.03 * cosl / mpp))));
       const corners = [[bb.x1, bb.y1], [bb.x2, bb.y1], [bb.x2, bb.y2], [bb.x1, bb.y2]].map(([x, y]) => geoToLatLon(g, { x, y }));
@@ -500,8 +544,8 @@ export function register(eng, app) {
         for (let tx = tx1; tx <= tx2; tx++) for (let ty = ty1; ty <= ty2; ty++) {
           const n = 2 ** z; if (ty < 0 || ty >= n) continue;
           const key = `${z}/${((tx % n) + n) % n}/${ty}`;
-          let im = TILES.get(key);
-          if (!im) { im = new Image(); im.crossOrigin = 'anonymous'; im.onload = () => view.redraw(); im.onerror = () => { im.bad = true; }; im.src = `https://tile.openstreetmap.org/${key}.png`; TILES.set(key, im); }
+          let im = TILES.get(g.map + key);
+          if (!im) { im = new Image(); im.crossOrigin = 'anonymous'; im.onload = () => view.redraw(); im.onerror = () => { im.bad = true; }; im.src = g.map === 'aerial' ? `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${key.split('/')[0]}/${key.split('/')[2]}/${key.split('/')[1]}` : `https://tile.openstreetmap.org/${key}.png`; TILES.set(g.map + key, im); }
           if (!im.complete || im.bad || !im.naturalWidth) continue;
           const nw = tileLatLon(tx, ty, z), ne = tileLatLon(tx + 1, ty, z), sw = tileLatLon(tx, ty + 1, z);
           const A = latLonToGeo(g, nw.lat, nw.lon), B = latLonToGeo(g, ne.lat, ne.lon), C = latLonToGeo(g, sw.lat, sw.lon);
@@ -510,7 +554,7 @@ export function register(eng, app) {
         }
       }
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.font = `${10 * r}px system-ui, sans-serif`; ctx.fillStyle = 'rgba(255,255,255,.8)';
-      const txt = '© OpenStreetMap', tw = ctx.measureText(txt).width; ctx.fillRect(view.W * r - tw - 10 * r, view.H * r - 16 * r, tw + 8 * r, 14 * r); ctx.fillStyle = '#333'; ctx.fillText(txt, view.W * r - tw - 6 * r, view.H * r - 5 * r);
+      const txt = g.map === 'aerial' ? '© Esri, Maxar, Earthstar Geographics' : '© OpenStreetMap', tw = ctx.measureText(txt).width; ctx.fillRect(view.W * r - tw - 10 * r, view.H * r - 16 * r, tw + 8 * r, 14 * r); ctx.fillStyle = '#333'; ctx.fillText(txt, view.W * r - tw - 6 * r, view.H * r - 5 * r);
       view.setWorld(ctx, v);
     }
     if (d.vars.GEOMARKERVISIBILITY !== 0) {
