@@ -601,7 +601,7 @@ export function register(eng, app) {
       if (m.kind === 'PIPE' || m.kind === 'INSUL') { r.len += m.len || 0; if (m.od && m.kind === 'PIPE') r.kg += pipeKgM(m.od, m.t) * (m.len || 0) / 1000; } else r.n += m.qty || 1;
       rows.set(m.desc, r);
     }
-    const order = ['PIPE', 'FLANGE', 'STUBEND', 'ORIFICE', 'BLIND', 'GASKET', 'BOLT', 'VALVE', 'STRAINER', 'ELBOW', 'TEE', 'CROSS', 'REDUCER', 'CAP', 'COUPLING', 'FORGED', 'OLET', 'SUPPORT', 'INSTRUMENT', 'EQUIPMENT', 'INSUL'];
+    const order = ['PIPE', 'FLANGE', 'STUBEND', 'ORIFICE', 'BLIND', 'GASKET', 'BOLT', 'NUT', 'WASHER', 'VALVE', 'STRAINER', 'ELBOW', 'TEE', 'CROSS', 'REDUCER', 'CAP', 'COUPLING', 'FORGED', 'OLET', 'SUPPORT', 'INSTRUMENT', 'EQUIPMENT', 'INSUL'];
     return [...rows.values()].sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind) || a.desc.localeCompare(b.desc));
   };
   R('MBOM', async (c) => {

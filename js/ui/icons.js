@@ -22,6 +22,8 @@ export const ICONS = {
   mstrainer: s(`<path d="M2 9h20M2 15h7"/><path d="M15 15l4 5M9 15l4 5M13 20h6" stroke="${B}"/>`),
   msight: s(`<path d="M2 12h4M18 12h4M6 7h12v10H6z"/><circle cx="12" cy="12" r="3" stroke="${B}"/>`),
   mgasket: s(`<path d="M7 3v18M17 3v18"/><path d="M11 5v14M13 5v14" stroke="${Rr}"/><path d="M4 7h16M4 17h16" stroke="${B}"/>`),
+  mbolting: s(`<path d="M8 4v16M16 4v16"/><path d="M3 11h18" stroke="${B}"/><path d="M4 9h3v4H4zM17 9h3v4h-3z" stroke="${Rr}"/>`),
+  mfastener: s(`<path d="M6 8h4v8H6z" stroke="${B}"/><path d="M10 10h10v4H10"/><path d="M13 10l-1 4M16 10l-1 4M19 10l-1 4" stroke="${Rr}"/>`),
   mstub: s(`<path d="M5 4v16h3V9h12M8 15h12"/>`),
   mblind: s(`<circle cx="7" cy="12" r="5"/><circle cx="17" cy="12" r="5"/><circle cx="17" cy="12" r="2.5" stroke="${B}"/>`),
   morifice: s(`<path d="M5 4v16M19 4v16M5 9h14M5 15h14"/><path d="M12 3v7M12 14v7" stroke="${Rr}" stroke-width="2"/>`),

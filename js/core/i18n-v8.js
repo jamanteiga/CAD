@@ -331,6 +331,8 @@ Isométrica de tubería | Isométrica de tubaxe | Piping isometric | Isométrica
 Isométricas y listados | Isométricas e listaxes | Isometrics and Lists | Isométricas e listagens | Isomètriques i llistats
 Junta | Xunta | Gasket | Junta | Junta
 Junta y tornillería | Xunta e parafusaría | Gasket and Bolting | Junta e parafusaria | Junta i cargols
+Tornillería de bridas | Parafusaría de bridas | Flange Bolting | Parafusaria de flanges | Cargols de brides
+Tornillo, tuerca o arandela | Parafuso, porca ou arandela | Bolt, Nut or Washer | Parafuso, porca ou anilha | Cargol, femella o volandera
 Lana mineral | La mineral | Mineral wool | Lã mineral | Llana mineral
 Las bridas socket weld de ASME B16.5 llegan hasta NPS 3 (2½ en Class 1500). | As bridas socket weld de ASME B16.5 chegan ata NPS 3 (2½ en Class 1500). | ASME B16.5 socket weld flanges go up to NPS 3 (2½ in Class 1500). | As flanges socket weld da ASME B16.5 vão até NPS 3 (2½ na Class 1500). | Les brides socket weld d'ASME B16.5 arriben fins a NPS 3 (2½ en Class 1500).
 Latrolet (45°) | Latrolet (45°) | Latrolet (45°) | Latrolet (45°) | Latrolet (45°)
@@ -452,6 +454,39 @@ ASME B16.48 no incluye este diámetro en clase {0}. | ASME B16.48 non inclúe es
 Derivación (olet) | Derivación (olet) | Branch (olet) | Derivação (olet) | Derivació (olet)
 Imagen PNG | Imaxe PNG | PNG image | Imagem PNG | Imatge PNG
 Poligonal | Poligonal | Polygonal | Poligonal | Poligonal
+Montaje | Montaxe | Assembly | Montagem | Muntatge
+Rosca | Rosca | Thread | Rosca | Rosca
+Material | Material | Material | Material | Material
+Vista | Vista | View | Vista | Vista
+Diámetro | Diámetro | Diameter | Diâmetro | Diàmetre
+Tipo | Tipo | Type | Tipo | Tipus
+Arandela | Arandela | Washer | Anilha | Volandera
+Arandelas | Arandelas | Washers | Anilhas | Volanderes
+arandela | arandela | washer | anilha | volandera
+Tornillería | Parafusaría | Bolting | Parafusaria | Cargols
+Apriete | Aperte | Grip | Aperto | Estrenyiment
+saliente | saínte | projection | saliência | sobresortint
+calculada | calculada | calculated | calculado | calculada
+hilos | fíos | threads | fios | fils
+Tornillo | Parafuso | Bolt | Parafuso | Cargol
+Tuerca | Porca | Nut | Porca | Femella
+Tornillo hexagonal | Parafuso hexagonal | Hex bolt | Parafuso sextavado | Cargol hexagonal
+Tuerca hexagonal | Porca hexagonal | Hex nut | Porca sextavada | Femella hexagonal
+Espárrago (varilla roscada) | Espárrago (variña roscada) | Stud bolt (threaded rod) | Perno (varão roscado) | Espàrrec (vareta roscada)
+Frontal | Frontal | Front | Frontal | Frontal
+aprox. | aprox. | approx. | aprox. | aprox.
+Sin junta (solo tornillería) | Sen xunta (só parafusaría) | No gasket (bolting only) | Sem junta (só parafusaria) | Sense junta (només cargols)
+Tuerca + arandela + espárrago + arandela + tuerca | Porca + arandela + espárrago + arandela + porca | Nut + washer + stud + washer + nut | Porca + anilha + perno + anilha + porca | Femella + volandera + espàrrec + volandera + femella
+Tornillo + arandela + tuerca | Parafuso + arandela + porca | Bolt + washer + nut | Parafuso + anilha + porca | Cargol + volandera + femella
+Arandela bajo la cabeza | Arandela baixo a cabeza | Washer under head | Anilha sob a cabeça | Volandera sota el cap
+Dibujar tornillería | Debuxar parafusaría | Draw bolting | Desenhar parafusaria | Dibuixar cargols
+Americana UNC / 8UN | Americana UNC / 8UN | Inch UNC / 8UN | Americana UNC / 8UN | Americana UNC / 8UN
+Métrica equivalente (ASME B16.5) | Métrica equivalente (ASME B16.5) | Metric equivalent (ASME B16.5) | Métrica equivalente (ASME B16.5) | Mètrica equivalent (ASME B16.5)
+Métrica (ISO 261) | Métrica (ISO 261) | Metric (ISO 261) | Métrica (ISO 261) | Mètrica (ISO 261)
+ASTM A320 L7 / A194 7 (baja temperatura) | ASTM A320 L7 / A194 7 (baixa temperatura) | ASTM A320 L7 / A194 7 (low temperature) | ASTM A320 L7 / A194 7 (baixa temperatura) | ASTM A320 L7 / A194 7 (baixa temperatura)
+ASTM A193 B16 / A194 4 (alta temperatura) | ASTM A193 B16 / A194 4 (alta temperatura) | ASTM A193 B16 / A194 4 (high temperature) | ASTM A193 B16 / A194 4 (alta temperatura) | ASTM A193 B16 / A194 4 (alta temperatura)
+ISO 3506 A4-70 (inoxidable) | ISO 3506 A4-70 (inoxidable) | ISO 3506 A4-70 (stainless) | ISO 3506 A4-70 (inoxidável) | ISO 3506 A4-70 (inoxidable)
+ASTM A193 B7 / A194 2H (rosca métrica) | ASTM A193 B7 / A194 2H (rosca métrica) | ASTM A193 B7 / A194 2H (metric thread) | ASTM A193 B7 / A194 2H (rosca métrica) | ASTM A193 B7 / A194 2H (rosca mètrica)
 `;
 
 // Mensajes de petición: English | castellano | galego | português | català
@@ -593,7 +628,8 @@ No layers are reserved. | No hay capas reservadas. | Non hai capas reservadas. |
 const MSGRE8 = [
   [/^(\d+) support\(s\) placed\.$/, '$1 soporte(s) colocado(s).', '$1 soporte(s) colocado(s).', '$1 suporte(s) colocado(s).', '$1 suport(s) col·locat(s).'],
   [/^(\d+) spool\(s\), (\d+) field weld\(s\)\.$/, '$1 spool(s), $2 soldadura(s) de campo.', '$1 spool(s), $2 soldadura(s) de campo.', '$1 spool(s), $2 soldadura(s) de campo.', '$1 spool(s), $2 soldadura(s) de camp.'],
-  [/^Flanged joint: (.+), (\d+) stud bolts (\S+) x (\d+) mm\.$/, 'Unión bridada: $1, $2 espárragos $3 × $4 mm.', 'Unión bridada: $1, $2 espárragos $3 × $4 mm.', 'União flangeada: $1, $2 pernos $3 × $4 mm.', 'Unió embridada: $1, $2 espàrrecs $3 × $4 mm.'],
+  [/^Flanged joint: (.+), (\d+) stud bolts (.+) x (.+)\.$/, 'Unión bridada: $1, $2 espárragos $3 × $4.', 'Unión bridada: $1, $2 espárragos $3 × $4.', 'União flangeada: $1, $2 pernos $3 × $4.', 'Unió embridada: $1, $2 espàrrecs $3 × $4.'],
+  [/^Flanged joint: (.+), (\d+) bolts (.+) x (.+)\.$/, 'Unión bridada: $1, $2 tornillos $3 × $4.', 'Unión bridada: $1, $2 parafusos $3 × $4.', 'União flangeada: $1, $2 parafusos $3 × $4.', 'Unió embridada: $1, $2 cargols $3 × $4.'],
   [/^Insulation: ([\d.]+) m\.$/, 'Aislamiento: $1 m.', 'Illamento: $1 m.', 'Isolamento: $1 m.', 'Aïllament: $1 m.'],
   [/^Isometric (\S+): (\d+) spool\(s\), (\d+) pipe piece\(s\), (\d+) weld\(s\)\.$/, 'Isométrica $1: $2 spool(s), $3 pieza(s) de tubo, $4 soldadura(s).', 'Isométrica $1: $2 spool(s), $3 peza(s) de tubo, $4 soldadura(s).', 'Isométrica $1: $2 spool(s), $3 peça(s) de tubo, $4 soldadura(s).', 'Isomètrica $1: $2 spool(s), $3 peça(ces) de tub, $4 soldadura(es).'],
   [/^Line (\S+): ([\d.]+) m, (\d+) elbow\(s\)\. Use MISO for the isometric\.$/, 'Línea $1: $2 m, $3 codo(s). Use ISOMETRICA para la isométrica.', 'Liña $1: $2 m, $3 cóbado(s). Use ISOMETRICA para a isométrica.', 'Linha $1: $2 m, $3 curva(s). Use ISOMETRICA para a isométrica.', 'Línia $1: $2 m, $3 colze(s). Feu servir ISOMETRICA per a la isomètrica.'],
@@ -639,7 +675,7 @@ const CMD8 = {
   MVALVE: ['VALVULA', 'VALVULA', 'VALVULA', 'VALVULA'], MVALVEGATE: ['VALVCOMPUERTA', 'VALVCOMPORTA', 'VALVCUNHA', 'VALVCOMPORTA'], MVALVEGLOBE: ['VALVGLOBO', 'VALVGLOBO', 'VALVGLOBO', 'VALVGLOBUS'], MVALVECHECK: ['VALVRETENCION', 'VALVRETENCION', 'VALVRETENCAO', 'VALVRETENCIO'],
   MVALVEBALL: ['VALVBOLA', 'VALVBOLA', 'VALVESFERA', 'VALVBOLA'], MVALVEPLUG: ['VALVMACHO', 'VALVMACHO', 'VALVMACHO', 'VALVMASCLE'], MVALVEBFLY: ['VALVMARIPOSA', 'VALVBOLBORETA', 'VALVBORBOLETA', 'VALVPAPALLONA'],
   MSTRAINER: ['FILTROY', 'FILTROY', 'FILTROY', 'FILTREY'], MSTRAINERB: ['FILTROCESTA', 'FILTROCESTA', 'FILTROCESTO', 'FILTRECISTELLA'], MSIGHTGLASS: ['MIRILLA', 'VISOR', 'VISOR', 'VISOR'],
-  MGASKET: ['JUNTA', 'XUNTA', 'JUNTA', 'JUNTA'], MFORGED: ['FORJADO', 'FORXADO', 'FORJADO', 'FORJAT'], MOLET: ['OLET', 'OLET', 'OLET', 'OLET'], MSTUBEND: ['PORTABRIDAS', 'PORTABRIDAS', 'PORTAFLANGE', 'PORTABRIDES'],
+  MGASKET: ['JUNTA', 'XUNTA', 'JUNTA', 'JUNTA'], MBOLTING: ['TORNILLERIA', 'PARAFUSARIA', 'PARAFUSARIA', 'CARGOLS'], MFASTENER: ['TORNILLO', 'PARAFUSO', 'PARAFUSO', 'CARGOL'], MFORGED: ['FORJADO', 'FORXADO', 'FORJADO', 'FORJAT'], MOLET: ['OLET', 'OLET', 'OLET', 'OLET'], MSTUBEND: ['PORTABRIDAS', 'PORTABRIDAS', 'PORTAFLANGE', 'PORTABRIDES'],
   MORIFICE: ['BRIDAORIFICIO', 'BRIDAORIFICIO', 'FLANGEORIFICIO', 'BRIDAORIFICI'], MBLIND: ['FIGURAOCHO', 'FIGURAOITO', 'FIGURAOITO', 'FIGURAVUIT'],
   MFLANGESW: ['BRIDASW', 'BRIDASW', 'FLANGESW', 'BRIDASW'], MFLANGETHD: ['BRIDAROSCADA', 'BRIDAROSCADA', 'FLANGEROSCADA', 'BRIDAROSCADA'], MFLANGELJ: ['BRIDALOCA', 'BRIDATOLA', 'FLANGESOLTA', 'BRIDABOJA'], MFLANGEEN: ['BRIDAEN1092', 'BRIDAEN1092', 'FLANGEEN1092', 'BRIDAEN1092'], MFLANGE47: ['BRIDAB1647', 'BRIDAB1647', 'FLANGEB1647', 'BRIDAB1647'],
   MSUPPORT: ['SOPORTE', 'SOPORTE', 'SUPORTE', 'SUPORT'], MSPAN: ['SEPARACIONSOPORTES', 'SEPARACIONSOPORTES', 'ESPACAMENTOSUPORTES', 'SEPARACIOSUPORTS'], MPUMP: ['BOMBA', 'BOMBA', 'BOMBA', 'BOMBA'], MVESSEL: ['RECIPIENTE', 'RECIPIENTE', 'RECIPIENTE', 'RECIPIENT'],

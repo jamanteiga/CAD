@@ -14,8 +14,10 @@ export default async (page, t) => {
   // datos de válvulas (ASME B16.10) y espárragos
   const vl = await ev(async () => { const m = await import('./js/cmd/mech2.js'); return [m.valveLen('gate', '150', '6', 'RF').L, m.valveLen('globe', '300', '4', 'RF').L, m.valveLen('ball', '600', '2', 'RF').L, m.valveLen('gate', '900', '3', 'RF').L, m.valveLen('gate', '150', '6', 'BW').L, m.valveLen('bfly', '150', '8', 'RF').L, m.valveLen('gate', '2500', '14', 'RF')]; });
   t.eq(vl, [267, 356, 292, 381, 403, 60, null], 'Cara a cara B16.10: compuerta, globo, bola, Class 900 3", BW y mariposa');
-  const st = await ev(async () => { const m = await import('./js/cmd/mech2.js'); const fl = webcad.mec.flangeOf('150', '8'); return m.studLength(fl, 'RF', 4.5).L; });
-  t.ok(st >= 105 && st <= 115, `espárrago Cl.150 NPS 8 ≈ 110 mm (${st})`);
+  const st = await ev(async () => { const m = await import('./js/cmd/mech2.js'); const fl = webcad.mec.flangeOf('150', '8'); const a = m.studLength(fl, 'RF', 4.5), b = m.studLength(fl, 'RF', 4.5, { asm: 'BOLT' }), c = m.studLength(fl, 'RF', 4.5, { sys: 'M' }); return [a.txt, Math.round(a.raw * 10) / 10, b.txt, c.f.thread, c.txt, Math.round(c.raw * 10) / 10]; });
+  // espárrago 3/4"-10 UNC: 2·26,9 + 4,5 + 2·(arandela 4,0 + tuerca 19,05 + 2 hilos 5,08) = 114,5 → 4-3/4"; tornillo: 58,3 + 4,0 + 19,05 + 5,08 = 86,4 → 3-1/2"
+  // métrica M20: 58,3 + 2·(3 + 18 + 10) = 120,3 → 125 mm
+  t.eq(st, ['4-3/4" (121 mm)', 114.5, '3-1/2" (89 mm)', 'M20×2.5', '125 mm', 120.3], 'Longitud: apriete + arandelas + tuercas + saliente (2 hilos UNC / 10 mm métrica)');
 
   // válvula de compuerta en alzado conectada a una brida
   await setSpec({ fstd: 'B16.5', kind: 'WN', cls: '300', nps: '4', sch: '40' });
@@ -33,7 +35,7 @@ export default async (page, t) => {
   await setSpec({ gk: 'SW', mate: '1', studs: '1' });
   await type('_MGASKET'); await clickW(15, 158.75); await dlgOk();
   const bom = await ev(() => webcad.mecBom([...webcad.doc.model]).map((r) => [r.kind, r.n]));
-  t.eq(bom, [['FLANGE', 2], ['GASKET', 1], ['BOLT', 12]], 'MGASKET: brida opuesta, junta y 12 espárragos');
+  t.eq(bom, [['FLANGE', 2], ['GASKET', 1], ['BOLT', 12], ['NUT', 24], ['WASHER', 24]], 'MGASKET: brida opuesta, junta, 12 espárragos, 24 tuercas y 24 arandelas');
 
   // forjados, olets
   await ev(() => { webcad.doc.model.length = 0; });

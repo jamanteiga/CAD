@@ -7,6 +7,7 @@ import { t as T } from '../core/i18n.js';
 import * as P from '../core/pipedata.js';
 import * as P2 from '../core/pipedata2.js';
 import { flangeOf, pipeOf, npsTxt, CLASSES } from './mech.js';
+import * as BD from '../core/boltdata.js';
 
 const IN = 25.4;
 const need = (v) => { if (v == null) throw new Cancel(); return v; };
@@ -148,16 +149,28 @@ export function valveSym(type, w, act) {
 }
 
 // ======================================================================= JUNTAS Y TORNILLERÍA
-// longitud de espárrago calculada (B16.5 anexo: espesores + junta + dos tuercas + saliente), redondeada a 5 mm
-export function studLength(fl, face, gasketT) {
-  const d = typeof fl.bolt === 'string' && /^M/.test(fl.bolt) ? +fl.bolt.slice(1) : P.fr(fl.bolt) * IN;
-  const ft = fl.incl || face === 'FF' ? fl.C : fl.C + fl.rfH; // espesor por brida incluido el resalte
-  const raw = 2 * ft + gasketT + 2 * d + 2 * Math.max(3.2, d * 0.18);
-  return { L: Math.ceil(raw / 5) * 5, d };
+// espesor que aprieta cada brida (desde la cara de junta hasta la cara de apoyo de la tuerca)
+export function flangeGrip(fl, face) {
+  if (face === 'RTJ') return (fl.incl ? fl.C - fl.rfH : fl.C) + 6.4;
+  if (face === 'FF') return fl.incl ? fl.C - fl.rfH : fl.C;
+  return fl.incl ? fl.C : fl.C + fl.rfH;
 }
-export const GASKETS = [['SW', 'Espirometálica (B16.20)'], ['FLAT', 'Plana sin amianto (B16.21)'], ['RTJ', 'Anillo RTJ octogonal (B16.20)']];
+export const gasketGrip = (kind, gd) => (kind === 'RTJ' ? 4 : kind === 'NONE' ? 0 : gd?.t || 0);
+// tamaño de tornillería según la brida y el sistema de rosca elegido ('IN' o 'M')
+export function boltSize(fl, sys) {
+  if (/^M/.test(String(fl.bolt))) return String(fl.bolt);
+  return sys === 'M' ? 'M' + (BD.IN2M[fl.bolt] || Math.round(BD.frac(fl.bolt) * 25.4)) : String(fl.bolt);
+}
+// longitud de espárrago/tornillo: espesores + junta + arandelas + tuercas + saliente (2 hilos en rosca americana, 10 mm en métrica)
+export function studLength(fl, face, gasketT, o = {}) {
+  const f = BD.fastener(boltSize(fl, o.sys || 'IN')), grip = 2 * flangeGrip(fl, face) + gasketT;
+  const r = BD.boltLength(f, grip, o.asm || 'STUD', o.washers !== false, !!o.headWasher);
+  return { ...r, d: f.d, f, grip };
+}
+export const GASKETS = [['SW', 'Espirometálica (B16.20)'], ['FLAT', 'Plana sin amianto (B16.21)'], ['RTJ', 'Anillo RTJ octogonal (B16.20)'], ['NONE', 'Sin junta (solo tornillería)']];
 export function gasketDims(fl, kind, od, id) {
   const ringOD = fl.BC - fl.hole; // anillo centrador / junta plana hasta los tornillos
+  if (kind === 'NONE') return { t: 0, desc: '' };
   if (kind === 'RTJ') return { t: 0, P: fl.P, A: fl.F ? fl.F * 0.8 : 11, H: fl.Eg ? fl.Eg * 2 + 3 : 17, desc: `R-${fl.ring}` };
   if (kind === 'FLAT') return { t: 3.2, OD: fl.face === 'FF' ? fl.O : ringOD, ID: id, desc: `${T('plana')} e=3,2` };
   const j = P.N19.indexOf(fl.nps), w = j >= 0 ? [P2.GK.WOD[j] * IN, P2.GK.WID[j] * IN] : [fl.R * 0.9, od * 1.05];
@@ -223,48 +236,104 @@ export function register(eng, app) {
   }, { alias: ['VALVULA', 'MVALVULA'] });
   for (const [cmd, t] of [['MVALVEGATE', 'gate'], ['MVALVEGLOBE', 'globe'], ['MVALVECHECK', 'check'], ['MVALVEBALL', 'ball'], ['MVALVEPLUG', 'plug'], ['MVALVEBFLY', 'bfly'], ['MSTRAINER', 'ystr'], ['MSTRAINERB', 'bstr'], ['MSIGHTGLASS', 'sight']]) R(cmd, (c) => eng.commands.MVALVE.fn(c, { vtype: t }));
 
-  // ---------- JUNTAS, ESPÁRRAGOS Y UNIÓN BRIDADA
-  R('MGASKET', async (c) => {
+  // ---------- JUNTAS, TORNILLERÍA Y UNIÓN BRIDADA
+  const ASM = [['STUD', 'Tuerca + arandela + espárrago + arandela + tuerca'], ['BOLT', 'Tornillo + arandela + tuerca']];
+  const boltDescs = (fl, v, sl) => {
+    const f = sl.f, sys = f.sys, mat = v.bmat || (sys === 'IN' ? 'B7' : '88');
+    const th = f.thread, Lt = sys === 'IN' ? sl.txt : `${sl.L} mm`;
+    const n = fl.n, washers = v.wsh !== '0', hw = v.asm === 'BOLT' && v.hwsh === '1';
+    const out = [];
+    if (v.asm === 'STUD') out.push({ kind: 'BOLT', desc: `${tr('Espárrago')} ${th} × ${Lt} ${BD.matText(sys, mat, 'stud')}`.trim(), qty: n });
+    else out.push({ kind: 'BOLT', desc: `${tr('Tornillo hexagonal')} ${th} × ${Lt} ${sys === 'IN' ? 'ASME B18.2.1' : 'ISO 4014'} ${BD.matText(sys, mat, 'stud')}`.trim(), qty: n });
+    out.push({ kind: 'NUT', desc: `${tr('Tuerca hexagonal')} ${th} ${sys === 'IN' ? 'ASME B18.2.2' : 'ISO 4032'} ${BD.matText(sys, mat, 'nut')}`.trim(), qty: v.asm === 'STUD' ? 2 * n : n });
+    if (washers) out.push({ kind: 'WASHER', desc: `${tr('Arandela')} ${f.name} Ø${Math.round(f.w.id * 10) / 10}/${Math.round(f.w.od * 10) / 10}×${Math.round(f.w.t * 10) / 10} ${sys === 'IN' ? '' : 'ISO 7089 '}${BD.matText(sys, mat, 'washer')}`.trim(), qty: v.asm === 'STUD' ? 2 * n : hw ? 2 * n : n });
+    return out;
+  };
+  const jointFields = (fl, s) => [
+    { k: 'gk', l: 'Junta', v: fl.face === 'RTJ' ? 'RTJ' : s.gk || 'SW', opts: () => (fl.face === 'RTJ' ? [GASKETS[2], GASKETS[3]] : [GASKETS[0], GASKETS[1], GASKETS[3]]) },
+    { k: 'mate', l: 'Brida opuesta', v: s.mate || '1', opts: () => [['1', 'Insertar brida igual enfrentada'], ['0', 'No']] },
+    { k: 'asm', l: 'Montaje', v: s.asm || 'STUD', opts: () => ASM },
+    { k: 'bsys', l: 'Rosca', v: /^M/.test(String(fl.bolt)) ? 'M' : s.bsys || 'IN', opts: () => (/^M/.test(String(fl.bolt)) ? [['M', 'Métrica (ISO 261)']] : [['IN', 'Americana UNC / 8UN'], ['M', 'Métrica equivalente (ASME B16.5)']]) },
+    { k: 'wsh', l: 'Arandelas', v: s.wsh || '1', opts: () => [['1', 'Sí'], ['0', 'No']] },
+    { k: 'hwsh', l: 'Arandela bajo la cabeza', v: s.hwsh || '0', when: (x) => x.asm === 'BOLT' && x.wsh === '1', opts: () => [['0', 'No'], ['1', 'Sí']] },
+    { k: 'bmat', l: 'Material', v: s.bmat, opts: (x) => (x.bsys === 'M' && !/^M/.test(String(fl.bolt)) ? BD.MAT_M : /^M/.test(String(fl.bolt)) ? BD.MAT_M : BD.MAT_IN) },
+    { k: 'studs', l: 'Dibujar tornillería', v: s.studs || '1', opts: () => [['1', 'Sí'], ['0', 'No']] },
+  ];
+  const jointCalc = (fl, x) => {
+    const gd = gasketDims(fl, x.gk, fl.od, fl.id), gt = gasketGrip(x.gk, gd);
+    const sl = studLength(fl, fl.face, gt, { sys: x.bsys, asm: x.asm, washers: x.wsh !== '0', headWasher: x.asm === 'BOLT' && x.hwsh === '1' });
+    return { gd, gt, sl };
+  };
+  const jointPreview = (fl, x) => {
+    const { gd, gt, sl } = jointCalc(fl, x), f = sl.f, ft = flangeGrip(fl, fl.face);
+    const ents = [{ type: 'LINE', p1: { x: 0, y: -f.e }, p2: { x: 0, y: f.e }, layer: '0' }, { type: 'LINE', p1: { x: ft, y: -f.e }, p2: { x: ft, y: f.e }, layer: '0' }, { type: 'LINE', p1: { x: -gt, y: -f.e }, p2: { x: -gt, y: f.e }, layer: '0' }, { type: 'LINE', p1: { x: -gt - ft, y: -f.e }, p2: { x: -gt - ft, y: f.e }, layer: '0' }];
+    ents.push(...BD.assemblySide(f, -gt - ft, ft, x.asm, x.wsh !== '0', x.asm === 'BOLT' && x.hwsh === '1', sl.L));
+    const lines = boltDescs(fl, x, sl).map((b) => `${b.qty} × ${b.desc}`);
+    const extra = f.sys === 'IN' ? `2 ${tr('hilos')} = ${Math.round(f.proj * 10) / 10} mm` : '10 mm';
+    return { ents, info: `${gd.desc ? tr('Junta') + ': ' + gd.desc + (gd.OD ? ` Ø${r1(gd.OD)}/${r1(gd.ID)}` : '') + '\n' : ''}${tr('Apriete')} ${r1(sl.grip)} mm · ${tr('saliente')} ${extra} · ${tr('calculada')} ${r1(sl.raw)} mm\n${lines.join('\n')}` };
+  };
+  app.mecJoint = { jointCalc, boltDescs, studLength };
+  const doJoint = async (c, defaults = {}) => {
     const e = await pickMec(c, 'Select flange to joint:', ['FLANGE']); if (!e) return;
     const fl = e.mec.fl; if (!fl) { c.print('This flange has no dimension data (insert it again with MFLANGE).'); return; }
-    const s = K().spec();
-    const v = await K().chooser('Unión bridada', [
-      { k: 'gk', l: 'Junta', v: fl.face === 'RTJ' ? 'RTJ' : s.gk || 'SW', opts: () => (fl.face === 'RTJ' ? GASKETS.slice(2) : GASKETS.slice(0, 2)) },
-      { k: 'mate', l: 'Brida opuesta', v: s.mate || '1', opts: () => [['1', 'Insertar brida igual enfrentada'], ['0', 'No']] },
-      { k: 'studs', l: 'Dibujar espárragos', v: s.studs || '1', opts: () => [['1', 'Sí'], ['0', 'No']] },
-    ], (x) => { const gd = gasketDims(fl, x.gk, fl.od, fl.id); const sl = studLength(fl, fl.face, x.gk === 'RTJ' ? 4 : gd.t); return { info: `${tr('Junta')}: ${gd.desc}${gd.OD ? ` Ø${r1(gd.OD)}/${r1(gd.ID)}` : ''}\n${fl.n} × ${tr('espárrago')} ${fl.bolt}${/^M/.test(fl.bolt) ? '' : '"'} × ${sl.L} mm + ${2 * fl.n} ${tr('tuercas')}`, ents: [] }; });
+    const s = { ...K().spec(), ...defaults };
+    const v = await K().chooser('Unión bridada', jointFields(fl, s), (x) => jointPreview(fl, x));
     if (!v) return; K().save(v);
     const d = doc(), k = K().scale(), rot = e.rot || 0, u = { x: Math.cos(rot), y: Math.sin(rot) }, n = { x: -u.y, y: u.x };
-    const gd = gasketDims(fl, v.gk, fl.od, fl.id), gt = v.gk === 'RTJ' ? 4 : gd.t;
+    const { gd, gt, sl } = jointCalc(fl, v), f = sl.f, ft = flangeGrip(fl, fl.face);
     const W = (x, y) => G.add(e.p, G.add(G.mul(u, x * k), G.mul(n, y * k * Math.sign(e.sy || 1))));
     const add = (ent) => d.add({ ...ent, layer: ent.layer || 'MEC_JUNTAS' });
+    const put = (it, dy = 0) => { const x = JSON.parse(JSON.stringify(it)); const t = (q) => W(q.x, q.y + dy); if (x.type === 'LINE') { x.p1 = t(x.p1); x.p2 = t(x.p2); } else if (x.type === 'LWPOLYLINE') x.pts = x.pts.map((q) => ({ ...t(q), b: 0 })); add(x); };
     d.begin('MGASKET'); K().ensureLayers(d); d.ensureLayer('MEC_JUNTAS', { color: 6 }); d.ensureLayer('MEC_TORNILLERIA', { color: 5 });
-    // junta en el lado de la cara (x < 0 en coordenadas de la brida)
-    const gk = [];
-    if (v.gk === 'RTJ') { for (const sg of [1, -1]) { const y = sg * gd.P / 2; gk.push(poly([[-gt / 2 - 2, y - gd.A / 2], [-gt / 2 + 2, y - gd.A / 2], [-gt / 2 + gd.H / 4, y], [-gt / 2 + 2, y + gd.A / 2], [-gt / 2 - 2, y + gd.A / 2], [-gt / 2 - gd.H / 4, y]])); } }
-    else for (const sg of [1, -1]) { gk.push(rect(-gt, sg * gd.ID / 2, 0, sg * gd.OD / 2)); }
-    for (const it of gk.flat()) { const t = (q) => W(q.x, q.y); const x = JSON.parse(JSON.stringify(it)); if (x.type === 'LINE') { x.p1 = t(x.p1); x.p2 = t(x.p2); } else if (x.type === 'LWPOLYLINE') x.pts = x.pts.map((q) => ({ ...t(q), b: 0 })); add(x); }
-    const gEnt = add({ type: 'POINT', p: W(-gt / 2, 0) });
-    K().tagMec(gEnt, { kind: 'GASKET', desc: `${tr('Junta')} ${gd.desc} ${fl.std === 'EN1092' ? 'DN' + (P.DN[fl.nps] || '') : 'NPS ' + fl.nps + '"'} ${fl.std === 'EN1092' ? fl.cls : 'Cl.' + fl.cls}${v.gk === 'RTJ' ? '' : fl.std === 'EN1092' ? ' EN 1514' : v.gk === 'SW' ? ' ASME B16.20' : ' ASME B16.21'}` });
-    let mate = null;
-    if (v.mate === '1') { mate = app.blocks.insertBlock(e.name, W(-gt, 0), e.sx, -(e.sy || 1), rot + Math.PI, {}, d.space); mate.layer = e.layer; K().tagMec(mate, { ...e.mec }); }
-    const sl = studLength(fl, fl.face, gt);
-    if (v.studs === '1') {
-      const tf = fl.incl || fl.face === 'FF' ? fl.C : fl.C + fl.rfH, x0 = -gt - tf - sl.d - 4, x1 = tf + sl.d + 4, x0n = x0 + (sl.L - (x1 - x0)) / 2 * -1;
-      void x0n;
-      const xa = -gt / 2 - sl.L / 2, xb = -gt / 2 + sl.L / 2;
-      for (const sg of [1, -1]) {
-        const y = sg * fl.BC / 2, r = sl.d / 2;
-        for (const q of rect(xa, y - r, xb, y + r)) { q.p1 = W(q.p1.x, q.p1.y); q.p2 = W(q.p2.x, q.p2.y); add({ ...q, layer: 'MEC_TORNILLERIA' }); }
-        for (const xn of [-gt - tf - sl.d, tf]) for (const q of rect(xn, y - sl.d * 0.85, xn + sl.d, y + sl.d * 0.85)) { q.p1 = W(q.p1.x, q.p1.y); q.p2 = W(q.p2.x, q.p2.y); add({ ...q, layer: 'MEC_TORNILLERIA' }); }
-      }
+    if (v.gk !== 'NONE') {
+      const gk = [];
+      if (v.gk === 'RTJ') { for (const sg of [1, -1]) { const y = sg * gd.P / 2; gk.push(poly([[-gt / 2 - 2, y - gd.A / 2], [-gt / 2 + 2, y - gd.A / 2], [-gt / 2 + gd.H / 4, y], [-gt / 2 + 2, y + gd.A / 2], [-gt / 2 - 2, y + gd.A / 2], [-gt / 2 - gd.H / 4, y]])); } }
+      else for (const sg of [1, -1]) gk.push(rect(-gt, sg * gd.ID / 2, 0, sg * gd.OD / 2));
+      for (const it of gk.flat()) put(it);
+      K().tagMec(add({ type: 'POINT', p: W(-gt / 2, 0) }), { kind: 'GASKET', desc: `${tr('Junta')} ${gd.desc} ${fl.std === 'EN1092' ? 'DN' + (P.DN[fl.nps] || '') : 'NPS ' + fl.nps + '"'} ${fl.std === 'EN1092' ? fl.cls : 'Cl.' + fl.cls}${v.gk === 'RTJ' ? '' : fl.std === 'EN1092' ? ' EN 1514' : v.gk === 'SW' ? ' ASME B16.20' : ' ASME B16.21'}` });
     }
-    const bEnt = add({ type: 'POINT', p: W(-gt / 2, fl.BC / 2), layer: 'MEC_TORNILLERIA' });
-    const boltTxt = /^M/.test(fl.bolt) ? fl.bolt : fl.bolt + '"';
-    K().tagMec(bEnt, { kind: 'BOLT', desc: `${tr('Espárrago')} ${boltTxt} × ${sl.L} mm ${tr('con 2 tuercas')}`, qty: fl.n });
+    if (v.mate === '1') { const mate = app.blocks.insertBlock(e.name, W(-gt, 0), e.sx, -(e.sy || 1), rot + Math.PI, {}, d.space); mate.layer = e.layer; K().tagMec(mate, { ...e.mec }); }
+    if (v.studs === '1') for (const sg of [1, -1]) for (const it of BD.assemblySide(f, -gt - ft, ft, v.asm, v.wsh !== '0', v.asm === 'BOLT' && v.hwsh === '1', sl.L)) put({ ...it, layer: it.layer || 'MEC_TORNILLERIA' }, sg * fl.BC / 2);
+    for (const b of boltDescs(fl, v, sl)) K().tagMec(add({ type: 'POINT', p: W(-gt / 2, fl.BC / 2), layer: 'MEC_TORNILLERIA' }), b);
     d.end(); redraw();
-    c.print(`Flanged joint: ${gd.desc}, ${fl.n} stud bolts ${boltTxt} x ${sl.L} mm.`);
-  }, { alias: ['JUNTA', 'MJUNTA', 'UNIONBRIDADA'] });
+    c.print(`Flanged joint: ${gd.desc || '-'}, ${fl.n} ${v.asm === 'STUD' ? 'stud bolts' : 'bolts'} ${f.thread} x ${sl.txt}.`);
+  };
+  R('MGASKET', (c) => doJoint(c), { alias: ['JUNTA', 'MJUNTA', 'UNIONBRIDADA'] });
+  R('MBOLTING', (c) => doJoint(c, { gk: 'SW' }), { alias: ['TORNILLERIA', 'MTORNILLERIA'] });
+
+  // ---------- TORNILLERÍA SUELTA: tornillo, espárrago, tuerca o arandela
+  const FTYPE = [['BOLT', 'Tornillo hexagonal'], ['STUD', 'Espárrago (varilla roscada)'], ['NUT', 'Tuerca hexagonal'], ['WASHER', 'Arandela']];
+  const SIZES_IN = ['1/2', '5/8', '3/4', '7/8', '1', '1-1/8', '1-1/4', '1-3/8', '1-1/2', '1-5/8', '1-3/4', '1-7/8', '2', '2-1/4', '2-1/2', '2-3/4', '3'];
+  const SIZES_M = [12, 14, 16, 20, 24, 27, 30, 33, 36, 39, 42, 45, 48, 52, 56, 64];
+  const fastBuild = (x) => {
+    const f = BD.fastener(x.fsys === 'M' ? 'M' + x.fm : x.fin), Lb = +x.flen || 100, ents = [];
+    if (x.fview === 'front') ents.push(...BD.fastenerFront(f, x.ftype));
+    else if (x.ftype === 'BOLT') ents.push(...BD.hexSide(-f.k, 0, f), ...BD.shankSide(0, Lb, f, [false, true], [Math.max(0, Lb - (2 * f.d + 6)), Lb]));
+    else if (x.ftype === 'STUD') ents.push(...BD.shankSide(0, Lb, f));
+    else if (x.ftype === 'NUT') ents.push(...BD.hexSide(0, f.m, f), { type: 'LINE', p1: { x: 0, y: f.d / 2 }, p2: { x: f.m, y: f.d / 2 }, layer: 'MEC_OCULTAS' }, { type: 'LINE', p1: { x: 0, y: -f.d / 2 }, p2: { x: f.m, y: -f.d / 2 }, layer: 'MEC_OCULTAS' });
+    else ents.push(...BD.washerSide(0, f.w.t, f), { type: 'LINE', p1: { x: 0, y: f.w.id / 2 }, p2: { x: f.w.t, y: f.w.id / 2 }, layer: 'MEC_OCULTAS' }, { type: 'LINE', p1: { x: 0, y: -f.w.id / 2 }, p2: { x: f.w.t, y: -f.w.id / 2 }, layer: 'MEC_OCULTAS' });
+    const mat = x.fmat || (f.sys === 'IN' ? 'B7' : '88'), part = x.ftype === 'NUT' ? 'nut' : x.ftype === 'WASHER' ? 'washer' : 'stud';
+    const Lt = f.sys === 'IN' ? `${BD.fmtIn(Lb / 25.4)}" (${Math.round(Lb)} mm)` : `${Lb} mm`;
+    const desc = { BOLT: `${T('Tornillo hexagonal')} ${f.thread} × ${Lt} ${f.sys === 'IN' ? 'ASME B18.2.1' : 'ISO 4014'}`, STUD: `${T('Espárrago')} ${f.thread} × ${Lt}`, NUT: `${T('Tuerca hexagonal')} ${f.thread} ${f.sys === 'IN' ? 'ASME B18.2.2' : 'ISO 4032'}`, WASHER: `${T('Arandela')} ${f.name} Ø${r1(f.w.id)}/${r1(f.w.od)}×${r1(f.w.t)}${f.sys === 'IN' ? '' : ' ISO 7089'}` }[x.ftype] + ' ' + BD.matText(f.sys, mat, part);
+    return { ents, f, desc: desc.trim(), info: `s ${r1(f.s)} · e ${r1(f.e)} · m ${r1(f.m)} · k ${r1(f.k)} · ${T('arandela')} Ø${r1(f.w.id)}/${r1(f.w.od)}×${r1(f.w.t)}${f.approx ? ' (' + T('aprox.') + ')' : ''}`, name: `MEC_TORN_${x.ftype}_${f.name}_${x.ftype === 'BOLT' || x.ftype === 'STUD' ? Lb : ''}_${x.fview}`.replace(/[^\w.-]/g, '_') };
+  };
+  R('MFASTENER', async (c) => {
+    const s = K().spec();
+    const LENS_IN = [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24].map((q) => [Math.round(q * 25.4 * 100) / 100, `${BD.fmtIn(q)}"`]);
+    const LENS_M = [40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 180, 200, 220, 250, 280, 300, 350, 400, 450, 500].map((n) => [n, n + ' mm']);
+    const v = await K().chooser('Tornillería', [
+      { k: 'ftype', l: 'Tipo', v: s.ftype2 || 'BOLT', opts: () => FTYPE },
+      { k: 'fsys', l: 'Rosca', v: s.fsys || 'M', opts: () => [['M', 'Métrica (ISO 261)'], ['IN', 'Americana UNC / 8UN']] },
+      { k: 'fm', l: 'Diámetro', v: s.fm || 20, when: (x) => x.fsys === 'M', opts: () => SIZES_M.map((n) => [n, 'M' + n]) },
+      { k: 'fin', l: 'Diámetro', v: s.fin || '3/4', when: (x) => x.fsys === 'IN', opts: () => SIZES_IN.map((n) => [n, n + '"']) },
+      { k: 'flen', l: 'Longitud', v: s.flen || 100, when: (x) => x.ftype === 'BOLT' || x.ftype === 'STUD', opts: (x) => (x.fsys === 'IN' ? LENS_IN : LENS_M) },
+      { k: 'fmat', l: 'Material', v: s.fmat, opts: (x) => (x.fsys === 'IN' ? BD.MAT_IN : BD.MAT_M) },
+      { k: 'fview', l: 'Vista', v: s.fview || 'side', opts: () => [['side', 'Lateral (alzado)'], ['front', 'Frontal']] },
+    ], fastBuild);
+    if (!v) return; K().save({ ...v, ftype2: v.ftype });
+    const b = fastBuild(v), d = doc(); d.begin('MFASTENER'); K().defBlock(b.name, b.ents, b.desc); d.end();
+    await K().place(c, b.name, K().mecInfo({ BOLT: 'BOLT', STUD: 'BOLT', NUT: 'NUT', WASHER: 'WASHER' }[v.ftype], b.desc), { layer: 'MEC_TORNILLERIA', cmd: 'MFASTENER', prompt: 'Specify insertion point:', attach: 'none' });
+  }, { alias: ['TORNILLO', 'MTORNILLO'] });
 
   // ---------- ACCESORIOS FORJADOS B16.11
   const FTYPES = [['E90', 'Codo 90°'], ['E45', 'Codo 45°'], ['TEE', 'Te'], ['CROSS', 'Cruz'], ['CAP', 'Casquete'], ['PLUG', 'Tapón hexagonal'], ['UNION', 'Unión (MSS SP-83)'], ['NIPPLE', 'Niple'], ['SWAGE', 'Reducción de enchufe (MSS SP-95)']];
