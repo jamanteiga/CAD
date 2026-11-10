@@ -1,5 +1,6 @@
 // Ensamblado de la interfaz
 import { h } from './dom.js';
+import * as P3 from '../core/plane3d.js';
 import { icon } from './icons.js';
 import { createDialogs, keyName } from './dialogs.js';
 import { extendDialogs } from './dialogs2.js';
@@ -51,7 +52,11 @@ export function createUI(app) {
     if (ws.value === 'classic') Object.assign(s, { ribbon: false, menuBar: true, screenMenu: true });
     else if (ws.value === 'both') Object.assign(s, { ribbon: true, menuBar: true, screenMenu: true });
     else Object.assign(s, { ribbon: true, menuBar: false, screenMenu: false });
-    if (s.ws3d && !was3d) { s.dock3d = true; app.ui.ribbon.active = 'home3d'; }
+    if (s.ws3d && !was3d) {
+      app.ui.ribbon.active = 'home3d';
+      // vista isométrica SO con estilo realista en la ventana principal, como al empezar un modelo 3D
+      const d = app.doc; if (d && !d.ext.view3d) { if (!d.vars.VSCURRENT || d.vars.VSCURRENT === '2dWireframe') d.vars.VSCURRENT = 'Realistic'; app.view.setCam(P3.SWISO); app.view.zoomExtents(); }
+    }
     if (!s.ws3d && was3d && app.ui.ribbon.active === 'home3d') app.ui.ribbon.active = 'home';
     saveSettings(); ui.applyLayout();
   };
@@ -118,7 +123,7 @@ export function createUI(app) {
         ib('stMenu', 'Personalización', false, (e) => ui.popup(e.clientX - 200, e.clientY - 120, [['Coordenadas', () => { s.showCoords = s.showCoords === false; saveSettings(); ui.applyLayout(); }, null, s.showCoords !== false], ['Historial de comandos (F2)', 'TEXTSCR']])),
       );
     },
-    coords(p) { const u = app.doc?.ext?.ucs; if (u) { const q = { x: p.x - u.o.x, y: p.y - u.o.y }, c = Math.cos(-(u.a || 0)), s = Math.sin(-(u.a || 0)); p = { x: q.x * c - q.y * s, y: q.x * s + q.y * c }; } coords.textContent = `${fmt(p.x, 4)}, ${fmt(p.y, 4)}, 0.0000`; },
+    coords(p) { const u = app.doc?.ext?.ucs; if (u) { const q = { x: p.x - u.o.x, y: p.y - u.o.y }, c = Math.cos(-(u.a || 0)), s = Math.sin(-(u.a || 0)); p = { x: q.x * c - q.y * s, y: q.x * s + q.y * c }; } coords.textContent = `${fmt(p.x, 4)}, ${fmt(p.y, 4)}, ${fmt(p.z || 0, 4)}`; },
   };
   ui.osnapMenu = (e) => {
     const v = app.doc.vars;
@@ -214,8 +219,7 @@ export function createUI(app) {
     document.getElementById('coords').hidden = s.showCoords === false;
     ws.value = s.ws3d && s.ribbon ? '3d' : !s.ribbon && s.menuBar ? 'classic' : s.ribbon && (s.menuBar || s.screenMenu) ? 'both' : 'ribbon';
     // espacio Modelado 3D: vista 3D acoplada junto a la planta
-    if (s.ws3d && s.dock3d !== false && app.view3d) { if (!app.v3d?.dock) { app.v3d?.close?.(); app.view3d({ dock: true }); } }
-    else if (app.v3d?.dock) app.v3d.close();
+    if (!s.ws3d && app.v3d?.dock) app.v3d.close();
     app.doc.vars.PICKBOX = s.pickbox || app.doc.vars.PICKBOX;
     ui.ribbon.render(); ui.status.update();
     app.view.resize(); app.view.redraw();
@@ -228,7 +232,10 @@ export function createUI(app) {
       if (app.v3d?.dock) app.v3d.sync();
       const d = app.doc, tag = document.getElementById('vptag');
       tag.innerHTML = '';
-      tag.append(t('[-][Superior][Estructura alámbrica 2D]'), d.blockEdit ? h('b', { text: `  Editor de bloques: ${d.blockEdit.name}` }) : '', d.active !== 'Model' ? '  ' + t(d.mspace ? 'MODELO (ventana)' : 'PAPEL') : '');
+      const cam = d.ext?.view3d, VN = { Top: 'Superior', Bottom: 'Inferior', Front: 'Frontal', Back: 'Posterior', Left: 'Izquierda', Right: 'Derecha', SWiso: 'Isométrica SO', SEiso: 'Isométrica SE', NEiso: 'Isométrica NE', NWiso: 'Isométrica NO' };
+      const vk = !cam ? 'Top' : Object.keys(P3.PRESETS).find((k) => { const c = P3.presetCam(k), da = Math.abs(((c.az - cam.az) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI); return Math.abs(c.el - cam.el) < 1e-3 && (da < 1e-3 || Math.abs(Math.cos(cam.el)) < 1e-6); });
+      const vsN = { '2dWireframe': 'Estructura alámbrica 2D', Wireframe: 'Estructura alámbrica', Hidden: 'Oculto', Shaded: 'Sombreado', Realistic: 'Realista' }[d.vars.VSCURRENT] || 'Estructura alámbrica 2D';
+      tag.append(cam || d.vars.VSCURRENT && d.vars.VSCURRENT !== '2dWireframe' ? `[-][${t(VN[vk] || 'Personalizada')}][${t(vsN)}]` : t('[-][Superior][Estructura alámbrica 2D]'), d.blockEdit ? h('b', { text: `  Editor de bloques: ${d.blockEdit.name}` }) : '', d.active !== 'Model' ? '  ' + t(d.mspace ? 'MODELO (ventana)' : 'PAPEL') : '');
       const be = d.blockEdit;
       let bar = document.getElementById('bedbar');
       if (be) {

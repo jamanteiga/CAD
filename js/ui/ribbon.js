@@ -184,6 +184,8 @@ export const TABS3D = [];
   const tab = (id) => TABS.find((t) => t.id === id), panel = (id, name) => tab(id).panels.find((p) => p.name === name);
   const PRIMS = [S('BOX', 'Prisma rectangular', 'box'), S('CYLINDER', 'Cilindro', 'cylinder'), S('CONE', 'Cono', 'cone'), S('SPHERE', 'Esfera', 'sphere'), S('PYRAMID', 'Pirámide', 'pyramid'), S('WEDGE', 'Cuña', 'wedge'), S('TORUS', 'Toroide', 'torus')];
   const VIEWS = [S('VIEWTOP', 'Superior', 'viewtop'), S('VIEWBOTTOM', 'Inferior', 'viewtop'), S('VIEWLEFT', 'Izquierda', 'viewside'), S('VIEWRIGHT', 'Derecha', 'viewside'), S('VIEWFRONT', 'Frontal', 'viewside'), S('VIEWBACK', 'Posterior', 'viewside'), S('VIEWSWISO', 'Isométrica SO', 'viewiso'), S('VIEWSEISO', 'Isométrica SE', 'viewiso'), S('VIEWNEISO', 'Isométrica NE', 'viewiso'), S('VIEWNWISO', 'Isométrica NO', 'viewiso')];
+  const WPS = [S('WPWORLD', 'Universal', 'wpworld'), S('WPTOP', 'Superior (XY)', 'wptop'), S('WPFRONT', 'Frontal (XZ)', 'wpfront'), S('WPRIGHT', 'Lateral derecho (YZ)', 'wpright'), S('WPLEFT', 'Lateral izquierdo', 'wpright'), S('WPBACK', 'Posterior', 'wpfront'), S('WPBOTTOM', 'Inferior', 'wptop'), S('WPVIEW', 'Paralelo a la vista', 'wptop')];
+  const COORD = { name: 'Coordenadas', items: [B('WORKPLANE', 'Plano de trabajo', 'wptop', WPS), COL(S('WPORIGIN', 'Origen', 'wporigin'), S('WPELEVATION', 'Elevación', 'wporigin'), S('WP3POINT', '3 puntos', 'wp3p')), COL(S('WPX', 'Girar X', 'wprot'), S('WPY', 'Girar Y', 'wprot'), S('WPZ', 'Girar Z', 'wprot')), COL(S('WPOBJECT', 'Objeto', 'wpobj'), S('WPPREVIOUS', 'Previo', 'wpworld'), S('WPWORLD', 'Universal', 'wpworld'))] };
   const VSTY = [S('VSCURRENT _Realistic', 'Realista', 'visualstyle'), S('VSCURRENT _Shaded', 'Sombreado', 'visualstyle'), S('VSCURRENT _Hidden', 'Oculto', 'visualstyle'), S('VSCURRENT _Wireframe', 'Estructura alámbrica', 'visualstyle')];
   TABS3D.push(
     { id: 'home3d', name: 'Inicio', panels: [
@@ -192,8 +194,8 @@ export const TABS3D = [];
       { name: 'Dibujo', items: [COL(S('LINE', 'Línea', 'line'), S('PLINE', 'Polilínea', 'pline'), S('CIRCLE', 'Círculo', 'circle')), COL(S('RECTANG', 'Rectángulo', 'rect'), S('POLYGON', 'Polígono', 'polygon'), S('REGION', 'Región', 'region'))] },
       { name: 'Modificar', items: [COL(S('MOVE', 'Desplazar', 'move'), S('COPY', 'Copiar', 'copy'), S('ROTATE', 'Girar', 'rotate')), COL(S('MIRROR', 'Simetría', 'mirror'), S('ARRAY', 'Matriz', 'array'), S('ERASE', 'Borrar', 'erase'))] },
       { name: 'Sección', items: [B('SECTION', 'Sección', 'region'), COL(S('SLICE', 'Corte', 'subtract'), S('VIEWBASE', 'Vista base', 'view'))] },
-      { name: 'Coordenadas', items: [B('UCS', 'SCP', 'ucs'), COL(S('UCS _World', 'Universal', 'ucs'), S('UCS _Previous', 'Previo', 'ucs'))] },
-      { name: 'Vista', items: [B('VIEWSWISO', 'Vistas', 'viewiso', VIEWS), B('VSCURRENT _Realistic', 'Estilo visual', 'visualstyle', VSTY), COL(S('3DORBIT', 'Órbita 3D', 'orbit'), S('VIEW3DPANEL', 'Vista 3D acoplada', 'dock3d'), S('VPORTS', 'Ventanas del modelo', 'vports'))] },
+      COORD,
+      { name: 'Vista', items: [B('VIEWSWISO', 'Vistas', 'viewiso', VIEWS), B('VSCURRENT _Realistic', 'Estilo visual', 'visualstyle', VSTY), COL(S('3DORBIT', 'Órbita 3D', 'orbit'), S('PLAN _C', 'Planta del plano', 'viewtop'), S('VPORTS', 'Ventanas del modelo', 'vports'))] },
       { name: 'Capas', items: [B('LAYER', 'Propiedades de capa', 'layers'), { combo: 'layer' }] },
     ] },
     { id: 'solid', name: 'Sólido', panels: [
@@ -205,13 +207,14 @@ export const TABS3D = [];
     { id: 'visualize', name: 'Visualizar', panels: [
       { name: 'Vistas', items: [B('VIEWTOP', 'Superior', 'viewtop'), B('VIEWFRONT', 'Frontal', 'viewside'), B('VIEWSWISO', 'Isométrica SO', 'viewiso', VIEWS)] },
       { name: 'Estilos visuales', items: [B('VSCURRENT _Realistic', 'Realista', 'visualstyle', VSTY), COL(S('VSCURRENT _Shaded', 'Sombreado', 'visualstyle'), S('VSCURRENT _Hidden', 'Oculto', 'visualstyle'), S('VSCURRENT _Wireframe', 'Estructura alámbrica', 'visualstyle'))] },
-      { name: 'Navegación', items: [B('3DORBIT', 'Órbita 3D', 'orbit'), B('VIEW3DPANEL', 'Vista 3D acoplada', 'dock3d')] },
+      { name: 'Navegación', items: [B('3DORBIT', 'Órbita 3D', 'orbit'), B('ZOOM _E', 'Zoom extensión', 'zoomext'), B('VIEW3DPANEL', 'Visor 3D aparte', 'dock3d')] },
       { name: 'Render', items: [B('RENDER', 'Renderizar', 'render')] },
       { name: 'Ventanas gráficas del modelo', items: [B('VPORTS', 'Ventanas del modelo', 'vports')] },
     ] },
   );
   panel('3d', 'Modelado').items.push(COL(S('PYRAMID', 'Pirámide', 'pyramid'), S('WEDGE', 'Cuña', 'wedge'), S('TORUS', 'Toroide', 'torus')));
-  panel('3d', 'Vista').items.push(B('VIEWSWISO', 'Vistas', 'viewiso', VIEWS), B('VIEW3DPANEL', 'Vista 3D acoplada', 'dock3d'));
+  panel('3d', 'Vista').items.push(B('VIEWSWISO', 'Vistas', 'viewiso', VIEWS));
+  tab('3d').panels.splice(2, 0, COORD);
   for (const id of ['insert', 'annotate', 'view', 'manage', 'output', 'collab', 'express', 'mech']) if (tab(id)) TABS3D.push(tab(id));
 }
 

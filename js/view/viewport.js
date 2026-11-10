@@ -3,10 +3,11 @@ import * as G from '../core/geom.js';
 import * as E from '../core/entities.js';
 import { drawEnts, drawEnt } from './renderer.js';
 import { osnap, orthoPoint, isoOrthoPoint, polarPoint, gridSnap, OSLABEL } from './snap.js';
-import { PAPER } from '../core/tables.js';
+import { PAPER, aciCss } from '../core/tables.js';
 import { THEMES } from '../app.js';
 import { GridIndex } from '../core/spatial.js';
 import { tKnown } from '../core/i18n.js';
+import * as P3 from '../core/plane3d.js';
 
 export class View {
   constructor(app, host) {
@@ -85,19 +86,67 @@ export class View {
     this.app.ui?.status?.update?.();
   }
   get scale() { return this.cur.s; }
-  toScreen(p, v = this.cur) { return { x: (p.x - v.cx) * v.s + this.W / 2, y: this.H / 2 - (p.y - v.cy) * v.s }; }
-  toWorld(x, y, v = this.cur) { return { x: (x - this.W / 2) / v.s + v.cx, y: (this.H / 2 - y) / v.s + v.cy }; }
-  worldBB(v = this.cur) { const a = this.toWorld(0, this.H, v), b = this.toWorld(this.W, 0, v); return { x1: a.x, y1: a.y, x2: b.x, y2: b.y }; }
+  // ---- 3D: cámara de la vista principal (doc.ext.view3d) y plano de trabajo actual (doc.ext.wp)
+  get cam() { return this.doc?.ext?.view3d || null; }
+  get wp() { return this.doc?.ext?.wp || null; }
+  hasWp() { const d = this.doc; if (!d) return false; if (this._wpRev !== d.rev || this._wpDoc !== d) { this._wpRev = d.rev; this._wpDoc = d; this._wpHas = d.model.some((e) => e.wp && !P3.isWorld(e.wp)); this._solHas = d.model.some((e) => e.type === '3DSOLID'); } return this._wpHas; }
+  // proyección activa: solo en el espacio modelo, fuera del editor de bloques
+  get P() {
+    const d = this.doc; if (!d || d.blockEdit || d.active !== 'Model') return null;
+    if (!this.cam && !this.hasWp() && P3.isWorld(this.wp) && !(this._solHas && (d.vars.VSCURRENT || '2dWireframe') !== '2dWireframe')) return null;
+    const k = JSON.stringify([this.cam, this.wp]);
+    if (this._pk !== k) { this._pk = k; const B = P3.basis(this.cam); const A = P3.affine(this.wp, B); const dt = P3.det(A); this._P = { B, A, det: dt, inv: Math.abs(dt) > 1e-9 ? { a: A.d / dt, b: -A.b / dt, c: -A.c / dt, d: A.a / dt } : null }; }
+    return this._P;
+  }
+  affOf(pl) { const P = this.P; return P ? (P3.same(pl, this.wp) ? P.A : P3.affine(pl, P.B)) : null; }
+  // coordenadas 2D de vista <-> pantalla
+  v2s(q, v = this.cur) { return { x: (q.x - v.cx) * v.s + this.W / 2, y: this.H / 2 - (q.y - v.cy) * v.s }; }
+  s2v(x, y, v = this.cur) { return { x: (x - this.W / 2) / v.s + v.cx, y: (this.H / 2 - y) / v.s + v.cy }; }
+  // punto local de un plano -> 2D de vista
+  l2v(p, A) { const z = p.z || 0; return { x: A.a * p.x + A.c * p.y + A.e + A.zx * z, y: A.b * p.x + A.d * p.y + A.f + A.zy * z }; }
+  v2l(q, A) { const dt = P3.det(A); if (Math.abs(dt) < 1e-9) return null; const x = q.x - A.e, y = q.y - A.f; return { x: (A.d * x - A.c * y) / dt, y: (-A.b * x + A.a * y) / dt }; }
+  toScreen(p, v = this.cur) { const P = v === this.cur ? this.P : null; return this.v2s(P ? this.l2v(p, P.A) : p, v); }
+  toWorld(x, y, v = this.cur) { const q = this.s2v(x, y, v), P = v === this.cur ? this.P : null; if (!P) return q; return this.v2l(q, P.A) || q; }
+  // punto del plano de trabajo actual -> universal 3D
+  toW3(p) { const w = P3.toW(this.wp, p); return { x: w[0], y: w[1], z: w[2] }; }
+  w3ToScreen(W, v = this.cur) { const B = this.P?.B || P3.basis(null); return this.v2s({ x: P3.dot(W, B.R), y: P3.dot(W, B.U) }, v); }
+  worldBB(v = this.cur) { const a = this.toWorld(0, this.H, v), b = this.toWorld(this.W, 0, v); return { x1: Math.min(a.x, b.x), y1: Math.min(a.y, b.y), x2: Math.max(a.x, b.x), y2: Math.max(a.y, b.y) }; }
+  // cambia la cámara conservando en el centro de la pantalla el punto del plano de trabajo que estaba allí
+  setCam(cam) {
+    const d = this.doc, v = { ...this.cur }, B0 = this.P?.B || P3.basis(this.cam);
+    let piv = null; const c = this.toWorld(this.W / 2, this.H / 2);
+    if (this.P?.inv || !this.P) piv = this.P ? P3.toW(this.wp, c) : [c.x, c.y, 0];
+    if (!piv) piv = P3.add(P3.mul(B0.R, v.cx), P3.mul(B0.U, v.cy));
+    d.ext.view3d = cam ? { az: cam.az, el: cam.el } : null; this._pk = null;
+    const B = P3.basis(d.ext.view3d);
+    v.cx = P3.dot(piv, B.R); v.cy = P3.dot(piv, B.U);
+    this.setCur(v); this.updateCursor?.(); this.redrawOverlay();
+    this.app.ui?.refresh?.();
+  }
 
   zoomAt(f, sx, sy) {
-    const v = { ...this.cur }, w0 = this.toWorld(sx, sy, v);
+    const v = { ...this.cur }, w0 = this.s2v(sx, sy, v);
     v.s = Math.min(1e7, Math.max(1e-7, v.s * f));
     v.cx = w0.x - (sx - this.W / 2) / v.s; v.cy = w0.y + (sy - this.H / 2) / v.s;
     this.setCur(v);
   }
   panPx(dx, dy) { const v = { ...this.cur }; v.cx -= dx / v.s; v.cy += dy / v.s; this.setCur(v); }
+  // caja (en coordenadas de vista) de unos objetos con proyección 3D
+  projBB(ents) {
+    const P = this.P, d = this.doc, bb = G.bbNew();
+    for (const e of ents) {
+      if (!d.isVisible(e)) continue;
+      if (e.type === '3DSOLID') { const m = this.app.meshOf?.(e); if (m) for (const w of m.v) G.bbAdd(bb, { x: P3.dot(w, P.B.R), y: P3.dot(w, P.B.U) }); continue; }
+      if (e.type === 'XLINE' || e.type === 'RAY') continue;
+      const b = E.entBBox(e, d); if (!G.bbValid(b)) continue;
+      const A = this.affOf(e.wp || P3.WORLD);
+      for (const q of [{ x: b.x1, y: b.y1 }, { x: b.x2, y: b.y1 }, { x: b.x2, y: b.y2 }, { x: b.x1, y: b.y2 }]) G.bbAdd(bb, this.l2v(q, A));
+    }
+    return G.bbValid(bb) ? bb : null;
+  }
   zoomWindow(bb, margin = 1.05) {
     if (!bb || !isFinite(bb.x1)) return;
+    if (this.P && !bb.view) { const A = this.P.A, b2 = G.bbNew(); for (const q of [{ x: bb.x1, y: bb.y1 }, { x: bb.x2, y: bb.y1 }, { x: bb.x2, y: bb.y2 }, { x: bb.x1, y: bb.y2 }]) G.bbAdd(b2, this.l2v(q, A)); bb = b2; }
     const w = Math.max(bb.x2 - bb.x1, 1e-6), h = Math.max(bb.y2 - bb.y1, 1e-6);
     const s = Math.min(this.W / (w * margin), this.H / (h * margin));
     this.setCur({ cx: (bb.x1 + bb.x2) / 2, cy: (bb.y1 + bb.y2) / 2, s: isFinite(s) && s > 0 ? s : 1 });
@@ -105,6 +154,7 @@ export class View {
   zoomExtents() {
     const d = this.doc;
     if (d.paperMode) { const l = d.layout; const bb = d.extents(l.ents) || { x1: 0, y1: 0, x2: l.w, y2: l.h }; G.bbUnion(bb, { x1: 0, y1: 0, x2: l.w, y2: l.h }); this.zoomWindow(bb, 1.1); return; }
+    if (this.P) { const pb = this.projBB(d.space); if (pb) { pb.view = true; this.zoomWindow(pb); } else { const o = this.l2v({ x: 0, y: 0 }, this.P.A); this.setCur({ cx: o.x, cy: o.y, s: Math.min(this.W / 420, this.H / 297) }); } return; }
     const bb = d.extents(d.space);
     if (bb) this.zoomWindow(bb); else this.setCur({ cx: 0, cy: 0, s: Math.min(this.W / 420, this.H / 297) });
   }
@@ -112,12 +162,12 @@ export class View {
   // índice espacial del espacio actual (se rehace cuando cambia el dibujo)
   index() {
     const d = this.doc, sp = d.space;
-    if (sp.length < 400) return null;
+    if (sp.length < 400 || this.P) return null;
     if (!this._idx || this._idx.sp !== sp || this._idx.rev !== d.rev || this._idx.n !== sp.length) this._idx = { sp, rev: d.rev, n: sp.length, g: new GridIndex(sp, d) };
     return this._idx.g;
   }
   near(bb) { const g = this.index(); return g ? g.query(bb) : this.doc.space; }
-  snapEnts(bb) { return bb ? this.near(bb) : this.doc.space; }
+  snapEnts(bb) { const all = bb ? this.near(bb) : this.doc.space; if (!this.P) return all; const k = P3.key(this.wp); return all.filter((e) => e.type !== '3DSOLID' && P3.key(e.wp) === k); }
 
   // ---- entrada de cursor: calcula punto con forzados
   updateCursor() {
@@ -200,7 +250,7 @@ export class View {
     return this.doc.blockEdit ? (THEMES[s.theme] || THEMES.dark).bedit : s.bgModel;
   }
   isDarkBg(c) { const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i.exec(c || ''); if (!m) return true; return (parseInt(m[1], 16) * 0.3 + parseInt(m[2], 16) * 0.59 + parseInt(m[3], 16) * 0.11) < 128; }
-  setWorld(ctx, v) { const r = this.dpr; ctx.setTransform(r * v.s, 0, 0, -r * v.s, r * (this.W / 2 - v.cx * v.s), r * (this.H / 2 + v.cy * v.s)); }
+  setWorld(ctx, v, pl) { const r = this.dpr; ctx.setTransform(r * v.s, 0, 0, -r * v.s, r * (this.W / 2 - v.cx * v.s), r * (this.H / 2 + v.cy * v.s)); const P = v === this.cur ? this.P : null; if (P) { const A = pl === undefined ? P.A : this.affOf(pl || P3.WORLD); ctx.transform(A.a, A.b, A.c, A.d, A.e, A.f); } }
   baseStyle(v, extra = {}) {
     const bg = this.bg(), d = this.doc;
     return { px: v.s * this.dpr, bgDark: this.isDarkBg(bg), bg, lwdisplay: d.vars.LWDISPLAY, viewBB: this.worldBB(v), vh: this.H / v.s, qtext: d.vars.QTEXTMODE, showAttdefValue: false, ...extra };
@@ -233,7 +283,7 @@ export class View {
     // encuadre rápido: si solo cambió la traslación y el último dibujo fue costoso, se desplaza la imagen
     // anterior y el dibujo completo se hace al parar
     const v0 = this.cur, L = this._last;
-    if (L && !this._full && this._rt === undefined && (d.blockEdit || d.active === 'Model') && L.cost > 25 && L.s === v0.s && L.rev === d.rev && L.sp === d.space && L.w === this.cv.width && L.h === this.cv.height && (L.cx !== v0.cx || L.cy !== v0.cy)) {
+    if (L && !this.P && !this._full && this._rt === undefined && (d.blockEdit || d.active === 'Model') && L.cost > 25 && L.s === v0.s && L.rev === d.rev && L.sp === d.space && L.w === this.cv.width && L.h === this.cv.height && (L.cx !== v0.cx || L.cy !== v0.cy)) {
       const r = this.dpr, dx = (L.cx - v0.cx) * v0.s * r, dy = (v0.cy - L.cy) * v0.s * r;
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = this.bg(); ctx.fillRect(0, 0, this.cv.width, this.cv.height);
       ctx.drawImage(L.img, dx, dy);
@@ -247,6 +297,7 @@ export class View {
     ctx.lineCap = 'butt'; ctx.lineJoin = 'miter';
     if (d.blockEdit || d.active === 'Model') {
       const v = this.cur;
+      if (this.P) { this.render3D(ctx, v); ctx.setTransform(1, 0, 0, 1, 0, 0); this._last = null; return; }
       if (!d.blockEdit) this.app.drawUnderlay?.(ctx, this, v);
       if (d.vars.GRIDMODE) this.drawGrid(ctx, v);
       this.setWorld(ctx, v);
@@ -290,6 +341,132 @@ export class View {
     this.setWorld(ctx, pv);
     drawEnts(ctx, l.ents, d, stP);
     if (d.mspace) { const vp = d.mspace; ctx.lineWidth = 3 / (pv.s * r); ctx.strokeStyle = '#2b8cff'; ctx.strokeRect(vp.c.x - vp.w / 2, vp.c.y - vp.h / 2, vp.w, vp.h); }
+  }
+  // ---- vista 3D en la ventana principal: rejilla del plano de trabajo, sólidos y objetos de cada plano
+  render3D(ctx, v) {
+    const d = this.doc, P = this.P, r = this.dpr;
+    if (d.vars.GRIDMODE) this.drawGrid3D(ctx, v);
+    const vs = d.vars.VSCURRENT || '2dWireframe', shaded = vs === 'Shaded' || vs === 'Realistic', hidden = vs === 'Hidden';
+    const ents = d.space.filter((e) => d.isVisible(e));
+    // sólidos (algoritmo del pintor)
+    const faces = [], light = P3.unit([0.4, -0.3, 0.86]);
+    this._solidScr = new Map();
+    for (const e of ents) {
+      if (e.type !== '3DSOLID') continue;
+      const m = this.app.meshOf?.(e); if (!m) continue;
+      const pv = m.v.map((w) => { const q = this.v2s({ x: P3.dot(w, P.B.R), y: P3.dot(w, P.B.U) }, v); return [q.x, q.y, P3.dot(w, P.B.F)]; });
+      const col = this.entCss(e), polys = [];
+      const push = (idx, holes) => {
+        if (idx.length < 3) return;
+        let n = [0, 0, 0]; for (let i = 0; i < idx.length; i++) { const p = m.v[idx[i]], q = m.v[idx[(i + 1) % idx.length]]; n[0] += (p[1] - q[1]) * (p[2] + q[2]); n[1] += (p[2] - q[2]) * (p[0] + q[0]); n[2] += (p[0] - q[0]) * (p[1] + q[1]); }
+        n = P3.unit(n);
+        const facing = P3.dot(n, P.B.F) < 0, z = idx.reduce((a, i) => a + pv[i][2], 0) / idx.length;
+        faces.push({ idx, holes, pv, n, z, col, facing, e }); polys.push(idx.map((i) => ({ x: pv[i][0], y: pv[i][1] })));
+      };
+      for (const f of m.f) push(f);
+      for (const cp of m.caps || []) push(cp.outer, cp.holes);
+      this._solidScr.set(e, { polys, edges: this.solidEdges(m, pv, P) });
+    }
+    ctx.setTransform(r, 0, 0, r, 0, 0); ctx.lineJoin = 'round';
+    const dark = this.isDarkBg(this.bg());
+    if (shaded || hidden) {
+      faces.sort((x, y) => y.z - x.z);
+      for (const f of faces) {
+        if (!f.facing) continue;
+        ctx.beginPath(); f.idx.forEach((i, k) => (k ? ctx.lineTo(f.pv[i][0], f.pv[i][1]) : ctx.moveTo(f.pv[i][0], f.pv[i][1]))); ctx.closePath();
+        for (const hl of f.holes || []) { hl.forEach((i, k) => (k ? ctx.lineTo(f.pv[i][0], f.pv[i][1]) : ctx.moveTo(f.pv[i][0], f.pv[i][1]))); ctx.closePath(); }
+        if (hidden) ctx.fillStyle = this.bg(); else { const k = 0.38 + 0.62 * Math.max(0, P3.dot(f.n, light)); ctx.fillStyle = shadeCss(f.col, k); }
+        ctx.fill('evenodd'); ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 0.6; ctx.stroke();
+      }
+    }
+    // aristas vivas y siluetas
+    ctx.lineWidth = 1;
+    for (const [e, s] of this._solidScr) {
+      ctx.strokeStyle = shaded ? (vs === 'Realistic' ? 'rgba(0,0,0,.55)' : shadeCss(this.entCss(e), 0.45)) : hidden ? (dark ? '#ddd' : '#222') : this.entCss(e);
+      ctx.beginPath();
+      for (const [a, b] of s.edges) { if (shaded || hidden) { if (!this.edgeVisible(faces, e, a, b)) continue; } ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+      ctx.stroke();
+    }
+    // objetos 2D agrupados por plano
+    const groups = new Map();
+    for (const e of ents) { if (e.type === '3DSOLID') continue; const k = P3.key(e.wp); let g = groups.get(k); if (!g) groups.set(k, (g = { pl: e.wp || P3.WORLD, ents: [] })); g.ents.push(e); }
+    for (const { pl, ents: list } of groups.values()) {
+      const A = this.affOf(pl), dt = Math.abs(P3.det(A));
+      this.setWorld(ctx, v, pl);
+      drawEnts(ctx, list, d, this.baseStyle(v, { viewBB: null, px: v.s * r * Math.sqrt(Math.max(dt, 1e-4)) }));
+    }
+  }
+  entCss(e) { const d = this.doc, L = d.layers[e.layer] || d.layers['0']; let c = e.color ?? 256; if (c === 256 || c === 0) c = L?.color ?? 7; return e.tc || (typeof c === 'string' ? c : aciCss(c, this.isDarkBg(this.bg()))); }
+  // aristas de la malla que se dibujan: vivas (> 20°) y contorno aparente para esta vista
+  solidEdges(m, pv, P) {
+    const key = (i) => m.v[i].map((x) => x.toFixed(6)).join(','), E2 = new Map();
+    const nrm = (f) => { let n = [0, 0, 0]; for (let i = 0; i < f.length; i++) { const p = m.v[f[i]], q = m.v[f[(i + 1) % f.length]]; n[0] += (p[1] - q[1]) * (p[2] + q[2]); n[1] += (p[2] - q[2]) * (p[0] + q[0]); n[2] += (p[0] - q[0]) * (p[1] + q[1]); } return P3.unit(n); };
+    const all = [...m.f, ...(m.caps || []).flatMap((c) => [c.outer, ...(c.holes || [])])];
+    for (const f of all) { const n = nrm(f); for (let i = 0; i < f.length; i++) { const a = f[i], b = f[(i + 1) % f.length], ka = key(a), kb = key(b), k = ka < kb ? ka + '|' + kb : kb + '|' + ka; const o = E2.get(k); if (o) o.n.push(n); else E2.set(k, { a, b, n: [n] }); } }
+    const out = [], cmax = Math.cos(20 * Math.PI / 180);
+    for (const { a, b, n } of E2.values()) {
+      const sil = n.length > 1 && (P3.dot(n[0], P.B.F) < 0) !== (P3.dot(n[1], P.B.F) < 0);
+      if (n.length < 2 || P3.dot(n[0], n[1]) < cmax || sil) out.push([pv[a], pv[b]]);
+    }
+    return out;
+  }
+  // arista visible si su punto medio no queda tapado por una cara más cercana de otro sólido (aproximado)
+  edgeVisible(faces, e, a, b) {
+    if (!this._occ || this._occ.faces !== faces) this._occ = { faces, list: faces.filter((f) => f.facing) };
+    const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, mz = (a[2] + b[2]) / 2;
+    for (const f of this._occ.list) {
+      if (f.z >= mz - 1e-6) continue;
+      const pts = f.idx.map((i) => ({ x: f.pv[i][0], y: f.pv[i][1] }));
+      if (!G.ptInPoly({ x: mx, y: my }, pts)) continue;
+      // profundidad de la cara en ese punto (plano por sus tres primeros vértices)
+      const [p0, p1, p2] = f.idx.slice(0, 3).map((i) => f.pv[i]);
+      const ux = p1[0] - p0[0], uy = p1[1] - p0[1], uz = p1[2] - p0[2], wx = p2[0] - p0[0], wy = p2[1] - p0[1], wz = p2[2] - p0[2];
+      const nx = uy * wz - uz * wy, ny = uz * wx - ux * wz, nz = ux * wy - uy * wx;
+      if (Math.abs(nz) < 1e-12) continue;
+      const zf = p0[2] - (nx * (mx - p0[0]) + ny * (my - p0[1])) / nz;
+      if (zf < mz - Math.max(1e-6, Math.abs(mz) * 1e-6)) return false;
+    }
+    return true;
+  }
+  // rejilla sobre el plano de trabajo actual
+  drawGrid3D(ctx, v) {
+    const d = this.doc, P = this.P, r = this.dpr;
+    if (!P.inv || Math.abs(P.det) < 0.02) return;
+    let u = d.vars.GRIDUNIT || 10;
+    const k = v.s * Math.sqrt(Math.abs(P.det));
+    while (u * k < 10) u *= 5;
+    while (u * k > 200) u /= 5;
+    const bb = this.worldBB(v);
+    const x0 = Math.floor(bb.x1 / u), x1 = Math.ceil(bb.x2 / u), y0 = Math.floor(bb.y1 / u), y1 = Math.ceil(bb.y2 / u);
+    if ((x1 - x0) > 600 || (y1 - y0) > 600) return;
+    const dark = this.isDarkBg(this.bg());
+    const minor = dark ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.07)', major = dark ? 'rgba(255,255,255,.12)' : 'rgba(0,0,0,.15)';
+    ctx.setTransform(r, 0, 0, r, 0, 0); ctx.lineWidth = 1 / r;
+    const line = (a, b) => { const A = this.toScreen(a), B = this.toScreen(b); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); };
+    for (const majorPass of [false, true]) {
+      ctx.strokeStyle = majorPass ? major : minor; ctx.beginPath();
+      for (let i = x0; i <= x1; i++) if ((i % 5 === 0) === majorPass) line({ x: i * u, y: y0 * u }, { x: i * u, y: y1 * u });
+      for (let j = y0; j <= y1; j++) if ((j % 5 === 0) === majorPass) line({ x: x0 * u, y: j * u }, { x: x1 * u, y: j * u });
+      ctx.stroke();
+    }
+    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = dark ? 'rgba(230,90,90,.55)' : 'rgba(200,0,0,.45)'; ctx.beginPath(); line({ x: x0 * u, y: 0 }, { x: x1 * u, y: 0 }); ctx.stroke();
+    ctx.strokeStyle = dark ? 'rgba(90,210,90,.55)' : 'rgba(0,150,0,.45)'; ctx.beginPath(); line({ x: 0, y: y0 * u }, { x: 0, y: y1 * u }); ctx.stroke();
+  }
+  // selección por ventana con proyección: cajas en pantalla
+  screenBB(e) {
+    const d = this.doc, bb = G.bbNew();
+    if (e.type === '3DSOLID') { const s = this._solidScr?.get(e); if (s) for (const pl of s.polys) for (const q of pl) G.bbAdd(bb, q); return G.bbValid(bb) ? bb : null; }
+    const b = E.entBBox(e, d); if (!G.bbValid(b)) return null;
+    const A = this.affOf(e.wp || P3.WORLD);
+    for (const q of [{ x: b.x1, y: b.y1 }, { x: b.x2, y: b.y1 }, { x: b.x2, y: b.y2 }, { x: b.x1, y: b.y2 }]) G.bbAdd(bb, this.v2s(this.l2v(q, A)));
+    return bb;
+  }
+  windowSelectProj(p1, p2, crossing) {
+    const a = this.toScreen(p1), b = this.toScreen(p2), w = { x1: Math.min(a.x, b.x), y1: Math.min(a.y, b.y), x2: Math.max(a.x, b.x), y2: Math.max(a.y, b.y) };
+    const d = this.doc, out = [];
+    for (const e of d.space) { if (!d.isVisible(e)) continue; const bb = this.screenBB(e); if (!bb) continue; if (G.bbInside(bb, w) || (crossing && G.bbOverlap(bb, w))) out.push(e); }
+    return out;
   }
   drawGrid(ctx, v) {
     const d = this.doc, r = this.dpr;
@@ -357,8 +534,14 @@ export class View {
     this.setWorld(c, v);
     const selSet = new Set([...(eng.sel || []), ...(eng.req?.sel || [])]);
     let n = 0;
-    for (const e of selSet) { if (n++ > 3000) break; drawEnt(c, e, d, { ...st, override: dark ? '#4fd1c5' : '#0b6f6a', extraW: 1.5, noDash: false }); }
-    if (eng.hover && !selSet.has(eng.hover)) { c.globalAlpha = 0.85; drawEnt(c, eng.hover, d, { ...st, extraW: 2, noDash: true }); c.globalAlpha = 1; }
+    const P = this.P;
+    const hl = (e, o) => {
+      if (!P) return drawEnt(c, e, d, o);
+      if (e.type === '3DSOLID') { const s = this._solidScr?.get(e); if (!s) return; c.save(); c.setTransform(r, 0, 0, r, 0, 0); c.strokeStyle = o.override || (dark ? '#9fe' : '#06a'); c.lineWidth = 1 + (o.extraW || 0); if (!o.noDash) c.setLineDash([6, 3]); c.beginPath(); for (const [a, b] of s.edges) { c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); } c.stroke(); c.restore(); return; }
+      this.setWorld(c, v, e.wp || P3.WORLD); drawEnt(c, e, d, { ...o, px: v.s * r * Math.sqrt(Math.max(Math.abs(P3.det(this.affOf(e.wp || P3.WORLD))), 1e-4)) }); this.setWorld(c, v);
+    };
+    for (const e of selSet) { if (n++ > 3000) break; hl(e, { ...st, override: dark ? '#4fd1c5' : '#0b6f6a', extraW: 1.5, noDash: false }); }
+    if (eng.hover && !selSet.has(eng.hover)) { c.globalAlpha = 0.85; hl(eng.hover, { ...st, extraW: 2, noDash: true }); c.globalAlpha = 1; }
     if (eng.hover?.url && !eng.req) { c.save(); c.setTransform(r, 0, 0, r, 0, 0); c.font = '12px Segoe UI, Arial, sans-serif'; const tx = '🔗 ' + (eng.hover.urlDesc || eng.hover.url) + '  (Ctrl+clic)', tw = c.measureText(tx).width; c.fillStyle = dark ? '#2b3340' : '#ffffe1'; c.fillRect(this.mouse.x + 14, this.mouse.y + 12, tw + 8, 18); c.fillStyle = dark ? '#e6e6e6' : '#111'; c.fillText(tx, this.mouse.x + 18, this.mouse.y + 25); c.restore(); }
     // previsualización
     const prev = eng.preview ? eng.preview(this.snapped) : null;
@@ -378,6 +561,12 @@ export class View {
       c.strokeStyle = crossing ? '#3c3' : '#4a8cff'; c.lineWidth = 1 / (v.s * r);
       if (crossing) c.setLineDash([5 / v.s, 3 / v.s]);
       c.beginPath(); win.path.forEach((q, i) => (i ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y))); c.closePath(); c.fill(); c.stroke(); c.setLineDash([]);
+    } else if (win && P) {
+      const a = this.toScreen(win.p1), b = this.toScreen(this.cursor), crossing = b.x < a.x;
+      c.save(); c.setTransform(r, 0, 0, r, 0, 0);
+      c.fillStyle = crossing ? 'rgba(60,180,80,.18)' : 'rgba(60,110,230,.18)'; c.strokeStyle = crossing ? '#3c3' : '#4a8cff'; c.lineWidth = 1;
+      if (crossing) c.setLineDash([5, 3]);
+      c.fillRect(a.x, a.y, b.x - a.x, b.y - a.y); c.strokeRect(a.x, a.y, b.x - a.x, b.y - a.y); c.restore();
     } else if (win) {
       const p1 = win.p1, p2 = this.cursor;
       const crossing = p2.x < p1.x;
@@ -390,7 +579,9 @@ export class View {
     // grips
     if (eng.grips && eng.grips.length) {
       const gs = this.app.settings.gripSize || 6;
+      const wk = P ? P3.key(this.wp) : null;
       for (const g of eng.grips) {
+        if (P && (g.ent?.type === '3DSOLID' || P3.key(g.ent?.wp) !== wk)) continue;
         const s = this.toScreen(g.p); const x = s.x * r, y = s.y * r, h = gs * r / 2 + 0.5;
         const hot = (eng.gripDrag && eng.gripDrag.grip === g) || eng.hotGrips?.includes(g), near = eng.hoverGrip === g;
         c.fillStyle = hot ? '#ff5a3c' : near ? '#ffb347' : g.kind?.startsWith('d') ? '#7fdcd0' : g.kind === 'mid' ? '#3fbfb2' : '#14a196';
@@ -431,6 +622,7 @@ export class View {
     this.app.drawCompare?.(c, this, dark);
     if (eng.hover && !eng.req && !eng.gripDrag && !eng.hover.url && performance.now() - (eng.hoverT || 0) > 600) this.app.drawRollover?.(c, this, eng.hover, dark);
     this.app.drawMarkups?.(c, this, dark);
+    if ((this.P || this.app.settings.ws3d) && d.active === 'Model' && !d.blockEdit) { this.drawTriad(c, dark); this.drawViewCube(c, dark); } else this._cube = null;
     // cursor
     if (this.mouse.in) this.drawCursor(c, dark);
     this.app.ui?.dyn?.update?.();
@@ -465,10 +657,15 @@ export class View {
     c.strokeStyle = dark ? '#e8e8e8' : '#111'; c.lineWidth = 1; c.beginPath();
     const showCross = !req || req.wantsPoint || eng.gripDrag;
     const pb = (this.doc.vars.PICKBOX || 4) * r;
-    if (showCross) { c.moveTo(x - size, y); c.lineTo(x + size, y); c.moveTo(x, y - size); c.lineTo(x, y + size); }
+    const P = this.P;
+    if (showCross && P && P.inv && Math.abs(P.det) > 0.02) {
+      // cursor en cruz alineado con los ejes X e Y del plano de trabajo
+      for (const ax of [{ x: P.A.a, y: -P.A.b }, { x: P.A.c, y: -P.A.d }]) { const L = Math.hypot(ax.x, ax.y) || 1, ux = ax.x / L * Math.min(size, 4e4), uy = ax.y / L * Math.min(size, 4e4); c.moveTo(x - ux, y - uy); c.lineTo(x + ux, y + uy); }
+    } else if (showCross) { c.moveTo(x - size, y); c.lineTo(x + size, y); c.moveTo(x, y - size); c.lineTo(x, y + size); }
     if (!req || req.kind === 'select' || req.kind === 'entity') c.rect(x - pb, y - pb, 2 * pb, 2 * pb);
     if (req?.wantsPoint) { const ap = 0; void ap; }
     c.stroke();
+    if (P || this.app.settings.ws3d) return;
     // icono SCU
     if (this.app.settings.ucsIcon) {
       const u = this.doc.ext?.ucs, ang = u?.a || 0, L = 30 * r;
@@ -480,6 +677,68 @@ export class View {
       c.fillStyle = dark ? '#ccc' : '#333'; c.font = `${10 * r}px system-ui`; c.fillText('X', o.x + ax.x * (L + 7 * r) - 3 * r, o.y + ax.y * (L + 7 * r) + 4 * r); c.fillText('Y', o.x + ay.x * (L + 7 * r) - 3 * r, o.y + ay.y * (L + 7 * r) + 4 * r);
       if (!u) { c.strokeStyle = dark ? '#ccc' : '#333'; c.lineWidth = r; c.strokeRect(o.x - 4 * r, o.y - 4 * r, 8 * r, 8 * r); }
     }
+  }
+
+  // tríada de ejes del plano de trabajo (X rojo, Y verde, Z azul): en su origen si se ve, si no abajo a la izquierda
+  drawTriad(c, dark) {
+    const r = this.dpr, B = this.P?.B || P3.basis(this.cam), pl = this.wp || P3.WORLD, n = P3.normal(pl), L = 46 * r;
+    let o = { x: 46 * r, y: (this.H - 46) * r };
+    const q = this.w3ToScreen(pl.o); if (q.x > 50 && q.x < this.W - 130 && q.y > 130 && q.y < this.H - 50) o = { x: q.x * r, y: q.y * r };
+    const axes = [[pl.u, 'X', dark ? '#ff5a5a' : '#d01818'], [pl.v, 'Y', dark ? '#5ee05e' : '#108a10'], [n, 'Z', dark ? '#5aa8ff' : '#1450d0']]
+      .map(([a, t, col]) => ({ dx: P3.dot(a, B.R), dy: -P3.dot(a, B.U), depth: P3.dot(a, B.F), t, col }))
+      .sort((a, b) => b.depth - a.depth);
+    c.save(); c.lineCap = 'round'; c.font = `600 ${11 * r}px system-ui, sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    for (const a of axes) {
+      const ex = o.x + a.dx * L, ey = o.y + a.dy * L, short = Math.hypot(a.dx, a.dy) < 0.15;
+      c.strokeStyle = a.col; c.fillStyle = a.col; c.lineWidth = 2.5 * r;
+      c.beginPath(); c.moveTo(o.x, o.y); c.lineTo(ex, ey); c.stroke();
+      if (short) { c.beginPath(); c.arc(o.x, o.y, 4 * r, 0, G.TAU); c.stroke(); }
+      const ang = Math.atan2(ey - o.y, ex - o.x), h = 6 * r;
+      if (!short) { c.beginPath(); c.moveTo(ex + Math.cos(ang) * h, ey + Math.sin(ang) * h); c.lineTo(ex + Math.cos(ang + 2.5) * h, ey + Math.sin(ang + 2.5) * h); c.lineTo(ex + Math.cos(ang - 2.5) * h, ey + Math.sin(ang - 2.5) * h); c.closePath(); c.fill(); }
+      c.fillText(a.t, o.x + a.dx * (L + 15 * r) + (short ? 9 * r : 0), o.y + a.dy * (L + 15 * r));
+    }
+    if (P3.isWorld(this.wp)) { c.strokeStyle = dark ? '#ddd' : '#333'; c.lineWidth = r; c.strokeRect(o.x - 4 * r, o.y - 4 * r, 8 * r, 8 * r); }
+    c.restore();
+  }
+  // cubo de vistas (arriba a la derecha): pulsar una cara orienta la vista; pulsar fuera de las caras, isométrica SO
+  get cubeC() { return { x: this.W - 78, y: 82, s: 31 }; }
+  drawViewCube(c, dark) {
+    const r = this.dpr, B = this.P?.B || P3.basis(this.cam), { x: cx, y: cy, s } = this.cubeC;
+    const P3s = (p) => [(cx + P3.dot(p, B.R) * s) * r, (cy - P3.dot(p, B.U) * s) * r, P3.dot(p, B.F)];
+    const FACES = [['Top', [0, 0, 1], 'SUPERIOR'], ['Bottom', [0, 0, -1], 'INFERIOR'], ['Front', [0, -1, 0], 'FRONTAL'], ['Back', [0, 1, 0], 'POSTERIOR'], ['Right', [1, 0, 0], 'DERECHA'], ['Left', [-1, 0, 0], 'IZQUIERDA']];
+    this._cube = [];
+    const fs = FACES.map(([k, n, lab]) => {
+      const u = n[0] ? [0, 1, 0] : [1, 0, 0], w = P3.cross(n, u);
+      const corner = (a, b) => P3.add(n, P3.add(P3.mul(u, a), P3.mul(w, b)));
+      const pts = [corner(-1, -1), corner(1, -1), corner(1, 1), corner(-1, 1)].map(P3s);
+      return { k, lab, pts, dot: P3.dot(n, B.F), z: pts.reduce((a, p) => a + p[2], 0) / 4 };
+    }).filter((f) => f.dot < -1e-6).sort((a, b) => b.z - a.z);
+    c.save(); c.font = `600 ${7.5 * r}px system-ui, sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    // brújula
+    c.strokeStyle = dark ? 'rgba(255,255,255,.35)' : 'rgba(0,0,0,.3)'; c.lineWidth = r; c.beginPath();
+    for (let i = 0; i <= 48; i++) { const a = i / 48 * G.TAU, q = P3s([Math.cos(a) * 1.9, Math.sin(a) * 1.9, -1]); i ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]); } c.stroke();
+    const nq = P3s([0, 2.25, -1]); c.fillStyle = dark ? '#ccc' : '#444'; c.fillText('N', nq[0], nq[1]);
+    for (const f of fs) {
+      c.beginPath(); f.pts.forEach((p, i) => (i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]))); c.closePath();
+      c.fillStyle = dark ? `rgba(70,80,96,${0.8 + 0.2 * -f.dot})` : `rgba(236,240,245,${0.85 + 0.15 * -f.dot})`; c.fill(); c.strokeStyle = dark ? '#9aa6b5' : '#7f8b99'; c.stroke();
+      const m = f.pts.reduce((a, p) => [a[0] + p[0] / 4, a[1] + p[1] / 4], [0, 0]);
+      if (-f.dot > 0.3) { const tx = tKnown(f.lab[0] + f.lab.slice(1).toLowerCase()).toUpperCase(), fw = Math.min(Math.hypot(f.pts[1][0] - f.pts[0][0], f.pts[1][1] - f.pts[0][1]), Math.hypot(f.pts[2][0] - f.pts[1][0], f.pts[2][1] - f.pts[1][1])); let fz = 7.5; c.font = `600 ${fz * r}px system-ui, sans-serif`; while (c.measureText(tx).width > fw * 0.9 && fz > 4) { fz -= 0.5; c.font = `600 ${fz * r}px system-ui, sans-serif`; } c.fillStyle = dark ? '#e4e8ee' : '#334'; c.fillText(tx, m[0], m[1]); }
+      this._cube.push({ k: f.k, pts: f.pts.map((p) => ({ x: p[0] / r, y: p[1] / r })) });
+    }
+    c.restore();
+  }
+  cubeHit(x, y) {
+    if (!(this.P || this.app.settings.ws3d) || !this._cube) return null;
+    const { x: cx, y: cy } = this.cubeC;
+    if (Math.hypot(x - cx, y - cy) > 72) return null;
+    for (const f of this._cube.slice().reverse()) if (G.ptInPoly({ x, y }, f.pts)) return f.k;
+    return 'SWiso';
+  }
+  // órbita: arrastre horizontal = acimut, vertical = elevación
+  orbitBy(dx, dy) {
+    const c0 = this._orb.cam;
+    this.setCam({ az: c0.az - dx * 0.008, el: Math.max(-Math.PI / 2, Math.min(Math.PI / 2, c0.el + dy * 0.008)) });
+    this._orb.cam = this.cam; this._orb.x += dx; this._orb.y += dy;
   }
 
   // ---- eventos
@@ -496,18 +755,24 @@ export class View {
     el.addEventListener('pointermove', (e) => {
       const r = el.getBoundingClientRect();
       const nx = e.clientX - r.left, ny = e.clientY - r.top;
+      if (this._orb) { this.orbitBy(nx - this.mouse.x, ny - this.mouse.y); this.mouse = { x: nx, y: ny, in: true }; return; }
       if (this.panning) { this.panPx(nx - this.mouse.x, ny - this.mouse.y); }
       this.mouse = { x: nx, y: ny, in: true };
       this.updateCursor();
       this.eng?.pointerMove(this.ptInfo(e));
       this.redrawOverlay();
-      this.app.ui?.status?.coords?.(this.snapped);
+      this.app.ui?.status?.coords?.(this.P ? this.toW3(this.snapped) : this.snapped);
     });
     el.addEventListener('pointerleave', () => { this.mouse.in = false; this.redrawOverlay(); });
     el.addEventListener('pointerdown', (e) => {
       el.setPointerCapture?.(e.pointerId); this.lastShift = e.shiftKey;
       const r = el.getBoundingClientRect(); this.mouse = { x: e.clientX - r.left, y: e.clientY - r.top, in: true };
       this.updateCursor();
+      const ck = e.button === 0 ? this.cubeHit(this.mouse.x, this.mouse.y) : null;
+      if (ck) { e.preventDefault(); this.setCam(ck === 'Top' && P3.isWorld(this.wp) && !this.app.settings.ws3d ? null : P3.presetCam(ck)); this.zoomExtents(); return; }
+      if ((e.button === 1 && e.shiftKey) || (e.button === 0 && this.eng?.req?.kind === 'orbit')) {
+        e.preventDefault(); this._orb = { x: this.mouse.x, y: this.mouse.y, cam: this.cam || { az: -Math.PI / 2, el: Math.PI / 2 } }; el.style.cursor = 'grabbing'; return;
+      }
       if (e.button === 1) {
         e.preventDefault();
         const now = performance.now();
@@ -519,6 +784,7 @@ export class View {
       this.eng?.pointerDown(this.ptInfo(e));
     });
     el.addEventListener('pointerup', (e) => {
+      if (this._orb) { this._orb = null; el.style.cursor = ''; return; }
       if (e.button === 1 || this.panning) { this.panning = false; el.style.cursor = ''; return; }
       this.eng?.pointerUp(this.ptInfo(e));
     });
@@ -536,7 +802,29 @@ export class View {
   }
   pickTol() { return (this.doc.vars.PICKBOX || 4) / this.scale; }
   // todos los objetos bajo el cursor (ciclo de selección)
+  // con proyección: el punto se lleva al plano de cada objeto; los sólidos se prueban en pantalla
+  pickProj(p, all) {
+    const d = this.doc, s = this.toScreen(p), out = [], tolPx = d.vars.PICKBOX || 4;
+    for (let i = d.space.length - 1; i >= 0; i--) {
+      const e = d.space[i]; if (!d.isVisible(e)) continue;
+      let dd;
+      if (e.type === '3DSOLID') { const sc = this._solidScr?.get(e); if (!sc) continue; dd = sc.polys.some((pl) => G.ptInPoly(s, pl)) ? tolPx : Infinity; }
+      else {
+        const A = this.affOf(e.wp || P3.WORLD), dt = Math.abs(P3.det(A)); if (dt < 1e-6) continue;
+        const q = this.v2l(this.s2v(s.x, s.y), A); if (!q) continue;
+        const tol = tolPx / (this.scale * Math.sqrt(dt));
+        const bb = { x1: q.x - tol, y1: q.y - tol, x2: q.x + tol, y2: q.y + tol };
+        if (e.type !== 'XLINE' && e.type !== 'RAY') { const b = E.entBBox(e, d); if (G.bbValid(b) && !G.bbOverlap(b, bb)) continue; }
+        const de = E.entDist(e, q, d); if (de > tol) continue; dd = de / tol * tolPx * 0.999;
+      }
+      if (dd <= tolPx) { out.push([e, dd]); if (!all && dd === 0 && e.type !== 'HATCH') break; }
+    }
+    if (all) return out.map((x) => x[0]);
+    out.sort((a, b) => a[1] - b[1]);
+    return out[0]?.[0] || null;
+  }
   pickAll(p) {
+    if (this.P) return this.pickProj(p, true);
     const tol = this.pickTol(), d = this.doc, out = [];
     const bb = { x1: p.x - tol, y1: p.y - tol, x2: p.x + tol, y2: p.y + tol };
     for (const e of this.near(bb)) {
@@ -547,6 +835,7 @@ export class View {
     return out.reverse();
   }
   pickAt(p, ents = null) {
+    if (this.P && !ents) return this.pickProj(p, false);
     const tol = this.pickTol(), d = this.doc;
     let best = null, bd = Infinity;
     const bb = { x1: p.x - tol, y1: p.y - tol, x2: p.x + tol, y2: p.y + tol };
@@ -561,4 +850,5 @@ export class View {
     return best;
   }
 }
+const shadeCss = (css, k) => { const m = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})/i.exec(css) || /rgb\((\d+),\s*(\d+),\s*(\d+)/.exec(css); let [rr, gg, bb] = m ? (String(css).startsWith('rgb') ? [+m[1], +m[2], +m[3]] : [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)]) : [200, 200, 200]; if (rr + gg + bb > 700 || rr + gg + bb < 60) rr = gg = bb = 205; return `rgb(${Math.round(rr * k)},${Math.round(gg * k)},${Math.round(bb * k)})`; };
 export { PAPER };

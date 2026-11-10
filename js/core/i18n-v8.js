@@ -455,6 +455,24 @@ Derivación (olet) | Derivación (olet) | Branch (olet) | Derivação (olet) | D
 Imagen PNG | Imaxe PNG | PNG image | Imagem PNG | Imatge PNG
 Poligonal | Poligonal | Polygonal | Poligonal | Poligonal
 Modelado 3D | Modelado 3D | 3D Modeling | Modelação 3D | Modelatge 3D
+Plano de trabajo | Plano de traballo | Work Plane | Plano de trabalho | Pla de treball
+Superior (XY) | Superior (XY) | Top (XY) | Superior (XY) | Superior (XY)
+Frontal (XZ) | Frontal (XZ) | Front (XZ) | Frontal (XZ) | Frontal (XZ)
+Lateral derecho (YZ) | Lateral dereito (YZ) | Right (YZ) | Lateral direito (YZ) | Lateral dret (YZ)
+Lateral izquierdo | Lateral esquerdo | Left | Lateral esquerdo | Lateral esquerre
+Paralelo a la vista | Paralelo á vista | Parallel to View | Paralelo à vista | Paral·lel a la vista
+Origen | Orixe | Origin | Origem | Origen
+Elevación | Elevación | Elevation | Elevação | Elevació
+3 puntos | 3 puntos | 3 Point | 3 pontos | 3 punts
+Girar X | Xirar X | Rotate X | Rodar X | Girar X
+Girar Y | Xirar Y | Rotate Y | Rodar Y | Girar Y
+Girar Z | Xirar Z | Rotate Z | Rodar Z | Girar Z
+Objeto | Obxecto | Object | Objeto | Objecte
+Planta del plano | Planta do plano | Plan View | Planta do plano | Planta del pla
+Visor 3D aparte | Visor 3D á parte | Separate 3D Viewer | Visor 3D à parte | Visor 3D a part
+Zoom extensión | Zoom extensión | Zoom Extents | Zoom extensão | Zoom extensió
+Personalizada | Personalizada | Custom | Personalizada | Personalitzada
+Frontal | Frontal | Front | Frontal | Frontal
 Archivo: iso.lin | Arquivo: iso.lin | File: iso.lin | Arquivo: iso.lin | Fitxer: iso.lin
 Importar alias (.pgp) | Importar alias (.pgp) | Import aliases (.pgp) | Importar alias (.pgp) | Importar àlies (.pgp)
 Modelado 3D ISO — mm | Modelado 3D ISO — mm | 3D Modeling ISO — mm | Modelação 3D ISO — mm | Modelatge 3D ISO — mm
@@ -530,6 +548,14 @@ ASTM A193 B7 / A194 2H (rosca métrica) | ASTM A193 B7 / A194 2H (rosca métrica
 
 // Mensajes de petición: English | castellano | galego | português | català
 const SENT8 = `
+Specify new origin point | Precise el nuevo punto de origen | Precise o novo punto de orixe | Especifique o novo ponto de origem | Precisa el nou punt d'origen
+Specify point on positive portion of X-axis | Precise un punto en la parte positiva del eje X | Precise un punto na parte positiva do eixe X | Especifique um ponto na parte positiva do eixo X | Precisa un punt a la part positiva de l'eix X
+Specify point on positive-Y portion of the UCS XY plane | Precise un punto en la parte Y positiva del plano XY | Precise un punto na parte Y positiva do plano XY | Especifique um ponto na parte Y positiva do plano XY | Precisa un punt a la part Y positiva del pla XY
+Specify elevation along the Z axis | Precise la elevación según el eje Z | Precise a elevación segundo o eixe Z | Especifique a elevação segundo o eixo Z | Precisa l'elevació segons l'eix Z
+Specify rotation angle about X axis | Precise el ángulo de giro alrededor del eje X | Precise o ángulo de xiro arredor do eixe X | Especifique o ângulo de rotação em torno do eixo X | Precisa l'angle de gir al voltant de l'eix X
+Specify rotation angle about Y axis | Precise el ángulo de giro alrededor del eje Y | Precise o ángulo de xiro arredor do eixe Y | Especifique o ângulo de rotação em torno do eixo Y | Precisa l'angle de gir al voltant de l'eix Y
+Specify rotation angle about Z axis | Precise el ángulo de giro alrededor del eje Z | Precise o ángulo de xiro arredor do eixe Z | Especifique o ângulo de rotação em torno do eixo Z | Precisa l'angle de gir al voltant de l'eix Z
+Press ESC or ENTER to exit. Drag to orbit; Shift+wheel button drags orbit at any time. | Pulse ESC o INTRO para salir. Arrastre para orbitar; Mayús + botón de la rueda orbita en cualquier momento. | Prema ESC ou INTRO para saír. Arrastre para orbitar; Maiús + botón da roda orbita en calquera momento. | Prima ESC ou ENTER para sair. Arraste para orbitar; Shift + botão da roda orbita a qualquer momento. | Premeu ESC o RETORN per sortir. Arrossegueu per orbitar; Maj + botó de la roda orbita en qualsevol moment.
 Specify tube radius | Precise el radio del tubo | Precise o raio do tubo | Especifique o raio do tubo | Precisa el radi del tub
 Specify other corner | Precise la otra esquina | Precise a outra esquina | Especifique o outro canto | Precisa l'altra cantonada
 Specify center point of base | Precise el punto central de la base | Precise o punto central da base | Especifique o ponto central da base | Precisa el punt central de la base
@@ -600,6 +626,7 @@ Specify a point on desired side | Indique un punto en el lado que desea conserva
 
 // Opciones: English | castellano | galego | português | català
 const KW8 = `
+3point | 3puntos | 3puntos | 3pontos | 3punts
 SWiso | isoSO | isoSO | isoSO | isoSO
 SEiso | isoSE | isoSE | isoSE | isoSE
 NEiso | isoNE | isoNE | isoNE | isoNE
@@ -651,6 +678,7 @@ planar Object | Objeto plano | Obxecto plano | Objeto plano | Objecte pla
 
 // Mensajes de salida: English | castellano | galego | português | català
 const MSG8 = `
+The points are collinear. | Los puntos están alineados. | Os puntos están aliñados. | Os pontos estão alinhados. | Els punts estan alineats.
 At least 2 solids are required. | Se necesitan al menos 2 sólidos. | Necesítanse polo menos 2 sólidos. | São necessários pelo menos 2 sólidos. | Calen almenys 2 sòlids.
 Collaboration session closed. | Sesión de colaboración cerrada. | Sesión de colaboración pechada. | Sessão de colaboração fechada. | Sessió de col·laboració tancada.
 DWG file created by the external converter. | Archivo DWG creado por el conversor externo. | Ficheiro DWG creado polo conversor externo. | Ficheiro DWG criado pelo conversor externo. | Fitxer DWG creat pel convertidor extern.
@@ -675,6 +703,7 @@ No layers are reserved. | No hay capas reservadas. | Non hai capas reservadas. |
 `;
 // Mensajes con valores: patrón, castellano, galego, português, català
 const MSGRE8 = [
+  [/^Work plane: origin (\S+), normal (\S+)\.$/, 'Plano de trabajo: origen $1, normal $2.', 'Plano de traballo: orixe $1, normal $2.', 'Plano de trabalho: origem $1, normal $2.', 'Pla de treball: origen $1, normal $2.'],
   [/^(\d+) support\(s\) placed\.$/, '$1 soporte(s) colocado(s).', '$1 soporte(s) colocado(s).', '$1 suporte(s) colocado(s).', '$1 suport(s) col·locat(s).'],
   [/^(\d+) spool\(s\), (\d+) field weld\(s\)\.$/, '$1 spool(s), $2 soldadura(s) de campo.', '$1 spool(s), $2 soldadura(s) de campo.', '$1 spool(s), $2 soldadura(s) de campo.', '$1 spool(s), $2 soldadura(s) de camp.'],
   [/^Flanged joint: (.+), (\d+) stud bolts (.+) x (.+)\.$/, 'Unión bridada: $1, $2 espárragos $3 × $4.', 'Unión bridada: $1, $2 espárragos $3 × $4.', 'União flangeada: $1, $2 pernos $3 × $4.', 'Unió embridada: $1, $2 espàrrecs $3 × $4.'],
@@ -724,6 +753,8 @@ const CMD8 = {
   MVALVE: ['VALVULA', 'VALVULA', 'VALVULA', 'VALVULA'], MVALVEGATE: ['VALVCOMPUERTA', 'VALVCOMPORTA', 'VALVCUNHA', 'VALVCOMPORTA'], MVALVEGLOBE: ['VALVGLOBO', 'VALVGLOBO', 'VALVGLOBO', 'VALVGLOBUS'], MVALVECHECK: ['VALVRETENCION', 'VALVRETENCION', 'VALVRETENCAO', 'VALVRETENCIO'],
   MVALVEBALL: ['VALVBOLA', 'VALVBOLA', 'VALVESFERA', 'VALVBOLA'], MVALVEPLUG: ['VALVMACHO', 'VALVMACHO', 'VALVMACHO', 'VALVMASCLE'], MVALVEBFLY: ['VALVMARIPOSA', 'VALVBOLBORETA', 'VALVBORBOLETA', 'VALVPAPALLONA'],
   MSTRAINER: ['FILTROY', 'FILTROY', 'FILTROY', 'FILTREY'], MSTRAINERB: ['FILTROCESTA', 'FILTROCESTA', 'FILTROCESTO', 'FILTRECISTELLA'], MSIGHTGLASS: ['MIRILLA', 'VISOR', 'VISOR', 'VISOR'],
+  WORKPLANE: ['PLANOTRABAJO', 'PLANOTRABALLO', 'PLANOTRABALHO', 'PLATREBALL'], WPWORLD: ['PTUNIVERSAL', 'PTUNIVERSAL', 'PTUNIVERSAL', 'PTUNIVERSAL'], WPTOP: ['PTSUPERIOR', 'PTSUPERIOR', 'PTSUPERIOR', 'PTSUPERIOR'], WPFRONT: ['PTFRONTAL', 'PTFRONTAL', 'PTFRONTAL', 'PTFRONTAL'], WPRIGHT: ['PTDERECHA', 'PTDEREITA', 'PTDIREITA', 'PTDRETA'], WPLEFT: ['PTIZQUIERDA', 'PTESQUERDA', 'PTESQUERDA', 'PTESQUERRA'], WPBACK: ['PTPOSTERIOR', 'PTPOSTERIOR', 'PTPOSTERIOR', 'PTPOSTERIOR'], WPBOTTOM: ['PTINFERIOR', 'PTINFERIOR', 'PTINFERIOR', 'PTINFERIOR'],
+  WPORIGIN: ['PTORIGEN', 'PTORIXE', 'PTORIGEM', 'PTORIGEN'], WPELEVATION: ['PTELEVACION', 'PTELEVACION', 'PTELEVACAO', 'PTELEVACIO'], WPX: ['PTGIRARX', 'PTXIRARX', 'PTRODARX', 'PTGIRARX'], WPY: ['PTGIRARY', 'PTXIRARY', 'PTRODARY', 'PTGIRARY'], WPZ: ['PTGIRARZ', 'PTXIRARZ', 'PTRODARZ', 'PTGIRARZ'], WP3POINT: ['PT3PUNTOS', 'PT3PUNTOS', 'PT3PONTOS', 'PT3PUNTS'], WPOBJECT: ['PTOBJETO', 'PTOBXECTO', 'PTOBJETO', 'PTOBJECTE'], WPVIEW: ['PTVISTA', 'PTVISTA', 'PTVISTA', 'PTVISTA'], WPPREVIOUS: ['PTPREVIO', 'PTPREVIO', 'PTANTERIOR', 'PTPREVI'],
   WEDGE: ['CUÑA', 'CUÑA', 'CUNHA', 'FALCA'], PYRAMID: ['PIRAMIDE', 'PIRAMIDE', 'PIRAMIDE', 'PIRAMIDE'], TORUS: ['TOROIDE', 'TOROIDE', 'TORO', 'TOR'], VIEWPRESET: ['VISTAPREDEF', 'VISTAPREDEF', 'VISTAPREDEF', 'VISTAPREDEF'], VIEW3DPANEL: ['VISTA3DACOPLADA', 'VISTA3DACOPLADA', 'VISTA3DACOPLADA', 'VISTA3DACOBLADA'],
   VIEWTOP: ['VISTASUP', 'VISTASUP', 'VISTASUP', 'VISTASUP'], VIEWBOTTOM: ['VISTAINF', 'VISTAINF', 'VISTAINF', 'VISTAINF'], VIEWFRONT: ['VISTAFRONTAL', 'VISTAFRONTAL', 'VISTAFRONTAL', 'VISTAFRONTAL'], VIEWBACK: ['VISTAPOST', 'VISTAPOST', 'VISTAPOST', 'VISTAPOST'], VIEWLEFT: ['VISTAIZQ', 'VISTAESQ', 'VISTAESQ', 'VISTAESQ'], VIEWRIGHT: ['VISTADER', 'VISTADER', 'VISTADIR', 'VISTADRE'],
   VIEWSWISO: ['ISOSO', 'ISOSO', 'ISOSO', 'ISOSO'], VIEWSEISO: ['ISOSE', 'ISOSE', 'ISOSE', 'ISOSE'], VIEWNEISO: ['ISONE', 'ISONE', 'ISONE', 'ISONE'], VIEWNWISO: ['ISONO', 'ISONO', 'ISONO', 'ISONO'],

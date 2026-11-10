@@ -239,11 +239,13 @@ export default async (page, t) => {
   t.near(await ev(() => webcad.E.GEN['3DSOLID'].volume(webcad.doc.model.at(-1))), Math.PI * 25 * 10, 15, 'REVOLVE: cilindro por revolución');
   t.eq(await ev(async () => (await webcad.solidTriangles(webcad.doc.model.filter((e) => e.type === '3DSOLID').slice(0, 1))).length), 12, 'triangulación para STL (prisma = 12 triángulos)');
   await type('_3DORBIT');
-  t.ok(await ev(() => !!document.getElementById('v3d') && webcad.v3d.faces() > 100), 'visor 3D abierto con las caras de los sólidos');
+  t.ok(await ev(() => !!webcad.view.P && webcad.view._solidScr?.size === 5 && !document.getElementById('v3d')), 'órbita 3D en la ventana principal, con los sólidos proyectados');
+  const az0 = await ev(() => webcad.doc.ext.view3d.az);
   await page.mouse.move(700, 400); await page.mouse.down(); await page.mouse.move(760, 430, { steps: 4 }); await page.mouse.up();
-  t.ok(await ev(() => Math.abs(webcad.v3d.cam.az - (-60 * Math.PI / 180)) > 0.1), 'órbita con el ratón');
+  t.ok(await ev((a) => Math.abs(webcad.doc.ext.view3d.az - a) > 0.1, az0), 'órbita con el ratón');
   await page.keyboard.press('Escape');
-  t.ok(await ev(() => !document.getElementById('v3d')), 'cerrar el visor 3D');
+  await type('_PLAN', 'W');
+  t.ok(await ev(() => webcad.doc.ext.view3d === null && !webcad.cmd.req), 'PLAN universal vuelve a la planta');
 
   // ---- nubes de puntos
   const pts = Array.from({ length: 500 }, (_, i) => `${500000 + (i % 25)} ${4700000 + Math.floor(i / 25)} ${100 + (i % 7)} 255 0 0`).join('\n');

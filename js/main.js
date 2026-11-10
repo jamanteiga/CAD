@@ -2,6 +2,14 @@
 import * as E from './core/entities.js';
 import { app, loadSettings, saveSettings } from './app.js';
 import { Doc } from './core/document.js';
+import * as P3 from './core/plane3d.js';
+// objetos nuevos del espacio modelo: se dibujan sobre el plano de trabajo actual
+Doc.onAdd = (d, e) => {
+  const wp = d.ext?.wp;
+  if (!wp || P3.isWorld(wp) || 'wp' in e) return;
+  if (e.type === '3DSOLID' && e.kind === 'mesh' && !e.local) return; // mallas ya en coordenadas universales (booleanas)
+  e.wp = { o: [...wp.o], u: [...wp.u], v: [...wp.v] };
+};
 import { View } from './view/viewport.js';
 import { Engine } from './cmd/engine.js';
 import * as Draw from './cmd/draw.js';

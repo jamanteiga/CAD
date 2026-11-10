@@ -357,6 +357,7 @@ export class Engine {
     if (req.single && req.sel.length) req.resolve(req.sel);
   }
   polySelect(pts, crossing) {
+    if (this.view?.P) { const b = G.bbNew(); for (const p of pts) G.bbAdd(b, p); return this.view.windowSelectProj({ x: b.x1, y: b.y1 }, { x: b.x2, y: b.y2 }, crossing); }
     const d = this.doc, poly = pts.map((p, i) => ({ k: 'L', a: p, b: pts[(i + 1) % pts.length] }));
     const pb = G.bbNew(); for (const p of pts) G.bbAdd(pb, p);
     return d.space.filter((e) => {
@@ -371,6 +372,7 @@ export class Engine {
     });
   }
   windowSelect(p1, p2, crossing) {
+    if (this.view?.P) return this.view.windowSelectProj(p1, p2, crossing);
     const bb = { x1: Math.min(p1.x, p2.x), y1: Math.min(p1.y, p2.y), x2: Math.max(p1.x, p2.x), y2: Math.max(p1.y, p2.y) };
     const d = this.doc, out = [];
     for (const e of d.space) {
@@ -677,7 +679,7 @@ export function parsePoint(t, eng) {
   const toW = (p) => (u ? G.add(u.o, G.rotate(p, { x: 0, y: 0 }, u.a || 0)) : p);
   const vec = (p) => (u ? G.rotate(p, { x: 0, y: 0 }, u.a || 0) : p);
   let m = new RegExp(`^(${NUM})\\s*,\\s*(${NUM})(?:\\s*,\\s*(${NUM}))?$`).exec(t);
-  if (m) { const p = { x: +m[1], y: +m[2] }; return rel ? G.add(last, vec(p)) : toW(p); }
+  if (m) { const p = { x: +m[1], y: +m[2] }; const q = rel ? G.add(last, vec(p)) : toW(p); if (m[3] != null) q.z = +m[3] + (rel ? last.z || 0 : 0); return q; }
   m = new RegExp(`^(${NUM})\\s*<\\s*(.+)$`).exec(t);
   if (m) { const a = parseAngle(m[2], eng.doc); if (a == null) return null; const p = G.polar({ x: 0, y: 0 }, a, +m[1]); return rel ? G.add(last, vec(p)) : toW(p); }
   return null;

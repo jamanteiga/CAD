@@ -244,7 +244,7 @@ export function register(eng, app) {
     if (k === 'ORigin' || k === 'Noorigin') app.settings.ucsIconOrigin = k === 'ORigin';
     saveSettings(); app.view.redrawOverlay();
   });
-  R('PLAN', async (c) => { const k = await c.getKw('Enter an option [Current ucs/Ucs/World] <Current ucs>:', 'Current ucs'); if (k == null) return; app.view.zoomExtents(); });
+  R('PLAN', async (c) => { const k = await c.getKw('Enter an option [Current ucs/Ucs/World] <Current ucs>:', 'Current ucs'); if (k == null) return; const wp = app.doc.ext.wp; if (k === 'World' || !wp) app.view.setCam(null); else { const n = [wp.u[1] * wp.v[2] - wp.u[2] * wp.v[1], wp.u[2] * wp.v[0] - wp.u[0] * wp.v[2], wp.u[0] * wp.v[1] - wp.u[1] * wp.v[0]]; app.view.setCam({ az: Math.atan2(n[1], n[0]), el: Math.asin(Math.max(-1, Math.min(1, n[2]))) }); } app.view.zoomExtents(); });
   app.ucsToWorld = toW;
 
   // ======================= VPORTS =======================

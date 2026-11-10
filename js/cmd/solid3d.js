@@ -6,6 +6,7 @@ import { Cancel } from './engine.js';
 import { h } from '../ui/dom.js';
 import { t as T } from '../core/i18n.js';
 import { aciCss } from '../core/tables.js';
+import * as P3 from '../core/plane3d.js';
 
 const isPt = (p) => p && typeof p === 'object' && 'x' in p;
 const need = (p) => { if (p == null) throw new Cancel(); return p; };
@@ -16,7 +17,14 @@ const earcut = async () => (EARCUT ||= (await import(new URL('../../vendor/earcu
 const ring = (l) => { const p = E.polyPoints({ pts: l, closed: true }); if (p.length > 1 && G.eq(p[0], p.at(-1), 1e-9)) p.pop(); return p; };
 const ccw = (p) => (G.polyArea(p) < 0 ? p.slice().reverse() : p);
 // malla: { v: [[x,y,z]], f: [[i,j,k,...]], caps: [{ outer:[idx], holes:[[idx]] }] }
+// malla en coordenadas universales (aplica el plano de trabajo del sólido, e.wp)
 export function meshOf(e) {
+  const m = meshLocal(e);
+  if (!e.wp || P3.isWorld(e.wp)) return m;
+  return { ...m, v: m.v.map(([x, y, z]) => P3.toW(e.wp, { x, y, z })), caps: m.caps };
+}
+// malla en las coordenadas del plano del sólido
+export function meshLocal(e) {
   const v = [], f = [];
   const add = (x, y, z) => (v.push([x, y, z]), v.length - 1);
   const z0 = e.z0 || 0;
@@ -240,7 +248,7 @@ export function register(eng, app) {
     solid({ kind: 'sphere', c: { ...ce }, r, z0: -r }); redraw();
   });
   // cuña, pirámide y toroide (mallas cerradas con caras orientadas hacia fuera)
-  const meshSolid = (polys, extra = {}) => solid({ kind: 'mesh', polys, ...extra });
+  const meshSolid = (polys, extra = {}) => solid({ kind: 'mesh', polys, local: true, ...extra });
   R('WEDGE', async (c) => {
     const p1 = need(await c.getPoint('Specify first corner or [Center]:'));
     let p2 = need(await c.getPoint('Specify other corner or [Cube/Length]:', { base: p1, rubber: 'rect' }));
@@ -292,7 +300,7 @@ export function register(eng, app) {
       const prof = profileOf(e);
       let k = 1;
       if (taper) { const b = G.bbNew(); for (const p of ring(prof[0])) G.bbAdd(b, p); const rr = Math.min(b.x2 - b.x1, b.y2 - b.y1) / 2; k = Math.max(0, (rr - Math.tan(taper) * Math.abs(hh)) / rr); }
-      d.add({ type: '3DSOLID', kind: 'extrude', prof, h: hh, taper: k, layer: e.layer, color: e.color });
+      d.add({ type: '3DSOLID', kind: 'extrude', prof, h: hh, taper: k, layer: e.layer, color: e.color, wp: e.wp || null });
       if (d.vars.DELOBJ !== 0) d.remove(e);
     }
     d.end(); redraw();
@@ -304,7 +312,7 @@ export function register(eng, app) {
     const a2 = need(await c.getPoint('Specify axis endpoint:', { base: a1 }));
     const ang = need(await c.getAngle('Specify angle of revolution or [STart angle/Reverse/EXpression] <360>:', { def: G.TAU }));
     const d = doc(); d.begin('REVOLVE');
-    for (const e of s) { d.add({ type: '3DSOLID', kind: 'revolve', prof: profileOf(e).slice(0, 1), axis: [a1, a2], ang: Math.abs(ang) < 1e-9 ? G.TAU : ang, layer: e.layer, color: e.color }); if (d.vars.DELOBJ !== 0) d.remove(e); }
+    for (const e of s) { d.add({ type: '3DSOLID', kind: 'revolve', prof: profileOf(e).slice(0, 1), axis: [a1, a2], ang: Math.abs(ang) < 1e-9 ? G.TAU : ang, layer: e.layer, color: e.color, wp: e.wp || null }); if (d.vars.DELOBJ !== 0) d.remove(e); }
     d.end(); redraw();
   }, { alias: ['REV3D'] });
 
@@ -312,7 +320,7 @@ export function register(eng, app) {
   const triangles = async (ents) => {
     const ec = await earcut(), tris = [];
     for (const e of ents) {
-      const m = meshOf(e);
+      const m = meshLocal(e), W = e.wp && !P3.isWorld(e.wp) ? (p) => P3.toW(e.wp, { x: p[0], y: p[1], z: p[2] }) : null, t0 = tris.length;
       for (const f of m.f) for (let i = 1; i < f.length - 1; i++) tris.push([m.v[f[0]], m.v[f[i]], m.v[f[i + 1]]]);
       for (const cap of m.caps || []) {
         const all = [cap.outer, ...cap.holes], flat = [], holes = [], idx = [];
@@ -321,6 +329,7 @@ export function register(eng, app) {
         const up = cap.z > (e.z0 || 0);
         for (let i = 0; i < t.length; i += 3) { const a = m.v[idx[t[i]]], b = m.v[idx[t[i + 1]]], cc = m.v[idx[t[i + 2]]]; const cr = (b[0] - a[0]) * (cc[1] - a[1]) - (b[1] - a[1]) * (cc[0] - a[0]); tris.push((cr > 0) === up ? [a, b, cc] : [a, cc, b]); }
       }
+      if (W) for (let i = t0; i < tris.length; i++) tris[i] = tris[i].map(W);
     }
     return tris;
   };
@@ -498,20 +507,67 @@ export function register(eng, app) {
     return app.v3d;
   };
   app.view3d = viewer;
-  R('3DORBIT', async () => { viewer(); }, { alias: ['3DO', 'ORBIT', '3DVIEW', 'VIEWCUBE', 'NAVVCUBE'] });
-  // vistas predefinidas (ortogonales e isométricas) sobre la vista 3D
-  const PRESETS = { Top: [-90, 89.9], Bottom: [-90, -89.9], Front: [-90, 0], Back: [90, 0], Left: [180, 0], Right: [0, 0], SWiso: [-135, 35.264], SEiso: [-45, 35.264], NEiso: [45, 35.264], NWiso: [135, 35.264] };
-  app.view3dPreset = (k) => { const p = PRESETS[k]; if (!p) return; const v = viewer({ view: { az: G.rad(p[0]), el: G.rad(p[1]) } }); Object.assign(v.cam, { az: G.rad(p[0]), el: G.rad(p[1]) }); v.draw(); };
+  app.meshOf = meshOf;
+  // órbita en la ventana principal: arrastrar con el botón izquierdo (o Mayús + botón central en cualquier momento)
+  R('3DORBIT', async (c) => {
+    if (!app.view.cam) app.view.setCam(P3.SWISO);
+    await c.ask({ kind: 'orbit', prompt: 'Press ESC or ENTER to exit. Drag to orbit; Shift+wheel button drags orbit at any time.' }).catch(() => {});
+  }, { alias: ['3DO', 'ORBIT', '3DVIEW', 'VIEWCUBE', 'NAVVCUBE'], transparent: true, keepSel: true });
+  // vistas predefinidas (ortogonales e isométricas) de la ventana principal
+  const PRESETS = P3.PRESETS;
+  app.view3dPreset = (k) => {
+    if (!PRESETS[k]) return;
+    if (app.v3d && !app.v3d.dock) app.v3d.close();
+    app.view.setCam(k === 'Top' && P3.isWorld(doc().ext.wp) && !app.settings.ws3d ? null : P3.presetCam(k));
+    app.view.zoomExtents();
+  };
   R('VIEWPRESET', async (c, args) => {
     const k = args?.k || await c.getKw('Enter an option [Top/Bottom/Front/Back/Left/Right/SWiso/SEiso/NEiso/NWiso] <SWiso>:', 'SWiso'); if (k == null) return;
     app.view3dPreset(k);
   }, { alias: ['VISTA3D', '3DVISTA'] });
   for (const k of Object.keys(PRESETS)) R('VIEW' + k.toUpperCase(), (c) => eng.commands.VIEWPRESET.fn(c, { k }));
+  // ---- plano de trabajo 3D (SCP 3D): los objetos nuevos se dibujan sobre él
+  const setWp = (pl, c) => {
+    const d = doc(), prev = d.ext.wp || null;
+    d.begin('WORKPLANE'); d.touchTables?.();
+    (d.ext.wpPrev ||= []).push(prev); if (d.ext.wpPrev.length > 10) d.ext.wpPrev.shift();
+    d.ext.wp = pl && !P3.isWorld(pl) ? pl : null;
+    d.end();
+    app.view._pk = null;
+    // plano visto de canto: se pasa a una vista isométrica para poder dibujar sobre él
+    const P = app.view.P; if (P && Math.abs(P.det) < 0.05) app.view.setCam(P3.SWISO);
+    redraw(); app.view.updateCursor?.(); app.view.redrawOverlay();
+    const n = P3.normal(d.ext.wp || P3.WORLD), o = (d.ext.wp || P3.WORLD).o;
+    c?.print(`Work plane: origin ${o.map((x) => G.fmt(x, 3)).join(',')}, normal ${n.map((x) => G.fmt(x, 3)).join(',')}.`);
+  };
+  app.setWorkPlane = setWp;
+  R('WORKPLANE', async (c, args) => {
+    const d = doc(), cur = d.ext.wp || P3.WORLD;
+    const k = args?.k || await c.getKw('Enter an option [World/Top/Bottom/Front/Back/Left/Right/Origin/Elevation/X/Y/Z/3point/Object/View/Previous] <World>:', 'World');
+    if (k == null) return;
+    if (k === 'World') return setWp(null, c);
+    if (P3.NAMED[k]) return setWp(P3.named(k, [...cur.o]), c);
+    if (k === 'Previous') { const p = (d.ext.wpPrev || []).pop(); d.begin('WORKPLANE'); d.ext.wp = p || null; d.end(); app.view._pk = null; redraw(); return; }
+    if (k === 'Origin') { const p = need(await c.getPoint('Specify new origin point <0,0,0>:', { def: { x: 0, y: 0 } })); return setWp(P3.plane(P3.toW(cur, isPt(p) ? p : { x: 0, y: 0 }), cur.u, cur.v), c); }
+    if (k === 'Elevation') { const z = await c.getReal('Specify elevation along the Z axis <0>:', { def: 0 }); if (z == null) return; return setWp(P3.plane(P3.toW(cur, { x: 0, y: 0, z }), cur.u, cur.v), c); }
+    if (k === 'X' || k === 'Y' || k === 'Z') { const a = await c.getReal(`Specify rotation angle about ${k} axis <90>:`, { def: 90 }); if (a == null) return; return setWp(P3.rotate(cur, k, a * Math.PI / 180), c); }
+    if (k === '3point') {
+      const p0 = need(await c.getPoint('Specify new origin point <0,0,0>:'));
+      const p1 = need(await c.getPoint('Specify point on positive portion of X-axis:', { base: p0 }));
+      const p2 = need(await c.getPoint('Specify point on positive-Y portion of the UCS XY plane:', { base: p0 }));
+      const pl = P3.from3(P3.toW(cur, p0), P3.toW(cur, p1), P3.toW(cur, p2)); if (!pl) { c.print('The points are collinear.'); return; }
+      return setWp(pl, c);
+    }
+    if (k === 'Object') { const s = await c.select('Select object to align UCS:', { single: true }); if (!s.length) return; return setWp(s[0].wp || null, c); }
+    if (k === 'View') { const B = P3.basis(app.view.cam); return setWp(P3.plane([...cur.o], B.R, B.U), c); }
+  }, { alias: ['PLANOTRABAJO', 'UCS3D', 'SCP3D'] });
+  for (const k of ['World', 'Top', 'Front', 'Right', 'Left', 'Back', 'Bottom', 'Origin', 'Elevation', 'X', 'Y', 'Z', '3point', 'Object', 'View', 'Previous']) R('WP' + k.toUpperCase(), (c) => eng.commands.WORKPLANE.fn(c, { k }));
   R('VIEW3DPANEL', async () => { const s = app.settings; if (app.v3d?.dock) { s.dock3d = false; app.v3d.close(); } else { s.dock3d = true; viewer({ dock: true }); } app.saveSettings?.(); }, { alias: ['PANEL3D'] });
   R('VSCURRENT', async (c) => {
     const k = await c.getKw(`Enter an option [2dwireframe/Wireframe/Hidden/Realistic/Shaded] <${doc().vars.VSCURRENT}>:`, doc().vars.VSCURRENT); if (k == null) return;
     const v = { '2dwireframe': '2dWireframe' }[k] || k; doc().vars.VSCURRENT = v;
-    if (v !== '2dWireframe') viewer(); else app.v3d?.close();
+    if (app.v3d) app.v3d.style.value = v === '2dWireframe' ? 'Shaded' : v, app.v3d.draw();
+    redraw();
   }, { alias: ['VS', 'SHADEMODE'] });
   R('RENDER', async () => { const v = viewer(); v.style.value = 'Realistic'; v.draw(); }, { alias: ['RR'] });
 

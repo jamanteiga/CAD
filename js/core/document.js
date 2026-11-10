@@ -28,6 +28,7 @@ export function newLayer(name, o = {}) {
 }
 
 export class Doc {
+  static onAdd = null; // (doc, e): asigna el plano de trabajo 3D a los objetos nuevos
   static hooks = []; // funciones (doc, tx) que se ejecutan al cerrar cada operación (cotas asociativas, anotativos…)
   constructor() { this.listeners = {}; this.reset(); }
   on(ev, fn) { (this.listeners[ev] ||= []).push(fn); }
@@ -179,6 +180,7 @@ export class Doc {
     return e;
   }
   add(e, arr = this.space) {
+    if (Doc.onAdd && arr === this.model) Doc.onAdd(this, e);
     this.stamp(e);
     arr.push(e);
     this._rec({ k: 'add', e, arr });

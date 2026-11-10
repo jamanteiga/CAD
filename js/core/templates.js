@@ -95,6 +95,6 @@ export function buildTemplate(id, opts = {}) {
   for (const e of [...d.model, ...L.ents]) d.stamp(e);
   d.modified = false;
   d._template = t.id;
-  if (t.ws3d) { d.vars.VSCURRENT = 'Realistic'; d.ext.ws = '3d'; }
+  if (t.ws3d) { d.vars.VSCURRENT = 'Realistic'; d.ext.ws = '3d'; d.ext.view3d = { az: -0.75 * Math.PI, el: Math.atan(1 / Math.SQRT2) }; }
   return d;
 }
