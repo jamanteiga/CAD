@@ -312,6 +312,7 @@ export const ICONS = {
   wp3p: s(`<path d="M5 18l14-3-6-10z" stroke="${B}"/><circle cx="5" cy="18" r="1.6"/><circle cx="19" cy="15" r="1.6"/><circle cx="13" cy="5" r="1.6"/>`),
   wprot: s(`<path d="M4 19h14M4 19V7"/><path d="M15 6a7 7 0 0 1 3 7" stroke="${Rr}"/><path d="M18 13l1.5-3M18 13l-3-1" stroke="${Rr}"/>`),
   wpobj: s(`<path d="M4 8l8-4 8 4v8l-8 4-8-4z" stroke="${B}"/><path d="M12 12h7M12 12V4" stroke="${Rr}"/>`),
+  mouse3d: s(`<ellipse cx="12" cy="17" rx="8" ry="3.5"/><path d="M8 16V10a4 3 0 0 1 8 0v6" stroke="${B}"/><path d="M12 4v3M9.5 5.5L12 3l2.5 2.5" stroke="${Rr}"/>`),
   dock3d: s(`<rect x="3" y="5" width="18" height="14"/><path d="M12 5v14" stroke="${B}"/><path d="M14 13l3-2 3 2v3l-3 2-3-2z" stroke="${Rr}"/>`),
   cylinder: s(`<ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v12a7 2.5 0 0 0 14 0V6" stroke="${B}"/>`),
   cone: s(`<path d="M12 3L5 18a7 2.5 0 0 0 14 0z" stroke="${B}"/><ellipse cx="12" cy="18" rx="7" ry="2.5"/>`),

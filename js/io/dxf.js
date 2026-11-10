@@ -4,6 +4,7 @@ import * as E from '../core/entities.js';
 import { Doc, newLayer } from '../core/document.js';
 import { LINETYPES } from '../core/tables.js';
 import { layoutBase } from '../core/i18n.js';
+import * as D3 from './dxf3d.js';
 
 const D2R = Math.PI / 180;
 
@@ -123,10 +124,10 @@ export function readDXF(text, name = 'Dibujo.dxf') {
             const [, g] = readEntity();
             const nm = gv(g, 2) || gv(g, 3);
             const bflags = gn(g, 70), xpath = gv(g, 1);
-            const base = { x: +(gv(g, 10) || 0), y: +(gv(g, 20) || 0) };
+            const base = { x: +(gv(g, 10) || 0), y: +(gv(g, 20) || 0) }; if (+(gv(g, 30) || 0)) base.z = +gv(g, 30);
             const raw = readEntities(['ENDBLK']);
             if (i < pairs.length) readEntity();
-            const conv = raw.map((r) => convEntity(r, stats)).flat().filter(Boolean);
+            const conv = D3.mergeFaces(raw.map((r) => convEntity(r, stats)).flat().filter(Boolean));
             if (/^\*Model_Space$/i.test(nm)) continue;
             if (/^\*Paper_Space$/i.test(nm)) { paper.push(...conv); continue; }
             if (/^\*Paper_Space\d+$/i.test(nm)) { paperBlocks[nm] = conv; continue; }
@@ -157,7 +158,9 @@ export function readDXF(text, name = 'Dibujo.dxf') {
     }
     i++;
   }
-  doc.model = ents;
+  // 3D: inserciones de bloques con contenido 3D descompuestas; caras 3D unidas en superficies
+  { const r = D3.explode3DInserts(doc, D3.mergeFaces(ents), G.M, E); doc.model = r.ents; if (r.n) stats.exploded3d = r.n; }
+  if (D3.has3D(doc.model)) { doc.ext.view3d = { az: -0.75 * Math.PI, el: Math.atan(1 / Math.SQRT2) }; if (doc.model.some((e) => e.type === '3DSOLID')) doc.vars.VSCURRENT = 'Realistic'; }
   const lays = Object.entries(layoutNames).sort((a, b) => a[1].order - b[1].order);
   const noVp1 = (arr) => arr.filter((e) => !(e.type === 'VIEWPORT' && e.vpid === 1));
   if (!lays.length) doc.layouts = [{ name: layoutBase() + '1', paper: 'A3', w: 420, h: 297, ents: noVp1(paper) }];
@@ -292,8 +295,20 @@ function common(g) {
 const ocsFlip = (g) => +(gv(g, 230) ?? 1) < 0;
 
 function convEntity(r, stats) {
+  const [type, g0, extra] = r;
+  const c = common(g0);
+  // objetos propiamente 3D
+  if (type === '3DFACE') return D3.face3D(g0, c);
+  if (type === 'MESH') return D3.meshEnt(g0, c) || (stats.unsupported.MESH = (stats.unsupported.MESH || 0) + 1, null);
+  if (type === 'POLYLINE' && (gn(g0, 70) & (8 | 16 | 64))) return D3.polyline3D(g0, extra || [], c);
+  // OCS con normal no vertical: se lee sin la simetría 2D y se lleva a su plano
+  const g = D3.needsRawOcs(type, g0) ? g0.filter((p) => p[0] !== 230) : g0;
+  const e = convEntity2D([type, g, extra], stats, c);
+  return D3.to3D(type, g0, e, extra);
+}
+function convEntity2D(r, stats, c0) {
   const [type, g, extra] = r;
-  const c = common(g);
+  const c = c0 || common(g);
   const flip = ocsFlip(g);
   const fx = (p) => (flip ? { x: -p.x, y: p.y } : p);
   switch (type) {

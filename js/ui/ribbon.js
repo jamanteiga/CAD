@@ -195,7 +195,7 @@ export const TABS3D = [];
       { name: 'Modificar', items: [COL(S('MOVE', 'Desplazar', 'move'), S('COPY', 'Copiar', 'copy'), S('ROTATE', 'Girar', 'rotate')), COL(S('MIRROR', 'Simetría', 'mirror'), S('ARRAY', 'Matriz', 'array'), S('ERASE', 'Borrar', 'erase'))] },
       { name: 'Sección', items: [B('SECTION', 'Sección', 'region'), COL(S('SLICE', 'Corte', 'subtract'), S('VIEWBASE', 'Vista base', 'view'))] },
       COORD,
-      { name: 'Vista', items: [B('VIEWSWISO', 'Vistas', 'viewiso', VIEWS), B('VSCURRENT _Realistic', 'Estilo visual', 'visualstyle', VSTY), COL(S('3DORBIT', 'Órbita 3D', 'orbit'), S('PLAN _C', 'Planta del plano', 'viewtop'), S('VPORTS', 'Ventanas del modelo', 'vports'))] },
+      { name: 'Vista', items: [B('VIEWSWISO', 'Vistas', 'viewiso', VIEWS), B('VSCURRENT _Realistic', 'Estilo visual', 'visualstyle', VSTY), COL(S('3DORBIT', 'Órbita 3D', 'orbit'), S('PLAN _C', 'Planta del plano', 'viewtop'), S('3DMOUSE', 'Ratón 3D', 'mouse3d'))] },
       { name: 'Capas', items: [B('LAYER', 'Propiedades de capa', 'layers'), { combo: 'layer' }] },
     ] },
     { id: 'solid', name: 'Sólido', panels: [
@@ -207,7 +207,7 @@ export const TABS3D = [];
     { id: 'visualize', name: 'Visualizar', panels: [
       { name: 'Vistas', items: [B('VIEWTOP', 'Superior', 'viewtop'), B('VIEWFRONT', 'Frontal', 'viewside'), B('VIEWSWISO', 'Isométrica SO', 'viewiso', VIEWS)] },
       { name: 'Estilos visuales', items: [B('VSCURRENT _Realistic', 'Realista', 'visualstyle', VSTY), COL(S('VSCURRENT _Shaded', 'Sombreado', 'visualstyle'), S('VSCURRENT _Hidden', 'Oculto', 'visualstyle'), S('VSCURRENT _Wireframe', 'Estructura alámbrica', 'visualstyle'))] },
-      { name: 'Navegación', items: [B('3DORBIT', 'Órbita 3D', 'orbit'), B('ZOOM _E', 'Zoom extensión', 'zoomext'), B('VIEW3DPANEL', 'Visor 3D aparte', 'dock3d')] },
+      { name: 'Navegación', items: [B('3DORBIT', 'Órbita 3D', 'orbit'), B('ZOOM _E', 'Zoom extensión', 'zoomext'), B('3DMOUSE', 'Ratón 3D', 'mouse3d'), B('VIEW3DPANEL', 'Visor 3D aparte', 'dock3d')] },
       { name: 'Render', items: [B('RENDER', 'Renderizar', 'render')] },
       { name: 'Ventanas gráficas del modelo', items: [B('VPORTS', 'Ventanas del modelo', 'vports')] },
     ] },

@@ -511,7 +511,7 @@ export function register(eng, app) {
   // órbita en la ventana principal: arrastrar con el botón izquierdo (o Mayús + botón central en cualquier momento)
   R('3DORBIT', async (c) => {
     if (!app.view.cam) app.view.setCam(P3.SWISO);
-    await c.ask({ kind: 'orbit', prompt: 'Press ESC or ENTER to exit. Drag to orbit; Shift+wheel button drags orbit at any time.' }).catch(() => {});
+    await c.ask({ kind: 'orbit', prompt: 'Press ESC or ENTER to exit. Drag to orbit; in 3D you can also orbit at any time with the right button or Shift+wheel button.' }).catch(() => {});
   }, { alias: ['3DO', 'ORBIT', '3DVIEW', 'VIEWCUBE', 'NAVVCUBE'], transparent: true, keepSel: true });
   // vistas predefinidas (ortogonales e isométricas) de la ventana principal
   const PRESETS = P3.PRESETS;

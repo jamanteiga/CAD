@@ -360,32 +360,42 @@ export class View {
         if (idx.length < 3) return;
         let n = [0, 0, 0]; for (let i = 0; i < idx.length; i++) { const p = m.v[idx[i]], q = m.v[idx[(i + 1) % idx.length]]; n[0] += (p[1] - q[1]) * (p[2] + q[2]); n[1] += (p[2] - q[2]) * (p[0] + q[0]); n[2] += (p[0] - q[0]) * (p[1] + q[1]); }
         n = P3.unit(n);
-        const facing = P3.dot(n, P.B.F) < 0, z = idx.reduce((a, i) => a + pv[i][2], 0) / idx.length;
-        faces.push({ idx, holes, pv, n, z, col, facing, e }); polys.push(idx.map((i) => ({ x: pv[i][0], y: pv[i][1] })));
+        let facing = P3.dot(n, P.B.F) < 0;
+        if (e.surf && !facing) { n = P3.mul(n, -1); facing = true; } // superficies abiertas: se ven por las dos caras
+        const z = idx.reduce((a, i) => a + pv[i][2], 0) / idx.length;
+        const fe = { idx, holes, pv, n, z, col, facing, e, m }; faces.push(fe); polys.push(idx.map((i) => ({ x: pv[i][0], y: pv[i][1] }))); return fe;
       };
       for (const f of m.f) push(f);
       for (const cp of m.caps || []) push(cp.outer, cp.holes);
-      this._solidScr.set(e, { polys, edges: this.solidEdges(m, pv, P) });
+      const se = this.solidEdges(m, pv, P);
+      this._solidScr.set(e, { polys, edges: se.list, keys: se.keys, vk: se.vk });
     }
     ctx.setTransform(r, 0, 0, r, 0, 0); ctx.lineJoin = 'round';
     const dark = this.isDarkBg(this.bg());
+    const edgeCol = (e) => (shaded ? (vs === 'Realistic' ? 'rgba(0,0,0,.55)' : shadeCss(this.entCss(e), 0.45)) : hidden ? (dark ? '#ddd' : '#222') : this.entCss(e));
     if (shaded || hidden) {
+      // pintor: de atrás adelante; cada cara se rellena y a continuación se trazan sus aristas vivas,
+      // así las caras más cercanas tapan las aristas ocultas
       faces.sort((x, y) => y.z - x.z);
       for (const f of faces) {
         if (!f.facing) continue;
         ctx.beginPath(); f.idx.forEach((i, k) => (k ? ctx.lineTo(f.pv[i][0], f.pv[i][1]) : ctx.moveTo(f.pv[i][0], f.pv[i][1]))); ctx.closePath();
         for (const hl of f.holes || []) { hl.forEach((i, k) => (k ? ctx.lineTo(f.pv[i][0], f.pv[i][1]) : ctx.moveTo(f.pv[i][0], f.pv[i][1]))); ctx.closePath(); }
-        if (hidden) ctx.fillStyle = this.bg(); else { const k = 0.38 + 0.62 * Math.max(0, P3.dot(f.n, light)); ctx.fillStyle = shadeCss(f.col, k); }
+        if (hidden) ctx.fillStyle = this.bg(); else { const k = 0.38 + 0.62 * Math.abs(P3.dot(f.n, light)) * (P3.dot(f.n, light) < 0 ? 0.55 : 1); ctx.fillStyle = shadeCss(f.col, k); }
         ctx.fill('evenodd'); ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 0.6; ctx.stroke();
+        const sc = this._solidScr.get(f.e); if (!sc) continue;
+        ctx.beginPath(); let any = false;
+        for (const ring of [f.idx, ...(f.holes || [])]) for (let i = 0; i < ring.length; i++) {
+          const a = ring[i], b = ring[(i + 1) % ring.length], ka = sc.vk[a], kb = sc.vk[b];
+          if (!sc.keys.has(ka < kb ? ka + '|' + kb : kb + '|' + ka)) continue;
+          ctx.moveTo(f.pv[a][0], f.pv[a][1]); ctx.lineTo(f.pv[b][0], f.pv[b][1]); any = true;
+        }
+        if (any) { ctx.strokeStyle = edgeCol(f.e); ctx.lineWidth = 1; ctx.stroke(); }
       }
-    }
-    // aristas vivas y siluetas
-    ctx.lineWidth = 1;
-    for (const [e, s] of this._solidScr) {
-      ctx.strokeStyle = shaded ? (vs === 'Realistic' ? 'rgba(0,0,0,.55)' : shadeCss(this.entCss(e), 0.45)) : hidden ? (dark ? '#ddd' : '#222') : this.entCss(e);
-      ctx.beginPath();
-      for (const [a, b] of s.edges) { if (shaded || hidden) { if (!this.edgeVisible(faces, e, a, b)) continue; } ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
-      ctx.stroke();
+    } else {
+      // estructura alámbrica: aristas vivas y contorno aparente
+      ctx.lineWidth = 1;
+      for (const [e, s] of this._solidScr) { ctx.strokeStyle = edgeCol(e); ctx.beginPath(); for (const [a, b] of s.edges) { ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); } ctx.stroke(); }
     }
     // objetos 2D agrupados por plano
     const groups = new Map();
@@ -399,16 +409,16 @@ export class View {
   entCss(e) { const d = this.doc, L = d.layers[e.layer] || d.layers['0']; let c = e.color ?? 256; if (c === 256 || c === 0) c = L?.color ?? 7; return e.tc || (typeof c === 'string' ? c : aciCss(c, this.isDarkBg(this.bg()))); }
   // aristas de la malla que se dibujan: vivas (> 20°) y contorno aparente para esta vista
   solidEdges(m, pv, P) {
-    const key = (i) => m.v[i].map((x) => x.toFixed(6)).join(','), E2 = new Map();
+    const vk = m.v.map((p) => p.map((x) => x.toFixed(6)).join(',')), key = (i) => vk[i], E2 = new Map();
     const nrm = (f) => { let n = [0, 0, 0]; for (let i = 0; i < f.length; i++) { const p = m.v[f[i]], q = m.v[f[(i + 1) % f.length]]; n[0] += (p[1] - q[1]) * (p[2] + q[2]); n[1] += (p[2] - q[2]) * (p[0] + q[0]); n[2] += (p[0] - q[0]) * (p[1] + q[1]); } return P3.unit(n); };
     const all = [...m.f, ...(m.caps || []).flatMap((c) => [c.outer, ...(c.holes || [])])];
     for (const f of all) { const n = nrm(f); for (let i = 0; i < f.length; i++) { const a = f[i], b = f[(i + 1) % f.length], ka = key(a), kb = key(b), k = ka < kb ? ka + '|' + kb : kb + '|' + ka; const o = E2.get(k); if (o) o.n.push(n); else E2.set(k, { a, b, n: [n] }); } }
-    const out = [], cmax = Math.cos(20 * Math.PI / 180);
-    for (const { a, b, n } of E2.values()) {
+    const out = [], keys = new Set(), cmax = Math.cos(20 * Math.PI / 180);
+    for (const [k, { a, b, n }] of E2) {
       const sil = n.length > 1 && (P3.dot(n[0], P.B.F) < 0) !== (P3.dot(n[1], P.B.F) < 0);
-      if (n.length < 2 || P3.dot(n[0], n[1]) < cmax || sil) out.push([pv[a], pv[b]]);
+      if (n.length < 2 || Math.abs(P3.dot(n[0], n[1])) < cmax || sil) { out.push([pv[a], pv[b]]); keys.add(k); }
     }
-    return out;
+    return { list: out, keys, vk };
   }
   // arista visible si su punto medio no queda tapado por una cara más cercana de otro sólido (aproximado)
   edgeVisible(faces, e, a, b) {
@@ -682,8 +692,8 @@ export class View {
   // tríada de ejes del plano de trabajo (X rojo, Y verde, Z azul): en su origen si se ve, si no abajo a la izquierda
   drawTriad(c, dark) {
     const r = this.dpr, B = this.P?.B || P3.basis(this.cam), pl = this.wp || P3.WORLD, n = P3.normal(pl), L = 46 * r;
-    let o = { x: 46 * r, y: (this.H - 46) * r };
-    const q = this.w3ToScreen(pl.o); if (q.x > 50 && q.x < this.W - 130 && q.y > 130 && q.y < this.H - 50) o = { x: q.x * r, y: q.y * r };
+    let o = { x: 56 * r, y: Math.max(140, this.H - 175) * r };
+    const q = this.w3ToScreen(pl.o); if (q.x > 50 && q.x < this.W - 130 && q.y > 130 && q.y < this.H - 150) o = { x: q.x * r, y: q.y * r };
     const axes = [[pl.u, 'X', dark ? '#ff5a5a' : '#d01818'], [pl.v, 'Y', dark ? '#5ee05e' : '#108a10'], [n, 'Z', dark ? '#5aa8ff' : '#1450d0']]
       .map(([a, t, col]) => ({ dx: P3.dot(a, B.R), dy: -P3.dot(a, B.U), depth: P3.dot(a, B.F), t, col }))
       .sort((a, b) => b.depth - a.depth);
@@ -755,6 +765,7 @@ export class View {
     el.addEventListener('pointermove', (e) => {
       const r = el.getBoundingClientRect();
       const nx = e.clientX - r.left, ny = e.clientY - r.top;
+      if (this._orb?.pending) { if (Math.hypot(nx - this._orb.x, ny - this._orb.y) > 4) { this._orb.pending = false; el.style.cursor = 'grabbing'; } else return; }
       if (this._orb) { this.orbitBy(nx - this.mouse.x, ny - this.mouse.y); this.mouse = { x: nx, y: ny, in: true }; return; }
       if (this.panning) { this.panPx(nx - this.mouse.x, ny - this.mouse.y); }
       this.mouse = { x: nx, y: ny, in: true };
@@ -770,6 +781,10 @@ export class View {
       this.updateCursor();
       const ck = e.button === 0 ? this.cubeHit(this.mouse.x, this.mouse.y) : null;
       if (ck) { e.preventDefault(); this.setCam(ck === 'Top' && P3.isWorld(this.wp) && !this.app.settings.ws3d ? null : P3.presetCam(ck)); this.zoomExtents(); return; }
+      // en 3D, botón derecho mantenido y arrastrado = órbita (pulsación corta = clic derecho normal)
+      if (e.button === 2 && (this.P || this.app.settings.ws3d) && this.doc.active === 'Model' && !this.doc.blockEdit) {
+        e.preventDefault(); this._orb = { x: this.mouse.x, y: this.mouse.y, cam: this.cam || { az: -Math.PI / 2, el: Math.PI / 2 }, pending: true, ev: e }; return;
+      }
       if ((e.button === 1 && e.shiftKey) || (e.button === 0 && this.eng?.req?.kind === 'orbit')) {
         e.preventDefault(); this._orb = { x: this.mouse.x, y: this.mouse.y, cam: this.cam || { az: -Math.PI / 2, el: Math.PI / 2 } }; el.style.cursor = 'grabbing'; return;
       }
@@ -784,7 +799,7 @@ export class View {
       this.eng?.pointerDown(this.ptInfo(e));
     });
     el.addEventListener('pointerup', (e) => {
-      if (this._orb) { this._orb = null; el.style.cursor = ''; return; }
+      if (this._orb) { const o = this._orb; this._orb = null; el.style.cursor = ''; if (o.pending && o.ev) { this.eng?.pointerDown(this.ptInfo(o.ev)); this.eng?.pointerUp(this.ptInfo(e)); } return; }
       if (e.button === 1 || this.panning) { this.panning = false; el.style.cursor = ''; return; }
       this.eng?.pointerUp(this.ptInfo(e));
     });

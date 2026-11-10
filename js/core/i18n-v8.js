@@ -455,6 +455,7 @@ Derivación (olet) | Derivación (olet) | Branch (olet) | Derivação (olet) | D
 Imagen PNG | Imaxe PNG | PNG image | Imagem PNG | Imatge PNG
 Poligonal | Poligonal | Polygonal | Poligonal | Poligonal
 Modelado 3D | Modelado 3D | 3D Modeling | Modelação 3D | Modelatge 3D
+Ratón 3D | Rato 3D | 3D Mouse | Rato 3D | Ratolí 3D
 Plano de trabajo | Plano de traballo | Work Plane | Plano de trabalho | Pla de treball
 Superior (XY) | Superior (XY) | Top (XY) | Superior (XY) | Superior (XY)
 Frontal (XZ) | Frontal (XZ) | Front (XZ) | Frontal (XZ) | Frontal (XZ)
@@ -555,7 +556,7 @@ Specify elevation along the Z axis | Precise la elevación según el eje Z | Pre
 Specify rotation angle about X axis | Precise el ángulo de giro alrededor del eje X | Precise o ángulo de xiro arredor do eixe X | Especifique o ângulo de rotação em torno do eixo X | Precisa l'angle de gir al voltant de l'eix X
 Specify rotation angle about Y axis | Precise el ángulo de giro alrededor del eje Y | Precise o ángulo de xiro arredor do eixe Y | Especifique o ângulo de rotação em torno do eixo Y | Precisa l'angle de gir al voltant de l'eix Y
 Specify rotation angle about Z axis | Precise el ángulo de giro alrededor del eje Z | Precise o ángulo de xiro arredor do eixe Z | Especifique o ângulo de rotação em torno do eixo Z | Precisa l'angle de gir al voltant de l'eix Z
-Press ESC or ENTER to exit. Drag to orbit; Shift+wheel button drags orbit at any time. | Pulse ESC o INTRO para salir. Arrastre para orbitar; Mayús + botón de la rueda orbita en cualquier momento. | Prema ESC ou INTRO para saír. Arrastre para orbitar; Maiús + botón da roda orbita en calquera momento. | Prima ESC ou ENTER para sair. Arraste para orbitar; Shift + botão da roda orbita a qualquer momento. | Premeu ESC o RETORN per sortir. Arrossegueu per orbitar; Maj + botó de la roda orbita en qualsevol moment.
+Press ESC or ENTER to exit. Drag to orbit; in 3D you can also orbit at any time with the right button or Shift+wheel button. | Pulse ESC o INTRO para salir. Arrastre para orbitar; en 3D también se orbita en cualquier momento con el botón derecho o con Mayús + botón de la rueda. | Prema ESC ou INTRO para saír. Arrastre para orbitar; en 3D tamén se orbita en calquera momento co botón dereito ou con Maiús + botón da roda. | Prima ESC ou ENTER para sair. Arraste para orbitar; em 3D também pode orbitar a qualquer momento com o botão direito ou Shift + botão da roda. | Premeu ESC o RETORN per sortir. Arrossegueu per orbitar; en 3D també podeu orbitar en qualsevol moment amb el botó dret o Maj + botó de la roda.
 Specify tube radius | Precise el radio del tubo | Precise o raio do tubo | Especifique o raio do tubo | Precisa el radi del tub
 Specify other corner | Precise la otra esquina | Precise a outra esquina | Especifique o outro canto | Precisa l'altra cantonada
 Specify center point of base | Precise el punto central de la base | Precise o punto central da base | Especifique o ponto central da base | Precisa el punt central de la base
@@ -678,6 +679,7 @@ planar Object | Objeto plano | Obxecto plano | Objeto plano | Objecte pla
 
 // Mensajes de salida: English | castellano | galego | português | català
 const MSG8 = `
+This browser cannot read 3D mice (WebHID): use Chrome or Edge on a computer. | Este navegador no puede leer ratones 3D (WebHID): use Chrome o Edge en un ordenador. | Este navegador non pode ler ratos 3D (WebHID): use Chrome ou Edge nun ordenador. | Este navegador não consegue ler ratos 3D (WebHID): use o Chrome ou o Edge num computador. | Aquest navegador no pot llegir ratolins 3D (WebHID): feu servir Chrome o Edge en un ordinador.
 The points are collinear. | Los puntos están alineados. | Os puntos están aliñados. | Os pontos estão alinhados. | Els punts estan alineats.
 At least 2 solids are required. | Se necesitan al menos 2 sólidos. | Necesítanse polo menos 2 sólidos. | São necessários pelo menos 2 sólidos. | Calen almenys 2 sòlids.
 Collaboration session closed. | Sesión de colaboración cerrada. | Sesión de colaboración pechada. | Sessão de colaboração fechada. | Sessió de col·laboració tancada.
@@ -703,6 +705,8 @@ No layers are reserved. | No hay capas reservadas. | Non hai capas reservadas. |
 `;
 // Mensajes con valores: patrón, castellano, galego, português, català
 const MSGRE8 = [
+  [/^3D mouse connected: (.+)\.$/, 'Ratón 3D conectado: $1.', 'Rato 3D conectado: $1.', 'Rato 3D ligado: $1.', 'Ratolí 3D connectat: $1.'],
+  [/^3D mouse not available: (.+)$/, 'Ratón 3D no disponible: $1', 'Rato 3D non dispoñible: $1', 'Rato 3D não disponível: $1', 'Ratolí 3D no disponible: $1'],
   [/^Work plane: origin (\S+), normal (\S+)\.$/, 'Plano de trabajo: origen $1, normal $2.', 'Plano de traballo: orixe $1, normal $2.', 'Plano de trabalho: origem $1, normal $2.', 'Pla de treball: origen $1, normal $2.'],
   [/^(\d+) support\(s\) placed\.$/, '$1 soporte(s) colocado(s).', '$1 soporte(s) colocado(s).', '$1 suporte(s) colocado(s).', '$1 suport(s) col·locat(s).'],
   [/^(\d+) spool\(s\), (\d+) field weld\(s\)\.$/, '$1 spool(s), $2 soldadura(s) de campo.', '$1 spool(s), $2 soldadura(s) de campo.', '$1 spool(s), $2 soldadura(s) de campo.', '$1 spool(s), $2 soldadura(s) de camp.'],
@@ -755,6 +759,7 @@ const CMD8 = {
   MSTRAINER: ['FILTROY', 'FILTROY', 'FILTROY', 'FILTREY'], MSTRAINERB: ['FILTROCESTA', 'FILTROCESTA', 'FILTROCESTO', 'FILTRECISTELLA'], MSIGHTGLASS: ['MIRILLA', 'VISOR', 'VISOR', 'VISOR'],
   WORKPLANE: ['PLANOTRABAJO', 'PLANOTRABALLO', 'PLANOTRABALHO', 'PLATREBALL'], WPWORLD: ['PTUNIVERSAL', 'PTUNIVERSAL', 'PTUNIVERSAL', 'PTUNIVERSAL'], WPTOP: ['PTSUPERIOR', 'PTSUPERIOR', 'PTSUPERIOR', 'PTSUPERIOR'], WPFRONT: ['PTFRONTAL', 'PTFRONTAL', 'PTFRONTAL', 'PTFRONTAL'], WPRIGHT: ['PTDERECHA', 'PTDEREITA', 'PTDIREITA', 'PTDRETA'], WPLEFT: ['PTIZQUIERDA', 'PTESQUERDA', 'PTESQUERDA', 'PTESQUERRA'], WPBACK: ['PTPOSTERIOR', 'PTPOSTERIOR', 'PTPOSTERIOR', 'PTPOSTERIOR'], WPBOTTOM: ['PTINFERIOR', 'PTINFERIOR', 'PTINFERIOR', 'PTINFERIOR'],
   WPORIGIN: ['PTORIGEN', 'PTORIXE', 'PTORIGEM', 'PTORIGEN'], WPELEVATION: ['PTELEVACION', 'PTELEVACION', 'PTELEVACAO', 'PTELEVACIO'], WPX: ['PTGIRARX', 'PTXIRARX', 'PTRODARX', 'PTGIRARX'], WPY: ['PTGIRARY', 'PTXIRARY', 'PTRODARY', 'PTGIRARY'], WPZ: ['PTGIRARZ', 'PTXIRARZ', 'PTRODARZ', 'PTGIRARZ'], WP3POINT: ['PT3PUNTOS', 'PT3PUNTOS', 'PT3PONTOS', 'PT3PUNTS'], WPOBJECT: ['PTOBJETO', 'PTOBXECTO', 'PTOBJETO', 'PTOBJECTE'], WPVIEW: ['PTVISTA', 'PTVISTA', 'PTVISTA', 'PTVISTA'], WPPREVIOUS: ['PTPREVIO', 'PTPREVIO', 'PTANTERIOR', 'PTPREVI'],
+  '3DMOUSE': ['RATON3D', 'RATO3D', 'RATO3D', 'RATOLI3D'],
   WEDGE: ['CUÑA', 'CUÑA', 'CUNHA', 'FALCA'], PYRAMID: ['PIRAMIDE', 'PIRAMIDE', 'PIRAMIDE', 'PIRAMIDE'], TORUS: ['TOROIDE', 'TOROIDE', 'TORO', 'TOR'], VIEWPRESET: ['VISTAPREDEF', 'VISTAPREDEF', 'VISTAPREDEF', 'VISTAPREDEF'], VIEW3DPANEL: ['VISTA3DACOPLADA', 'VISTA3DACOPLADA', 'VISTA3DACOPLADA', 'VISTA3DACOBLADA'],
   VIEWTOP: ['VISTASUP', 'VISTASUP', 'VISTASUP', 'VISTASUP'], VIEWBOTTOM: ['VISTAINF', 'VISTAINF', 'VISTAINF', 'VISTAINF'], VIEWFRONT: ['VISTAFRONTAL', 'VISTAFRONTAL', 'VISTAFRONTAL', 'VISTAFRONTAL'], VIEWBACK: ['VISTAPOST', 'VISTAPOST', 'VISTAPOST', 'VISTAPOST'], VIEWLEFT: ['VISTAIZQ', 'VISTAESQ', 'VISTAESQ', 'VISTAESQ'], VIEWRIGHT: ['VISTADER', 'VISTADER', 'VISTADIR', 'VISTADRE'],
   VIEWSWISO: ['ISOSO', 'ISOSO', 'ISOSO', 'ISOSO'], VIEWSEISO: ['ISOSE', 'ISOSE', 'ISOSE', 'ISOSE'], VIEWNEISO: ['ISONE', 'ISONE', 'ISONE', 'ISONE'], VIEWNWISO: ['ISONO', 'ISONO', 'ISONO', 'ISONO'],

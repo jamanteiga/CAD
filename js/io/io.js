@@ -45,6 +45,8 @@ export function createIO(app) {
     const st = d.importStats;
     log(`${f ? f.name : d.name}: ${d.model.length} objetos en espacio modelo, ${Object.keys(d.blocks).length} bloques, ${Object.keys(d.layers).length} capas.`);
     if (st && Object.keys(st.unsupported).length) log('Objetos no soportados (omitidos): ' + Object.entries(st.unsupported).map(([k, v]) => `${k}×${v}`).join(', '));
+    if (st && ['3DSOLID', 'REGION', 'BODY', 'SURFACE', 'EXTRUDEDSURFACE', 'LOFTEDSURFACE', 'REVOLVEDSURFACE', 'SWEPTSURFACE'].some((k) => st.unsupported[k])) log('Los sólidos y superficies ACIS no se pueden leer: expórtelos desde el programa de origen como malla (MESH o caras 3D) o en STL.');
+    if (d.ext?.view3d) log('Dibujo con contenido 3D: vista isométrica. Cubo de vistas, botón derecho + arrastrar u órbita para girarlo; PLAN para volver a la planta.');
   }
   io.open = async () => {
     let f = null;
@@ -77,7 +79,8 @@ export function createIO(app) {
     for (const [k, l] of Object.entries(d.layers)) if (!doc.layers[k]) doc.layers[k] = l;
     for (const [k, b] of Object.entries(d.blocks)) if (!doc.blocks[k]) doc.blocks[k] = b;
     for (const [k, l] of Object.entries(d.ltypes)) if (!doc.ltypes[k]) doc.ltypes[k] = l;
-    for (const e of d.model) { delete e.hid; doc.add(e, doc.model); }
+    for (const e of d.model) { delete e.hid; if (!('wp' in e)) e.wp = null; doc.add(e, doc.model); }
+    if (d.ext?.view3d && !doc.ext.view3d) { doc.ext.view3d = d.ext.view3d; if (d.vars.VSCURRENT !== '2dWireframe' && doc.vars.VSCURRENT === '2dWireframe') doc.vars.VSCURRENT = d.vars.VSCURRENT; }
     doc.end();
     log(`${d.model.length} objetos importados de ${f.name}.`);
     app.view.zoomExtents();
