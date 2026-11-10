@@ -89,7 +89,7 @@ export const TABS = [
     { name: 'Dibujo', items: [B('BREAKLINE', 'Símbolo de línea de rotura', 'breakline'), B('COUNT', 'Contar', 'count')] },
     { name: 'Herramientas', items: [B('ALIASEDIT', 'Alias de comandos', 'aliases'), COL(S('XDATA', 'Adjuntar datos X', 'xdata'), S('XDLIST', 'Listar datos X', 'xdata'), S('SETVAR ?', 'Variables de sistema', 'setvar')), B('CAL', 'Calculadora', 'units')] },
   ] },
-  { id: 'mep', name: 'Instalaciones', panels: [
+  { id: 'mep', name: 'HVAC', panels: [
     { name: 'Conductos', items: [B('DUCT', 'Conducto', 'duct'), B('DUCTSIZE', 'Dimensionar', 'ductsize'), B('DUCTCALC', 'Pérdida de carga', 'ductcalc')] },
     { name: 'Tuberías', items: [B('PIPE', 'Tubería', 'pipe')] },
     { name: 'Biblioteca', items: [B('BIBLIOTECA', 'Biblioteca de bloques', 'library')] },
@@ -215,7 +215,7 @@ export const TABS3D = [];
   panel('3d', 'Modelado').items.push(COL(S('PYRAMID', 'Pirámide', 'pyramid'), S('WEDGE', 'Cuña', 'wedge'), S('TORUS', 'Toroide', 'torus')));
   panel('3d', 'Vista').items.push(B('VIEWSWISO', 'Vistas', 'viewiso', VIEWS));
   tab('3d').panels.splice(2, 0, COORD);
-  for (const id of ['insert', 'annotate', 'view', 'manage', 'output', 'collab', 'express', 'mech']) if (tab(id)) TABS3D.push(tab(id));
+  for (const id of ['insert', 'annotate', 'view', 'manage', 'output', 'collab', 'express', 'mep', 'mech']) if (tab(id)) TABS3D.push(tab(id));
 }
 
 export function createRibbon(app) {
