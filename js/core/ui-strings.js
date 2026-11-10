@@ -645,7 +645,7 @@ Inglés | Inglés | English
 Añadir | Engadir | Add
 Filtrar | Filtrar | Filter
 Comando | Comando | Command
-Importar acad.pgp | Importar acad.pgp | Import acad.pgp
+Importar alias (.pgp) | Importar alias (.pgp) | Import acad.pgp
 Atajos de teclado | Atallos de teclado | Keyboard shortcuts
 Asignar | Asignar | Assign
 Tecla | Tecla | Key
@@ -1144,9 +1144,10 @@ Flecha de flujo | Frecha de fluxo | Flow arrow
 Ancho | Largo | Width
 Climatización (HVAC) A1 — mm | Climatización (HVAC) A1 — mm | HVAC A1 — mm
 Vacío (sin marco) — mm | Baleiro (sen marco) — mm | Blank (no frame) — mm
-ISO A0 — mm | ISO A0 — mm | ISO A0 — mm
-ISO A1 — mm | ISO A1 — mm | ISO A1 — mm
-ISO A2 — mm | ISO A2 — mm | ISO A2 — mm
+ISO A0 apaisado — mm | ISO A0 apaisado — mm | ISO A0 landscape — mm
+Modelado 3D ISO — mm | Modelado 3D ISO — mm | 3D Modeling ISO — mm
+ISO A1 apaisado — mm | ISO A1 apaisado — mm | ISO A1 landscape — mm
+ISO A2 apaisado — mm | ISO A2 apaisado — mm | ISO A2 landscape — mm
 ISO A3 apaisado — mm | ISO A3 apaisado — mm | ISO A3 landscape — mm
 ISO A4 vertical — mm | ISO A4 vertical — mm | ISO A4 portrait — mm
 Naval A1 — mm | Naval A1 — mm | Marine A1 — mm

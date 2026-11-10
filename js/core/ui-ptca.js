@@ -644,7 +644,7 @@ Inglés | Inglês | Anglès
 Añadir | Adicionar | Afegir
 Filtrar | Filtrar | Filtrar
 Comando | Comando | Ordre
-Importar acad.pgp | Importar acad.pgp | Importar acad.pgp
+Importar alias (.pgp) | Importar alias (.pgp) | Importar alias (.pgp)
 Atajos de teclado | Atalhos de teclado | Dreceres de teclat
 Asignar | Atribuir | Assignar
 Tecla | Tecla | Tecla
@@ -1138,9 +1138,10 @@ Flecha de flujo | Seta de fluxo | Fletxa de flux
 Ancho | Largura | Amplada
 Climatización (HVAC) A1 — mm | Climatização (AVAC) A1 — mm | Climatització (HVAC) A1 — mm
 Vacío (sin marco) — mm | Vazio (sem moldura) — mm | Buit (sense marc) — mm
-ISO A0 — mm | ISO A0 — mm | ISO A0 — mm
-ISO A1 — mm | ISO A1 — mm | ISO A1 — mm
-ISO A2 — mm | ISO A2 — mm | ISO A2 — mm
+ISO A0 apaisado — mm | ISO A0 horizontal — mm | ISO A0 apaïsat — mm
+Modelado 3D ISO — mm | Modelação 3D ISO — mm | Modelatge 3D ISO — mm
+ISO A1 apaisado — mm | ISO A1 horizontal — mm | ISO A1 apaïsat — mm
+ISO A2 apaisado — mm | ISO A2 horizontal — mm | ISO A2 apaïsat — mm
 ISO A3 apaisado — mm | ISO A3 horizontal — mm | ISO A3 apaïsat — mm
 ISO A4 vertical — mm | ISO A4 vertical — mm | ISO A4 vertical — mm
 Naval A1 — mm | Naval A1 — mm | Naval A1 — mm

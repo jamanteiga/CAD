@@ -46,11 +46,16 @@ export function createUI(app) {
   const ws = document.getElementById('wsSel');
   ws.onchange = () => {
     const s = app.settings;
+    const was3d = !!s.ws3d;
+    s.ws3d = ws.value === '3d';
     if (ws.value === 'classic') Object.assign(s, { ribbon: false, menuBar: true, screenMenu: true });
     else if (ws.value === 'both') Object.assign(s, { ribbon: true, menuBar: true, screenMenu: true });
     else Object.assign(s, { ribbon: true, menuBar: false, screenMenu: false });
+    if (s.ws3d && !was3d) { s.dock3d = true; app.ui.ribbon.active = 'home3d'; }
+    if (!s.ws3d && was3d && app.ui.ribbon.active === 'home3d') app.ui.ribbon.active = 'home';
     saveSettings(); ui.applyLayout();
   };
+  ui.setWorkspace = (v) => { ws.value = v; ws.onchange(); };
   const search = document.getElementById('searchBox');
   search.onkeydown = (e) => { e.stopPropagation(); if (e.key === 'Enter') { const q = search.value.trim(); search.value = ''; if (q) app.cmd.run(q); ui.cmdline.forceFocus(); } };
 
@@ -207,7 +212,10 @@ export function createUI(app) {
     document.getElementById('filetabs').hidden = s.fileTabs === false;
     document.getElementById('ltabs').hidden = s.layoutTabs === false;
     document.getElementById('coords').hidden = s.showCoords === false;
-    ws.value = !s.ribbon && s.menuBar ? 'classic' : s.ribbon && (s.menuBar || s.screenMenu) ? 'both' : 'ribbon';
+    ws.value = s.ws3d && s.ribbon ? '3d' : !s.ribbon && s.menuBar ? 'classic' : s.ribbon && (s.menuBar || s.screenMenu) ? 'both' : 'ribbon';
+    // espacio Modelado 3D: vista 3D acoplada junto a la planta
+    if (s.ws3d && s.dock3d !== false && app.view3d) { if (!app.v3d?.dock) { app.v3d?.close?.(); app.view3d({ dock: true }); } }
+    else if (app.v3d?.dock) app.v3d.close();
     app.doc.vars.PICKBOX = s.pickbox || app.doc.vars.PICKBOX;
     ui.ribbon.render(); ui.status.update();
     app.view.resize(); app.view.redraw();
@@ -217,6 +225,7 @@ export function createUI(app) {
     ui._rq = requestAnimationFrame(() => {
       ui._rq = null;
       ui.ribbon.render(); ui.props.render(); ui.layers.render(); ui.status.update(); ui.renderLayoutTabs(); ui.setTitle();
+      if (app.v3d?.dock) app.v3d.sync();
       const d = app.doc, tag = document.getElementById('vptag');
       tag.innerHTML = '';
       tag.append(t('[-][Superior][Estructura alámbrica 2D]'), d.blockEdit ? h('b', { text: `  Editor de bloques: ${d.blockEdit.name}` }) : '', d.active !== 'Model' ? '  ' + t(d.mspace ? 'MODELO (ventana)' : 'PAPEL') : '');

@@ -1,4 +1,4 @@
-// Tipografías de trazo (como las SHX de AutoCAD).
+// Tipografías de trazo (como las fuentes SHX).
 // - Fuentes libres incluidas (Hershey/LibreCAD, GPL v2+ / dominio público) en vendor/fonts/stroke/*.json,
 //   que sustituyen a las SHX habituales (txt, simplex, romans, isocp…).
 // - Lector de archivos .SHX reales (shapes, unifont y bigfont) que el usuario carga desde su equipo.

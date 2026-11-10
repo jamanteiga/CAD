@@ -65,17 +65,17 @@ export function meshVolume(m) {
   return V;
 }
 // aristas vivas de una malla proyectadas en planta
-export function featureEdges(m, angDeg = 20) {
+export function featureEdges(m, angDeg = 20, sil = false) {
   const key = (p) => `${p[0].toFixed(6)},${p[1].toFixed(6)},${p[2].toFixed(6)}`;
   const nrm = (f) => { let n = [0, 0, 0]; for (let i = 0; i < f.length; i++) { const p = m.v[f[i]], q = m.v[f[(i + 1) % f.length]]; n[0] += (p[1] - q[1]) * (p[2] + q[2]); n[1] += (p[2] - q[2]) * (p[0] + q[0]); n[2] += (p[0] - q[0]) * (p[1] + q[1]); } const l = Math.hypot(...n) || 1; return n.map((x) => x / l); };
   const E2 = new Map();
   m.f.forEach((f, fi) => { const n = nrm(f); for (let i = 0; i < f.length; i++) { const a = m.v[f[i]], b = m.v[f[(i + 1) % f.length]]; const ka = key(a), kb = key(b); const k = ka < kb ? ka + '|' + kb : kb + '|' + ka; const o = E2.get(k); if (o) o.n.push(n); else E2.set(k, { a, b, n: [n] }); } });
   const cmax = Math.cos(angDeg * Math.PI / 180), out = [];
-  for (const { a, b, n } of E2.values()) if (n.length < 2 || n[0][0] * n[1][0] + n[0][1] * n[1][1] + n[0][2] * n[1][2] < cmax) out.push([a, b]);
+  for (const { a, b, n } of E2.values()) if (n.length < 2 || n[0][0] * n[1][0] + n[0][1] * n[1][1] + n[0][2] * n[1][2] < cmax || (sil && n[0][2] * n[1][2] < -1e-9)) out.push([a, b]);
   return out;
 }
 const solidOutline = (e) => {
-  if (e.kind === 'mesh') { const out = []; const seen = new Set(); for (const [a, b] of featureEdges(meshOf(e))) { if (Math.hypot(a[0] - b[0], a[1] - b[1]) < 1e-9) continue; const k = [a[0], a[1], b[0], b[1]].map((x) => x.toFixed(5)); const kk = k[0] + k[1] < k[2] + k[3] ? k.join() : [k[2], k[3], k[0], k[1]].join(); if (seen.has(kk)) continue; seen.add(kk); out.push({ type: 'LINE', p1: { x: a[0], y: a[1] }, p2: { x: b[0], y: b[1] } }); } return out; }
+  if (e.kind === 'mesh') { const out = []; const seen = new Set(); for (const [a, b] of featureEdges(meshOf(e), 20, true)) { if (Math.hypot(a[0] - b[0], a[1] - b[1]) < 1e-9) continue; const k = [a[0], a[1], b[0], b[1]].map((x) => x.toFixed(5)); const kk = k[0] + k[1] < k[2] + k[3] ? k.join() : [k[2], k[3], k[0], k[1]].join(); if (seen.has(kk)) continue; seen.add(kk); out.push({ type: 'LINE', p1: { x: a[0], y: a[1] }, p2: { x: b[0], y: b[1] } }); } return out; }
   if (e.kind === 'sphere') return [{ type: 'CIRCLE', c: e.c, r: e.r }];
   if (e.kind === 'revolve') { const m = meshOf(e); const pts = m.v.map(([x, y]) => ({ x, y })); const bb = G.bbNew(); for (const p of pts) G.bbAdd(bb, p); return [{ type: 'LWPOLYLINE', pts: [{ x: bb.x1, y: bb.y1 }, { x: bb.x2, y: bb.y1 }, { x: bb.x2, y: bb.y2 }, { x: bb.x1, y: bb.y2 }].map((p) => ({ ...p, b: 0 })), closed: true }, ...e.prof.map((l) => ({ type: 'LWPOLYLINE', pts: l.map((p) => ({ ...p })), closed: true }))]; }
   const out = e.prof.map((l) => ({ type: 'LWPOLYLINE', pts: l.map((p) => ({ x: p.x, y: p.y, b: p.b || 0 })), closed: true }));
@@ -239,6 +239,39 @@ export function register(eng, app) {
     const r = need(await c.getDist('Specify radius or [Diameter]:', { base: ce, preview: (q) => [{ type: 'CIRCLE', c: ce, r: G.dist(ce, q) }] }));
     solid({ kind: 'sphere', c: { ...ce }, r, z0: -r }); redraw();
   });
+  // cuña, pirámide y toroide (mallas cerradas con caras orientadas hacia fuera)
+  const meshSolid = (polys, extra = {}) => solid({ kind: 'mesh', polys, ...extra });
+  R('WEDGE', async (c) => {
+    const p1 = need(await c.getPoint('Specify first corner or [Center]:'));
+    let p2 = need(await c.getPoint('Specify other corner or [Cube/Length]:', { base: p1, rubber: 'rect' }));
+    if (p2 === 'Cube' || p2 === 'Length') { const L = need(await c.getDist('Specify length:', { base: p1 })); p2 = { x: p1.x + L, y: p1.y + L }; }
+    const hh = need(await c.getDist('Specify height or [2Point]:', { def: Math.abs(p2.x - p1.x) }));
+    const x1 = p1.x, x2 = p2.x, y1 = Math.min(p1.y, p2.y), y2 = Math.max(p1.y, p2.y), z0 = Math.min(0, hh), z1 = Math.max(0, hh);
+    const sx = x2 >= x1 ? 1 : -1, b0 = [x1, y1, z0], b1 = [x2, y1, z0], b2 = [x2, y2, z0], b3 = [x1, y2, z0], t0 = [x1, y1, z1], t3 = [x1, y2, z1];
+    let polys = [[b0, b3, b2, b1], [b0, t0, t3, b3], [b0, b1, t0], [b3, t3, b2], [t0, b1, b2, t3]];
+    if (sx < 0) polys = polys.map((f) => f.slice().reverse());
+    meshSolid(polys); redraw();
+  });
+  R('PYRAMID', async (c) => {
+    let n = 4;
+    let ce = need(await c.getPoint('Specify center point of base or [Sides]:'));
+    if (ce === 'Sides') { n = Math.max(3, Math.min(32, need(await c.getInt('Enter number of sides <4>:', { def: 4 })))); ce = need(await c.getPoint('Specify center point of base or [Sides]:')); }
+    const q = need(await c.getPoint('Specify base radius:', { base: ce, preview: (pt) => { const r = G.dist(ce, pt), a = G.ang(ce, pt); return [{ type: 'LWPOLYLINE', closed: true, pts: [...Array(n).keys()].map((i) => ({ ...G.polar(ce, a + i * G.TAU / n, r), b: 0 })) }]; } }));
+    const r = isPt(q) ? G.dist(ce, q) : +q, a0 = isPt(q) ? G.ang(ce, q) : Math.PI / n;
+    const hh = need(await c.getDist('Specify height or [2Point/Axis endpoint/Top radius]:', { def: r * 2 }));
+    const base = [...Array(n).keys()].map((i) => { const p = G.polar(ce, a0 + i * G.TAU / n, r); return [p.x, p.y, 0]; }), apex = [ce.x, ce.y, hh];
+    let polys = [base.slice().reverse(), ...base.map((p, i) => [p, base[(i + 1) % n], apex])];
+    if (hh < 0) polys = polys.map((f) => f.slice().reverse());
+    meshSolid(polys); redraw();
+  });
+  R('TORUS', async (c) => {
+    const ce = need(await c.getPoint('Specify center point or [3P/2P/Ttr]:'));
+    const R1 = need(await c.getDist('Specify radius or [Diameter]:', { base: ce, preview: (q) => [{ type: 'CIRCLE', c: ce, r: G.dist(ce, q) }] }));
+    const r2 = need(await c.getDist('Specify tube radius or [2Point/Diameter]:', { def: R1 / 4 }));
+    const n = 36, m = 24, P = (i, j) => { const u = G.TAU * i / n, v = G.TAU * j / m, k = R1 + r2 * Math.cos(v); return [ce.x + k * Math.cos(u), ce.y + k * Math.sin(u), r2 * Math.sin(v)]; };
+    const polys = []; for (let i = 0; i < n; i++) for (let j = 0; j < m; j++) polys.push([P(i, j), P(i + 1, j), P(i + 1, j + 1), P(i, j + 1)]);
+    meshSolid(polys); redraw();
+  }, { alias: ['TOR'] });
   const profileOf = (e) => {
     if (e.type === 'CIRCLE') return [[{ ...G.polar(e.c, 0, e.r), b: 1 }, { ...G.polar(e.c, Math.PI, e.r), b: 1 }]];
     if (e.type === 'LWPOLYLINE' && e.closed) return [e.pts.map((p) => ({ x: p.x, y: p.y, b: p.b || 0 }))];
@@ -320,7 +353,9 @@ export function register(eng, app) {
   // ---------- visor 3D
   const VS = { '2dWireframe': 'Estructura alámbrica 2D', Wireframe: 'Estructura alámbrica', Hidden: 'Oculto', Shaded: 'Sombreado', Realistic: 'Realista' };
   const viewer = (o = {}) => {
-    const d = doc(), host = app.view.host;
+    if (o.dock && app.v3d?.dock) return app.v3d;
+    if (!o.dock && app.v3d?.dock) { if (o.view) Object.assign(app.v3d.cam, o.view); app.v3d.draw(); return app.v3d; }
+    let d = doc(); const host = app.view.host;
     document.getElementById('v3d')?.remove();
     const cv = h('canvas', { class: 'v3d-cv' });
     const style = h('select', { class: 'rcombo', onchange: () => { d.vars.VSCURRENT = style.value; draw(); } }, Object.entries(VS).filter(([k]) => k !== '2dWireframe').map(([k, l]) => h('option', { value: k, selected: k === (d.vars.VSCURRENT === '2dWireframe' ? 'Shaded' : d.vars.VSCURRENT), text: tr(l) })));
@@ -328,16 +363,20 @@ export function register(eng, app) {
     const flat = h('input', { type: 'checkbox', checked: true, onchange: () => draw() });
     const root = h('div', { id: 'v3d', class: 'v3d' }, cv,
       h('div', { class: 'v3d-bar' }, h('b', { text: tr('Vista 3D') }), h('span', { text: tr('Estilo visual') }), style, h('label', {}, persp, h('span', { text: tr('Perspectiva') })), h('label', {}, flat, h('span', { text: tr('Objetos 2D') })),
-        h('button', { class: 'btn', type: 'button', text: tr('Extensión'), onclick: () => { fit(); draw(); } }),
+        h('button', { class: 'btn', type: 'button', text: tr('Extensión'), onclick: () => { auto = true; fit(); draw(); } }),
         h('button', { class: 'btn', type: 'button', text: tr('Renderizar'), onclick: () => render() }),
-        h('button', { class: 'btn pri', type: 'button', text: tr('Cerrar'), onclick: () => close() })),
+        o.dock ? '' : h('button', { class: 'btn pri', type: 'button', text: tr('Cerrar'), onclick: () => close() })),
       h('div', { class: 'v3d-hint', text: tr('Arrastrar: órbita · Botón derecho o central: encuadre · Rueda: zoom · Pulse una cara del cubo para orientar la vista') }));
-    host.append(root);
-    const solids = d.model.filter((e) => e.type === '3DSOLID' && d.isVisible(e));
-    const clouds = d.model.filter((e) => e.type === 'POINTCLOUD' && d.isVisible(e));
-    const meshes = solids.map((e) => ({ e, m: meshOf(e), col: colorOf(e) }));
-    const wires = [];
-    for (const e of d.model) { if (e.type === '3DSOLID' || e.type === 'POINTCLOUD' || !d.isVisible(e)) continue; for (const p of E.prims(e, d)) { if (p.k === 'L') wires.push([[p.a.x, p.a.y, 0], [p.b.x, p.b.y, 0], colorOf(e)]); else { const pts = G.tessArc(p.c, p.r, p.full ? 0 : p.a1, p.full ? G.TAU - 1e-9 : p.a2, 24); for (let i = 1; i < pts.length; i++) wires.push([[pts[i - 1].x, pts[i - 1].y, 0], [pts[i].x, pts[i].y, 0], colorOf(e)]); } } if (wires.length > 60000) break; }
+    if (o.dock) { root.classList.add('dock'); host.after(root); } else host.append(root);
+    let clouds = [], meshes = [], wires = [], rev = -1, auto = true;
+    const load = () => {
+      d = doc(); rev = d.rev;
+      clouds = d.model.filter((e) => e.type === 'POINTCLOUD' && d.isVisible(e));
+      meshes = d.model.filter((e) => e.type === '3DSOLID' && d.isVisible(e)).map((e) => ({ e, m: meshOf(e), col: colorOf(e) }));
+      wires = [];
+      for (const e of d.model) { if (e.type === '3DSOLID' || e.type === 'POINTCLOUD' || !d.isVisible(e)) continue; for (const p of E.prims(e, d)) { if (p.k === 'L') wires.push([[p.a.x, p.a.y, 0], [p.b.x, p.b.y, 0], colorOf(e)]); else { const pts = G.tessArc(p.c, p.r, p.full ? 0 : p.a1, p.full ? G.TAU - 1e-9 : p.a2, 24); for (let i = 1; i < pts.length; i++) wires.push([[pts[i - 1].x, pts[i - 1].y, 0], [pts[i].x, pts[i].y, 0], colorOf(e)]); } } if (wires.length > 60000) break; }
+    };
+    load();
     const cam = { az: G.rad(-60), el: G.rad(30), dist: 100, t: [0, 0, 0] };
     const bbox = () => { const b = { x1: Infinity, y1: Infinity, z1: Infinity, x2: -Infinity, y2: -Infinity, z2: -Infinity }; const ad = (x, y, z) => { b.x1 = Math.min(b.x1, x); b.x2 = Math.max(b.x2, x); b.y1 = Math.min(b.y1, y); b.y2 = Math.max(b.y2, y); b.z1 = Math.min(b.z1, z); b.z2 = Math.max(b.z2, z); }; for (const { m } of meshes) for (const v of m.v) ad(...v); if (flat.checked) for (const w of wires) { ad(...w[0]); ad(...w[1]); } for (const e of clouds) { const c = cloudData(d, e.cloud); if (c) { ad(c.bb.x1, c.bb.y1, c.bb.z1); ad(c.bb.x2, c.bb.y2, c.bb.z2); } } if (!isFinite(b.x1)) { b.x1 = b.y1 = b.z1 = -50; b.x2 = b.y2 = b.z2 = 50; } return b; };
     const fit = () => { const b = bbox(); cam.t = [(b.x1 + b.x2) / 2, (b.y1 + b.y2) / 2, (b.z1 + b.z2) / 2]; cam.dist = Math.max(1, Math.hypot(b.x2 - b.x1, b.y2 - b.y1, b.z2 - b.z1)) * 1.15; };
@@ -437,26 +476,38 @@ export function register(eng, app) {
       if (!drag) return;
       const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
       if (drag.b === 0 && !e.shiftKey) { cam.az = drag.az - dx * 0.01; cam.el = Math.max(-1.5699, Math.min(1.5699, drag.el + dy * 0.01)); }
-      else { const B = basis(), k = cam.dist / Math.min(W, H); cam.t = drag.t.map((v, i) => v - (B.right[i] * dx - B.up[i] * dy) * k); }
+      else { auto = false; const B = basis(), k = cam.dist / Math.min(W, H); cam.t = drag.t.map((v, i) => v - (B.right[i] * dx - B.up[i] * dy) * k); }
       draw();
     });
     cv.addEventListener('pointerup', () => { drag = null; });
-    cv.addEventListener('wheel', (e) => { e.preventDefault(); cam.dist *= Math.pow(1.0015, e.deltaY); draw(); }, { passive: false });
+    cv.addEventListener('wheel', (e) => { e.preventDefault(); auto = false; cam.dist *= Math.pow(1.0015, e.deltaY); draw(); }, { passive: false });
     const key = (e) => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
-    document.addEventListener('keydown', key, true);
-    function close() { ro.disconnect(); document.removeEventListener('keydown', key, true); root.remove(); app.ui.cmdline?.focus?.(); app.v3d = null; }
+    if (!o.dock) document.addEventListener('keydown', key, true);
+    function close() { ro.disconnect(); document.removeEventListener('keydown', key, true); root.remove(); app.ui.cmdline?.focus?.(); app.v3d = null; if (o.dock) app.view.resize?.(); }
+    // vista acoplada: se actualiza con cada cambio del dibujo
+    const sync = () => { const dd = doc(); if (dd !== d || dd.rev !== rev) { const first = dd !== d; load(); if (first || auto) fit(); draw(); } };
     function render() {
       const c2 = document.createElement('canvas'), k = 2; c2.width = W * k; c2.height = H * k;
       const keep = style.value; if (keep === 'Wireframe' || keep === 'Hidden') style.value = 'Realistic';
       draw(c2.getContext('2d'), k, W, H); style.value = keep; draw();
       c2.toBlob((b) => app.io.deliver((d.name.replace(/\.[^.]+$/, '') || 'render') + '-render.png', b, 'image/png'), 'image/png');
     }
-    app.v3d = { cam, draw, close, meshes, faces: () => meshes.reduce((a, m) => a + m.m.f.length, 0), style };
+    app.v3d = { cam, draw, close, sync, fit, dock: !!o.dock, get meshes() { return meshes; }, faces: () => meshes.reduce((a, m) => a + m.m.f.length, 0), style };
+    if (o.dock) app.view.resize?.();
     resize();
     return app.v3d;
   };
   app.view3d = viewer;
   R('3DORBIT', async () => { viewer(); }, { alias: ['3DO', 'ORBIT', '3DVIEW', 'VIEWCUBE', 'NAVVCUBE'] });
+  // vistas predefinidas (ortogonales e isométricas) sobre la vista 3D
+  const PRESETS = { Top: [-90, 89.9], Bottom: [-90, -89.9], Front: [-90, 0], Back: [90, 0], Left: [180, 0], Right: [0, 0], SWiso: [-135, 35.264], SEiso: [-45, 35.264], NEiso: [45, 35.264], NWiso: [135, 35.264] };
+  app.view3dPreset = (k) => { const p = PRESETS[k]; if (!p) return; const v = viewer({ view: { az: G.rad(p[0]), el: G.rad(p[1]) } }); Object.assign(v.cam, { az: G.rad(p[0]), el: G.rad(p[1]) }); v.draw(); };
+  R('VIEWPRESET', async (c, args) => {
+    const k = args?.k || await c.getKw('Enter an option [Top/Bottom/Front/Back/Left/Right/SWiso/SEiso/NEiso/NWiso] <SWiso>:', 'SWiso'); if (k == null) return;
+    app.view3dPreset(k);
+  }, { alias: ['VISTA3D', '3DVISTA'] });
+  for (const k of Object.keys(PRESETS)) R('VIEW' + k.toUpperCase(), (c) => eng.commands.VIEWPRESET.fn(c, { k }));
+  R('VIEW3DPANEL', async () => { const s = app.settings; if (app.v3d?.dock) { s.dock3d = false; app.v3d.close(); } else { s.dock3d = true; viewer({ dock: true }); } app.saveSettings?.(); }, { alias: ['PANEL3D'] });
   R('VSCURRENT', async (c) => {
     const k = await c.getKw(`Enter an option [2dwireframe/Wireframe/Hidden/Realistic/Shaded] <${doc().vars.VSCURRENT}>:`, doc().vars.VSCURRENT); if (k == null) return;
     const v = { '2dwireframe': '2dWireframe' }[k] || k; doc().vars.VSCURRENT = v;

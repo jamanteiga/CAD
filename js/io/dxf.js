@@ -166,7 +166,7 @@ export function readDXF(text, name = 'Dibujo.dxf') {
     const src = /^\*Paper_Space$/i.test(brName) || !brName ? paper : paperBlocks[brName] || [];
     return { name: nm, paper: L.w > 400 ? 'A3' : 'A4', w: L.w, h: L.h, ents: noVp1(src) };
   });
-  // datos de WebCAD y objetos de AutoCAD (grupos, propiedades)
+  // datos de WebCAD y objetos estándar DXF (grupos, propiedades)
   readObjects(doc, objs);
   for (const [nm, x] of Object.entries(blockExtra)) if (doc.blocks[nm]) { Object.assign(doc.blocks[nm], x); doc.blocks[nm]._ver = (doc.blocks[nm]._ver || 0) + 1; }
   restoreWebcad(doc);
@@ -545,7 +545,7 @@ function hatchFrom(g, c) {
   return e;
 }
 
-// ============ ESCRITURA (AutoCAD R12 / AC1009)
+// ============ ESCRITURA (DXF R12 / AC1009)
 export function writeDXF(doc, opts = {}) {
   const out = [];
   const w = (c, v) => { out.push(String(c)); out.push(typeof v === 'number' ? fmt(v) : String(v)); };

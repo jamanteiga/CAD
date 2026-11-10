@@ -24,6 +24,7 @@ export function register(eng, app) {
     } else d = buildTemplate(id, { name: nextName() });
     app.addDoc(d);
     app.view.zoomExtents?.();
+    if (d.ext?.ws === '3d') app.ui.setWorkspace?.('3d');
     return d;
   };
   dlg().template = async () => {

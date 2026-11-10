@@ -38,7 +38,7 @@ export function textWidth(str, h, wf = 1, font = null) {
   mctx.font = `100px ${FONT}`;
   return mctx.measureText(str).width / 100 * (h / CAP) * wf;
 }
-// ---------- campos (sintaxis de AutoCAD: %<\AcVar Title>%, %<\AcVar SaveDate \f "dd/MM/yyyy">%…)
+// ---------- campos (sintaxis estándar: %<\AcVar Title>%, %<\AcVar SaveDate \f "dd/MM/yyyy">%…)
 let fieldCtx = () => ({});
 export const setFieldContext = (fn) => { fieldCtx = fn; };
 const pad = (n, k = 2) => String(n).padStart(k, '0');

@@ -11,7 +11,7 @@ const screen = (css, pct) => { if (pct >= 100) return css; const m = /rgb\((\d+)
 export const BUILTIN_STYLES = {
   'monochrome.ctb': { type: 'ctb', all: { color: '#000000' }, colors: {} },
   'grayscale.ctb': { type: 'ctb', all: { color: 'gray' }, colors: {} },
-  'acad.ctb': { type: 'ctb', all: {}, colors: {} },
+  'color.ctb': { type: 'ctb', all: {}, colors: {} },
   'Screening 50%.ctb': { type: 'ctb', all: { screen: 50 }, colors: {} },
   'monochrome.stb': { type: 'stb', styles: { Normal: {}, Monocromo: { color: '#000000' } }, layers: {}, def: 'Monocromo' },
 };

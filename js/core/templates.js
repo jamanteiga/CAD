@@ -32,9 +32,10 @@ const LAYERS = {
 export const TEMPLATES = [
   { id: 'iso-a3', name: 'ISO A3 apaisado — mm', paper: 'A3', layers: ['base'] },
   { id: 'iso-a4v', name: 'ISO A4 vertical — mm', paper: 'A4V', layers: ['base'] },
-  { id: 'iso-a2', name: 'ISO A2 — mm', paper: 'A2', layers: ['base'] },
-  { id: 'iso-a1', name: 'ISO A1 — mm', paper: 'A1', layers: ['base'] },
-  { id: 'iso-a0', name: 'ISO A0 — mm', paper: 'A0', layers: ['base'] },
+  { id: 'iso-a2', name: 'ISO A2 apaisado — mm', paper: 'A2', layers: ['base'] },
+  { id: 'iso-a1', name: 'ISO A1 apaisado — mm', paper: 'A1', layers: ['base'] },
+  { id: 'iso-a0', name: 'ISO A0 apaisado — mm', paper: 'A0', layers: ['base'] },
+  { id: 'iso-3d', name: 'Modelado 3D ISO — mm', paper: 'A3', layers: ['base'], ws3d: true },
   { id: 'hvac-a1', name: 'Climatización (HVAC) A1 — mm', paper: 'A1', layers: ['base', 'hvac'] },
   { id: 'naval-a1', name: 'Naval A1 — mm', paper: 'A1', layers: ['base', 'naval'] },
   { id: 'pid-a3', name: 'P&ID / esquemas A3 — mm', paper: 'A3', layers: ['base', 'pid'] },
@@ -94,5 +95,6 @@ export function buildTemplate(id, opts = {}) {
   for (const e of [...d.model, ...L.ents]) d.stamp(e);
   d.modified = false;
   d._template = t.id;
+  if (t.ws3d) { d.vars.VSCURRENT = 'Realistic'; d.ext.ws = '3d'; }
   return d;
 }

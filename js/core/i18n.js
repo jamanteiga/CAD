@@ -1,6 +1,6 @@
 // Idiomas de WebCAD Libre: castellano (es), galego (gl), português (pt), català (ca) e inglés (en).
 // Los comandos y opciones internos están en inglés; los mensajes se traducen al mostrarlos.
-// La línea de comandos acepta el idioma activo y el inglés; el prefijo "_" fuerza el inglés (como en AutoCAD: _LINE, _Undo).
+// La línea de comandos acepta el idioma activo y el inglés; el prefijo "_" fuerza el inglés (_LINE, _Undo).
 // Los nombres de comando en castellano, gallego, portugués y catalán se aceptan siempre.
 import * as GL from './i18n-gl.js';
 import * as PT from './lang-pt.js';
@@ -428,7 +428,7 @@ MSG_RE.push(
   [/^Handle: (.*)$/, "Identificador: $1"],
 );
 
-// ---------- nombres de comando en castellano (AutoCAD en español) -> comando interno
+// ---------- nombres de comando en castellano (nombres localizados en español) -> comando interno
 export const CMD_ES = {
   LINEA: 'LINE', POL: 'PLINE', POLILINEA: 'PLINE', CIRCULO: 'CIRCLE', ARCO: 'ARC', RECTANGULO: 'RECTANG', POLIGONO: 'POLYGON', ELIPSE: 'ELLIPSE', PUNTO: 'POINT',
   LINEAX: 'XLINE', RAYO: 'RAY', ARANDELA: 'DONUT', NUBEREV: 'REVCLOUD', COBERTURA: 'WIPEOUT', CONTORNO: 'BOUNDARY', DESPLAZA: 'MOVE', COPIA: 'COPY', GIRA: 'ROTATE',

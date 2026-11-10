@@ -454,6 +454,45 @@ ASME B16.48 no incluye este diámetro en clase {0}. | ASME B16.48 non inclúe es
 Derivación (olet) | Derivación (olet) | Branch (olet) | Derivação (olet) | Derivació (olet)
 Imagen PNG | Imaxe PNG | PNG image | Imagem PNG | Imatge PNG
 Poligonal | Poligonal | Polygonal | Poligonal | Poligonal
+Modelado 3D | Modelado 3D | 3D Modeling | Modelação 3D | Modelatge 3D
+Archivo: iso.lin | Arquivo: iso.lin | File: iso.lin | Arquivo: iso.lin | Fitxer: iso.lin
+Importar alias (.pgp) | Importar alias (.pgp) | Import aliases (.pgp) | Importar alias (.pgp) | Importar àlies (.pgp)
+Modelado 3D ISO — mm | Modelado 3D ISO — mm | 3D Modeling ISO — mm | Modelação 3D ISO — mm | Modelatge 3D ISO — mm
+Examinar plantillas... | Examinar modelos... | Browse templates... | Procurar modelos... | Examinar plantilles...
+Pirámide | Pirámide | Pyramid | Pirâmide | Piràmide
+Cuña | Cuña | Wedge | Cunha | Falca
+Toroide | Toroide | Torus | Toro | Tor
+Sólido | Sólido | Solid | Sólido | Sòlid
+Visualizar | Visualizar | Visualize | Visualizar | Visualitzar
+Primitivas | Primitivas | Primitive | Primitivas | Primitives
+Booleanas | Booleanas | Boolean | Booleanas | Booleanes
+Navegación | Navegación | Navigate | Navegação | Navegació
+Render | Render | Render | Render | Render
+Estilos visuales | Estilos visuais | Visual Styles | Estilos visuais | Estils visuals
+Vistas | Vistas | Views | Vistas | Vistes
+Coordenadas | Coordenadas | Coordinates | Coordenadas | Coordenades
+Sección | Sección | Section | Secção | Secció
+SCP | SCP | UCS | SCP | SCP
+Universal | Universal | World | Universal | Universal
+Previo | Previo | Previous | Anterior | Previ
+Superior | Superior | Top | Superior | Superior
+Inferior | Inferior | Bottom | Inferior | Inferior
+Izquierda | Esquerda | Left | Esquerda | Esquerra
+Derecha | Dereita | Right | Direita | Dreta
+Posterior | Posterior | Back | Posterior | Posterior
+Isométrica SO | Isométrica SO | SW Isometric | Isométrica SO | Isomètrica SO
+Isométrica SE | Isométrica SE | SE Isometric | Isométrica SE | Isomètrica SE
+Isométrica NE | Isométrica NE | NE Isometric | Isométrica NE | Isomètrica NE
+Isométrica NO | Isométrica NO | NW Isometric | Isométrica NO | Isomètrica NO
+Realista | Realista | Realistic | Realista | Realista
+Sombreado | Sombreado | Shaded | Sombreado | Ombrejat
+Oculto | Oculto | Hidden | Oculto | Ocult
+Estructura alámbrica | Estrutura de arames | Wireframe | Estrutura de arames | Estructura de filferro
+Estilo visual | Estilo visual | Visual Style | Estilo visual | Estil visual
+Vista 3D acoplada | Vista 3D acoplada | Docked 3D View | Vista 3D acoplada | Vista 3D acoblada
+Ventanas del modelo | Xanelas do modelo | Model Viewports | Janelas do modelo | Finestres del model
+Modelado | Modelado | Modeling | Modelação | Modelatge
+Edición de sólidos | Edición de sólidos | Solid Editing | Edição de sólidos | Edició de sòlids
 Montaje | Montaxe | Assembly | Montagem | Muntatge
 Rosca | Rosca | Thread | Rosca | Rosca
 Material | Material | Material | Material | Material
@@ -491,6 +530,11 @@ ASTM A193 B7 / A194 2H (rosca métrica) | ASTM A193 B7 / A194 2H (rosca métrica
 
 // Mensajes de petición: English | castellano | galego | português | català
 const SENT8 = `
+Specify tube radius | Precise el radio del tubo | Precise o raio do tubo | Especifique o raio do tubo | Precisa el radi del tub
+Specify other corner | Precise la otra esquina | Precise a outra esquina | Especifique o outro canto | Precisa l'altra cantonada
+Specify center point of base | Precise el punto central de la base | Precise o punto central da base | Especifique o ponto central da base | Precisa el punt central de la base
+Specify base radius | Precise el radio de la base | Precise o raio da base | Especifique o raio da base | Precisa el radi de la base
+Specify radius | Precise el radio | Precise o raio | Especifique o raio | Precisa el radi
 Enter scale | Indique la escala | Indique a escala | Indique a escala | Indiqueu l'escala
 Enter view scale | Indique la escala de la vista | Indique a escala da vista | Indique a escala da vista | Indiqueu l'escala de la vista
 Latitude | Latitud | Latitude | Latitude | Latitud
@@ -556,6 +600,11 @@ Specify a point on desired side | Indique un punto en el lado que desea conserva
 
 // Opciones: English | castellano | galego | português | català
 const KW8 = `
+SWiso | isoSO | isoSO | isoSO | isoSO
+SEiso | isoSE | isoSE | isoSE | isoSE
+NEiso | isoNE | isoNE | isoNE | isoNE
+NWiso | isoNO | isoNO | isoNO | isoNO
+Sides | Lados | Lados | Lados | Costats
 3points | 3puntos | 3puntos | 3pontos | 3punts
 Left | Izquierda | Esquerda | Esquerda | Esquerra
 Right | Derecha | Dereita | Direita | Dreta
@@ -675,6 +724,9 @@ const CMD8 = {
   MVALVE: ['VALVULA', 'VALVULA', 'VALVULA', 'VALVULA'], MVALVEGATE: ['VALVCOMPUERTA', 'VALVCOMPORTA', 'VALVCUNHA', 'VALVCOMPORTA'], MVALVEGLOBE: ['VALVGLOBO', 'VALVGLOBO', 'VALVGLOBO', 'VALVGLOBUS'], MVALVECHECK: ['VALVRETENCION', 'VALVRETENCION', 'VALVRETENCAO', 'VALVRETENCIO'],
   MVALVEBALL: ['VALVBOLA', 'VALVBOLA', 'VALVESFERA', 'VALVBOLA'], MVALVEPLUG: ['VALVMACHO', 'VALVMACHO', 'VALVMACHO', 'VALVMASCLE'], MVALVEBFLY: ['VALVMARIPOSA', 'VALVBOLBORETA', 'VALVBORBOLETA', 'VALVPAPALLONA'],
   MSTRAINER: ['FILTROY', 'FILTROY', 'FILTROY', 'FILTREY'], MSTRAINERB: ['FILTROCESTA', 'FILTROCESTA', 'FILTROCESTO', 'FILTRECISTELLA'], MSIGHTGLASS: ['MIRILLA', 'VISOR', 'VISOR', 'VISOR'],
+  WEDGE: ['CUÑA', 'CUÑA', 'CUNHA', 'FALCA'], PYRAMID: ['PIRAMIDE', 'PIRAMIDE', 'PIRAMIDE', 'PIRAMIDE'], TORUS: ['TOROIDE', 'TOROIDE', 'TORO', 'TOR'], VIEWPRESET: ['VISTAPREDEF', 'VISTAPREDEF', 'VISTAPREDEF', 'VISTAPREDEF'], VIEW3DPANEL: ['VISTA3DACOPLADA', 'VISTA3DACOPLADA', 'VISTA3DACOPLADA', 'VISTA3DACOBLADA'],
+  VIEWTOP: ['VISTASUP', 'VISTASUP', 'VISTASUP', 'VISTASUP'], VIEWBOTTOM: ['VISTAINF', 'VISTAINF', 'VISTAINF', 'VISTAINF'], VIEWFRONT: ['VISTAFRONTAL', 'VISTAFRONTAL', 'VISTAFRONTAL', 'VISTAFRONTAL'], VIEWBACK: ['VISTAPOST', 'VISTAPOST', 'VISTAPOST', 'VISTAPOST'], VIEWLEFT: ['VISTAIZQ', 'VISTAESQ', 'VISTAESQ', 'VISTAESQ'], VIEWRIGHT: ['VISTADER', 'VISTADER', 'VISTADIR', 'VISTADRE'],
+  VIEWSWISO: ['ISOSO', 'ISOSO', 'ISOSO', 'ISOSO'], VIEWSEISO: ['ISOSE', 'ISOSE', 'ISOSE', 'ISOSE'], VIEWNEISO: ['ISONE', 'ISONE', 'ISONE', 'ISONE'], VIEWNWISO: ['ISONO', 'ISONO', 'ISONO', 'ISONO'],
   MGASKET: ['JUNTA', 'XUNTA', 'JUNTA', 'JUNTA'], MBOLTING: ['TORNILLERIA', 'PARAFUSARIA', 'PARAFUSARIA', 'CARGOLS'], MFASTENER: ['TORNILLO', 'PARAFUSO', 'PARAFUSO', 'CARGOL'], MFORGED: ['FORJADO', 'FORXADO', 'FORJADO', 'FORJAT'], MOLET: ['OLET', 'OLET', 'OLET', 'OLET'], MSTUBEND: ['PORTABRIDAS', 'PORTABRIDAS', 'PORTAFLANGE', 'PORTABRIDES'],
   MORIFICE: ['BRIDAORIFICIO', 'BRIDAORIFICIO', 'FLANGEORIFICIO', 'BRIDAORIFICI'], MBLIND: ['FIGURAOCHO', 'FIGURAOITO', 'FIGURAOITO', 'FIGURAVUIT'],
   MFLANGESW: ['BRIDASW', 'BRIDASW', 'FLANGESW', 'BRIDASW'], MFLANGETHD: ['BRIDAROSCADA', 'BRIDAROSCADA', 'FLANGEROSCADA', 'BRIDAROSCADA'], MFLANGELJ: ['BRIDALOCA', 'BRIDATOLA', 'FLANGESOLTA', 'BRIDABOJA'], MFLANGEEN: ['BRIDAEN1092', 'BRIDAEN1092', 'FLANGEEN1092', 'BRIDAEN1092'], MFLANGE47: ['BRIDAB1647', 'BRIDAB1647', 'FLANGEB1647', 'BRIDAB1647'],

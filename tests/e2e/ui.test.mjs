@@ -25,7 +25,7 @@ export default async (page, t) => {
 
   // selector de tema siempre visible en la barra de título
   for (const [i, th] of [[2, 'dark'], [1, 'mid'], [0, 'light']]) { await page.click(`#themeSw button >> nth=${i}`); t.eq(await page.evaluate(() => document.documentElement.dataset.ui), th, `barra de título: tema ${th}`); }
-  // sin referencias a AutoCAD y con los comandos en castellano en pantalla
+  // sin referencias a marcas comerciales y con los comandos en castellano en pantalla
   await page.evaluate(() => { webcad.ui.setLang('es'); webcad.settings.menuBar = true; webcad.settings.screenMenu = true; webcad.ui.applyLayout(); });
   const vis = await page.evaluate(async () => {
     const out = [];
@@ -33,7 +33,7 @@ export default async (page, t) => {
     for (const tab of [...document.querySelectorAll('.rt')]) { tab.click(); await new Promise((r) => setTimeout(r, 30)); grab(); }
     return out.join('\n');
   });
-  t.ok(!/autocad|autodesk|\bR12\b/i.test(vis), 'ninguna referencia visual a AutoCAD');
+  t.ok(!/autocad|autodesk|\bR12\b/i.test(vis), 'ninguna referencia visual a marcas comerciales');
   t.ok(!/\((PLINE|CIRCLE|MTEXT|DIMLINEAR|LAYER|INSERT|MATCHPROP|EATTEDIT|BLOCK|PROPERTIES|PLOT|DUCT)\)/.test(vis) && /\(POL\)/.test(vis), 'la cinta muestra los comandos en castellano');
   await page.click('#cmdin'); await type('_circle', '500,500', '2');
   t.ok(await page.evaluate(() => /Comando: CIRCULO/.test(document.getElementById('cmdhist').textContent)), 'un comando escrito en inglés se muestra en castellano');

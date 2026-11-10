@@ -1,4 +1,4 @@
-// Cinta de opciones (Ribbon) estilo AutoCAD 2023
+// Cinta de opciones (Ribbon) con la disposición de referencia
 import { h } from './dom.js';
 import { icon } from './icons.js';
 import { aciCss, colorName, lwName, LWEIGHTS, HATCHES } from '../core/tables.js';
@@ -178,6 +178,43 @@ const HATCH_TAB = { id: 'hatch', name: 'Creación de sombreado', ctx: true, pane
   { name: 'Cerrar', items: [B('', 'Cerrar Creación de sombreado', 'bclose')] },
 ] };
 
+// ---- espacio de trabajo Modelado 3D: fichas propias + las comunes
+export const TABS3D = [];
+{
+  const tab = (id) => TABS.find((t) => t.id === id), panel = (id, name) => tab(id).panels.find((p) => p.name === name);
+  const PRIMS = [S('BOX', 'Prisma rectangular', 'box'), S('CYLINDER', 'Cilindro', 'cylinder'), S('CONE', 'Cono', 'cone'), S('SPHERE', 'Esfera', 'sphere'), S('PYRAMID', 'Pirámide', 'pyramid'), S('WEDGE', 'Cuña', 'wedge'), S('TORUS', 'Toroide', 'torus')];
+  const VIEWS = [S('VIEWTOP', 'Superior', 'viewtop'), S('VIEWBOTTOM', 'Inferior', 'viewtop'), S('VIEWLEFT', 'Izquierda', 'viewside'), S('VIEWRIGHT', 'Derecha', 'viewside'), S('VIEWFRONT', 'Frontal', 'viewside'), S('VIEWBACK', 'Posterior', 'viewside'), S('VIEWSWISO', 'Isométrica SO', 'viewiso'), S('VIEWSEISO', 'Isométrica SE', 'viewiso'), S('VIEWNEISO', 'Isométrica NE', 'viewiso'), S('VIEWNWISO', 'Isométrica NO', 'viewiso')];
+  const VSTY = [S('VSCURRENT _Realistic', 'Realista', 'visualstyle'), S('VSCURRENT _Shaded', 'Sombreado', 'visualstyle'), S('VSCURRENT _Hidden', 'Oculto', 'visualstyle'), S('VSCURRENT _Wireframe', 'Estructura alámbrica', 'visualstyle')];
+  TABS3D.push(
+    { id: 'home3d', name: 'Inicio', panels: [
+      { name: 'Modelado', items: [B('BOX', 'Prisma rectangular', 'box', PRIMS), B('EXTRUDE', 'Extrusión', 'extrude'), B('REVOLVE', 'Revolución', 'revolve'), COL(S('PYRAMID', 'Pirámide', 'pyramid'), S('WEDGE', 'Cuña', 'wedge'), S('TORUS', 'Toroide', 'torus'))] },
+      { name: 'Edición de sólidos', items: [COL(S('UNION', 'Unión', 'union'), S('SUBTRACT', 'Diferencia', 'subtract'), S('INTERSECT', 'Intersección', 'intersect')), COL(S('FILLETEDGE', 'Empalmar arista', 'fillet'), S('CHAMFEREDGE', 'Achaflanar arista', 'chamfer'), S('SLICE', 'Corte', 'subtract'))] },
+      { name: 'Dibujo', items: [COL(S('LINE', 'Línea', 'line'), S('PLINE', 'Polilínea', 'pline'), S('CIRCLE', 'Círculo', 'circle')), COL(S('RECTANG', 'Rectángulo', 'rect'), S('POLYGON', 'Polígono', 'polygon'), S('REGION', 'Región', 'region'))] },
+      { name: 'Modificar', items: [COL(S('MOVE', 'Desplazar', 'move'), S('COPY', 'Copiar', 'copy'), S('ROTATE', 'Girar', 'rotate')), COL(S('MIRROR', 'Simetría', 'mirror'), S('ARRAY', 'Matriz', 'array'), S('ERASE', 'Borrar', 'erase'))] },
+      { name: 'Sección', items: [B('SECTION', 'Sección', 'region'), COL(S('SLICE', 'Corte', 'subtract'), S('VIEWBASE', 'Vista base', 'view'))] },
+      { name: 'Coordenadas', items: [B('UCS', 'SCP', 'ucs'), COL(S('UCS _World', 'Universal', 'ucs'), S('UCS _Previous', 'Previo', 'ucs'))] },
+      { name: 'Vista', items: [B('VIEWSWISO', 'Vistas', 'viewiso', VIEWS), B('VSCURRENT _Realistic', 'Estilo visual', 'visualstyle', VSTY), COL(S('3DORBIT', 'Órbita 3D', 'orbit'), S('VIEW3DPANEL', 'Vista 3D acoplada', 'dock3d'), S('VPORTS', 'Ventanas del modelo', 'vports'))] },
+      { name: 'Capas', items: [B('LAYER', 'Propiedades de capa', 'layers'), { combo: 'layer' }] },
+    ] },
+    { id: 'solid', name: 'Sólido', panels: [
+      { name: 'Primitivas', items: [B('BOX', 'Prisma rectangular', 'box', PRIMS), COL(S('CYLINDER', 'Cilindro', 'cylinder'), S('CONE', 'Cono', 'cone'), S('SPHERE', 'Esfera', 'sphere')), COL(S('PYRAMID', 'Pirámide', 'pyramid'), S('WEDGE', 'Cuña', 'wedge'), S('TORUS', 'Toroide', 'torus'))] },
+      { name: 'Sólido', items: [B('EXTRUDE', 'Extrusión', 'extrude'), B('REVOLVE', 'Revolución', 'revolve')] },
+      { name: 'Booleanas', items: [B('UNION', 'Unión', 'union'), B('SUBTRACT', 'Diferencia', 'subtract'), B('INTERSECT', 'Intersección', 'intersect')] },
+      { name: 'Edición de sólidos', items: [COL(S('FILLETEDGE', 'Empalmar arista', 'fillet'), S('CHAMFEREDGE', 'Achaflanar arista', 'chamfer'), S('SLICE', 'Corte', 'subtract')), COL(S('CONVTOMESH', 'Convertir en malla', 'box'), S('MASSPROP', 'Propiedades físicas', 'list'))] },
+    ] },
+    { id: 'visualize', name: 'Visualizar', panels: [
+      { name: 'Vistas', items: [B('VIEWTOP', 'Superior', 'viewtop'), B('VIEWFRONT', 'Frontal', 'viewside'), B('VIEWSWISO', 'Isométrica SO', 'viewiso', VIEWS)] },
+      { name: 'Estilos visuales', items: [B('VSCURRENT _Realistic', 'Realista', 'visualstyle', VSTY), COL(S('VSCURRENT _Shaded', 'Sombreado', 'visualstyle'), S('VSCURRENT _Hidden', 'Oculto', 'visualstyle'), S('VSCURRENT _Wireframe', 'Estructura alámbrica', 'visualstyle'))] },
+      { name: 'Navegación', items: [B('3DORBIT', 'Órbita 3D', 'orbit'), B('VIEW3DPANEL', 'Vista 3D acoplada', 'dock3d')] },
+      { name: 'Render', items: [B('RENDER', 'Renderizar', 'render')] },
+      { name: 'Ventanas gráficas del modelo', items: [B('VPORTS', 'Ventanas del modelo', 'vports')] },
+    ] },
+  );
+  panel('3d', 'Modelado').items.push(COL(S('PYRAMID', 'Pirámide', 'pyramid'), S('WEDGE', 'Cuña', 'wedge'), S('TORUS', 'Toroide', 'torus')));
+  panel('3d', 'Vista').items.push(B('VIEWSWISO', 'Vistas', 'viewiso', VIEWS), B('VIEW3DPANEL', 'Vista 3D acoplada', 'dock3d'));
+  for (const id of ['insert', 'annotate', 'view', 'manage', 'output', 'collab', 'express', 'mech']) if (tab(id)) TABS3D.push(tab(id));
+}
+
 export function createRibbon(app) {
   const root = document.getElementById('ribbon'), tabsEl = document.getElementById('rtabs'), panels = document.getElementById('rpanels');
   const rb = { active: 'home', ctx: new Set() };
@@ -307,11 +344,11 @@ export function createRibbon(app) {
   rb.render = () => {
     closeDrop();
     tabsEl.innerHTML = ''; panels.innerHTML = '';
-    const tabs = [...TABS];
+    const tabs = [...(app.settings.ws3d ? TABS3D : TABS)];
     if (app.doc.active !== 'Model' && !app.doc.blockEdit) tabs.push(LAYOUT_TAB);
     if (rb.ctx.has('bedit')) tabs.push(BEDIT_TAB);
     if (rb.ctx.has('hatch')) tabs.push(HATCH_TAB);
-    if (!tabs.find((t) => t.id === rb.active)) rb.active = 'home';
+    if (!tabs.find((t) => t.id === rb.active)) rb.active = app.settings.ws3d ? 'home3d' : 'home';
     for (const t of tabs) tabsEl.append(h('div', { class: 'rt' + (t.id === rb.active ? ' on' : '') + (t.ctx ? ' ctx' : ''), text: t.name, onclick: () => { if (rb.active === t.id && !t.ctx) { root.classList.toggle('min'); return; } root.classList.remove('min'); rb.active = t.id; rb.render(); } }));
     tabsEl.append(h('span', { class: 'rmin', title: 'Minimizar cinta', text: '▭', onclick: () => root.classList.toggle('min') }));
     const tab = tabs.find((t) => t.id === rb.active);
@@ -333,8 +370,8 @@ export function createRibbon(app) {
     }
   };
   rb.showContext = (id) => { rb.ctx.add(id); rb.active = id; root.classList.remove('min'); rb.render(); };
-  rb.hideContext = (id) => { rb.ctx.delete(id); if (rb.active === id) rb.active = 'home'; rb.render(); };
-  rb.refreshCombos = () => { if (['home'].includes(rb.active) || rb.ctx.size) rb.render(); };
+  rb.hideContext = (id) => { rb.ctx.delete(id); if (rb.active === id) rb.active = app.settings.ws3d ? 'home3d' : 'home'; rb.render(); };
+  rb.refreshCombos = () => { if (['home', 'home3d'].includes(rb.active) || rb.ctx.size) rb.render(); };
   return rb;
 }
 export { LAYOUT_TAB, BEDIT_TAB, HATCH_TAB };

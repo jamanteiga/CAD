@@ -1,4 +1,4 @@
-// ActiveX / Visual LISP: modelo de objetos de AutoCAD para rutinas vla-* y vlax-*.
+// ActiveX / Visual LISP: modelo de objetos ActiveX para rutinas vla-* y vlax-*.
 // Application → Document → colecciones (Layers, Blocks, Layouts, TextStyles, Linetypes, DimStyles, Groups,
 // Dictionaries, SelectionSets…) → objetos y entidades con sus propiedades y métodos.
 // vla-get-X / vla-put-X / vla-Metodo se resuelven dinámicamente, de modo que cualquier propiedad o método
@@ -574,7 +574,7 @@ export function installActiveX(L_, K) {
         case 'GETPAPERSIZE': { if (a[0] instanceof K.Sym) L_.set(a[0], R(l ? l.w : 420)); if (a[1] instanceof K.Sym) L_.set(a[1], R(l ? l.h : 297)); return null; }
         case 'GETCANONICALMEDIANAMES': return new Arr(VT.STRING, ['ISO_full_bleed_A4_(297.00_x_210.00_MM)', 'ISO_full_bleed_A3_(420.00_x_297.00_MM)', 'ISO_full_bleed_A2_(594.00_x_420.00_MM)', 'ISO_full_bleed_A1_(841.00_x_594.00_MM)', 'ISO_full_bleed_A0_(1189.00_x_841.00_MM)']);
         case 'GETPLOTDEVICENAMES': return new Arr(VT.STRING, ['DWG To PDF.pc3', 'PublishToWeb PNG.pc3']);
-        case 'GETPLOTSTYLETABLENAMES': return new Arr(VT.STRING, ['monochrome.ctb', 'acad.ctb', 'Grayscale.ctb']);
+        case 'GETPLOTSTYLETABLENAMES': return new Arr(VT.STRING, ['monochrome.ctb', 'color.ctb', 'Grayscale.ctb']);
         case 'COPYFROM': case 'REFRESHPLOTDEVICEINFO': case 'SETCUSTOMSCALE': case 'SETWINDOWTOPLOT': return null;
       }
       return undefined;
@@ -1548,14 +1548,14 @@ export function installActiveX(L_, K) {
   // conjunto de selección activo (vla-get-activeselectionset)
   const origSsget = L_.g.get('SSGET');
   L_.g.set('SSGET', async function (a) { const r = await origSsget.call(this, a); L_._activeSS = r instanceof PickSet ? r.items.slice() : []; return r; });
-  // getpropertyvalue / setpropertyvalue (AutoCAD 2012+)
+  // getpropertyvalue / setpropertyvalue (versión 2012+)
   const objArg = (x) => (x instanceof Ename ? (x.e ? ent(x.e) : null) : x);
   def('getpropertyvalue', (a) => { const o = objArg(a[0]); const v = out(getProp(o, pname(a[1]).replace(/[/]/g, ''), a.slice(2)), true); return v; });
   def('setpropertyvalue', (a) => { const o = objArg(a[0]); putProp(o, pname(a[1]).replace(/[/]/g, ''), a[a.length - 1], a.slice(2, -1)); return null; });
   def('ispropertyreadonly', (a) => { const o = objArg(a[0]); const P = pname(a[1]).toUpperCase(); try { getProp(o, P); } catch (_) { throw new LispError('ADS request error'); } return canWrite(o, P) ? 0 : 1; });
   def('dumpallproperties', function (a) { const o = objArg(a[0]); return L_.g.get('VLAX-DUMP-OBJECT').call(this, [o]); });
 
-  // ---------- vlax-curve-*: parámetros como en AutoCAD (línea: distancia; arco/círculo/elipse: ángulo; polilínea: índice de vértice)
+  // ---------- vlax-curve-*: parámetros estándar (línea: distancia; arco/círculo/elipse: ángulo; polilínea: índice de vértice)
   const curveOf = (o) => {
     const e = o instanceof Ename ? o.e : o instanceof VlaObj && o.kind === 'ent' ? o.ref : null;
     if (!e) throw new LispError('bad argument type: curve ' + show(o));

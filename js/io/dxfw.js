@@ -1,7 +1,7 @@
 // Escritura DXF 2000 (AC1015) con identificadores, propietarios y diccionarios.
 // Lo que DXF no puede representar (bloques dinámicos, cotas editables, tablas, restricciones, grupos, propiedades)
 // viaja como XDATA/XRECORD de la aplicación WEBCAD, de modo que WebCAD recupera el dibujo sin pérdidas
-// y AutoCAD ve la geometría equivalente.
+// y otros programas ven la geometría equivalente.
 import * as G from '../core/geom.js';
 import * as E from '../core/entities.js';
 import { HATCHES } from '../core/tables.js';
@@ -15,7 +15,7 @@ import { lispToPairs, pairsToLisp } from './xdutil.js';
 export function writeDXF2000(doc, opts = {}) {
   const out = [];
   const fmt = (v) => (Number.isInteger(v) ? String(v) : String(+(+v).toFixed(12)));
-  // ANSI_1252: lo representable va como byte; el resto como \\U+XXXX (lo entiende cualquier AutoCAD)
+  // ANSI_1252: lo representable va como byte; el resto como \\U+XXXX (lo entiende cualquier lector DXF)
   const esc = (t) => String(t ?? '').replace(/[^\x00-\x7f\xa0-\xff€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ]/g, (ch) => '\\U+' + ch.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0'));
   const w = (c, v) => { out.push(String(c).padStart(3, ' ')); out.push(typeof v === 'number' ? fmt(v) : esc(v)); };
   const P = (code, p, z = true) => { w(code, p?.x ?? 0); w(code + 10, p?.y ?? 0); if (z) w(code + 20, 0); };
@@ -401,7 +401,7 @@ export function writeDXF2000(doc, opts = {}) {
     w(0, 'GROUP'); w(5, groupH[n]); w(330, fixed.groupDict); w(100, 'AcDbGroup'); w(300, g.desc || ''); w(70, 0); w(71, g.selectable === false ? 0 : 1);
     for (const hid of g.hids || []) if (used.has(hid)) w(340, hid);
   }
-  // propiedades del dibujo (formato DWGPROPS de AutoCAD)
+  // propiedades del dibujo (formato DWGPROPS estándar)
   const pr = doc.props || {};
   w(0, 'XRECORD'); w(5, propsH); w(330, fixed.root); w(100, 'AcDbXrecord'); w(280, 1);
   w(1, 'DWGPROPS COOKIE'); w(2, pr.title || ''); w(3, pr.subject || ''); w(4, pr.author || ''); w(6, pr.comments || ''); w(7, pr.keywords || ''); w(8, pr.lastSavedBy || ''); w(9, pr.revision || '');
@@ -478,7 +478,7 @@ export function catmullToBspline(pts, closed) {
   knots.push(segs, segs, segs, segs);
   return { cps, knots };
 }
-// definición del patrón en coordenadas del dibujo (escalada y girada), como la guarda AutoCAD
+// definición del patrón en coordenadas del dibujo (escalada y girada), como la guardan los DXF de referencia
 function hatchDefs(e) {
   if (e.pdef?.length && e.pdef[0].world) return e.pdef.map((d) => ({ a: d.a, o: d.o, d: d.d, dash: d.dash || [] }));
   const pat = HATCHES[(e.pattern || 'ANSI31').toUpperCase()] || HATCHES.ANSI31;

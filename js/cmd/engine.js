@@ -47,7 +47,7 @@ export class Engine {
   }
   resolveName(raw) {
     let n = norm(String(raw).trim());
-    const en = /^[.\-+]*_/.test(n); // prefijo _ = nombre inglés (como en AutoCAD localizado)
+    const en = /^[.\-+]*_/.test(n); // prefijo _ = nombre inglés (como en los CAD localizados)
     n = n.replace(/^[_.\-+]+/, (m) => (m.includes('-') ? '-' : ''));
     const dash = n.startsWith('-');
     let base = dash ? n.slice(1) : n;

@@ -2,6 +2,7 @@
 import { h } from './dom.js';
 import { LOGO } from './icons.js';
 import { LANGS } from '../core/i18n.js';
+import { TEMPLATES } from '../core/templates.js';
 
 const FILE_ICON = '<svg viewBox="0 0 46 56" aria-hidden="true"><path d="M2 2h28l14 14v38H2z" fill="#c9d1dc"/><path d="M30 2v14h14" fill="#9aa5b4"/></svg>';
 const GRID_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z" fill="currentColor"/></svg>';
@@ -38,7 +39,7 @@ export function createStart(app) {
       h('div', { class: 'side' },
         h('div', { class: 'brand', html: LOGO }, h('h1', {}, 'WebCAD', h('i', { text: 'Libre' }))),
         split('Abrir...', () => app.io.open(), [['Abrir...', () => { S.hide(); app.io.open(); }], ['Abrir de la nube...', () => { S.hide(); app.cmd.run('CLOUDOPEN'); }], ['Dibujo de ejemplo', () => { S.hide(); app.ui.loadSample(); }]]),
-        split('Nuevo', () => app.io.newDrawing(true), [['Nuevo', () => { S.hide(); app.io.newDrawing(true); }], ['Nuevo desde plantilla...', () => { S.hide(); app.cmd.run('NEW'); }]]),
+        split('Nuevo', () => app.io.newDrawing(true), [['Nuevo', () => { S.hide(); app.io.newDrawing(true); }], null, ...TEMPLATES.map((t) => [t.name, () => { S.hide(); app.io.newFromTemplate(t.id); }, t.ws3d ? 'box' : 'template']), null, ['Examinar plantillas...', () => { S.hide(); app.cmd.run('NEW'); }]]),
         h('nav', {}, nav('recent', 'Recientes'), nav('learn', 'Aprendizaje')),
         h('div', { class: 'prefs' },
           h('label', { text: 'Tema' }), seg(app.settings.theme, [['light', 'Claro'], ['mid', 'Intermedio'], ['dark', 'Oscuro']], (v) => app.ui.setTheme(v)),

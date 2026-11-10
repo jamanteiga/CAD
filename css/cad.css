@@ -7,7 +7,7 @@
 @font-face { font-family: "Spline Sans Mono"; font-weight: 500 700; font-display: swap; src: url(../vendor/fonts/spline-sans-mono-latin-500-normal.woff2) format("woff2"); }
 /* Identidad WebCAD Libre: acento verde azulado atlántico; temas oscuro (pizarra), intermedio (granito) y claro (papel vegetal) */
 :root {
-  /* oscuro: gris azulado como el entorno de referencia (AutoCAD 2023) */
+  /* oscuro: gris azulado como el entorno de referencia (versión 2023) */
   --bg-app: #212830; --bg-title: #222933; --bg-ribbon: #3b4453; --bg-panel: #3b4453; --bg-panel-label: #3b4453;
   --bg-tabs: #222933; --bg-input: #2b3340; --bg-hover: #4f5a6c; --bg-active: #1f6ab0; --bg-dialog: #3b4453; --bg-field: #2b3340;
   --fg: #eef1f5; --fg-dim: #c3cad5; --fg-faint: #8a95a5; --border: #222933; --border-soft: #56616f;
@@ -381,3 +381,7 @@ body.tablet .dlg .btn, body.tablet .dlg .fld { min-height: 38px; font-size: 15px
 body.tablet #host .cv-over { touch-action: none; }
 .helpcard h3 { font-size: 16px; }
 .helpcard p { margin: 6px 0; line-height: 1.45; }
+/* espacio de trabajo Modelado 3D: vista 3D acoplada junto a la planta */
+.v3d.dock { position: relative; inset: auto; flex: 0 0 46%; min-width: 0; z-index: 1; border-left: 2px solid var(--line, #8894a3); }
+.v3d.dock .v3d-hint { display: none; }
+@media (max-width: 700px) { .v3d.dock { flex-basis: 50%; } }

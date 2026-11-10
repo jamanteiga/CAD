@@ -1,5 +1,5 @@
 // ActiveX / Visual LISP: modelo de objetos, safearrays, colecciones, diccionarios, xdata, reactores…
-// Cada caso es una rutina como las que circulan para AutoCAD, sin adaptar.
+// Cada caso es una rutina como las que circulan en Internet, sin adaptar.
 import fs from 'fs';
 import { ready, typer } from './helpers.mjs';
 export default async (page, t) => {

@@ -1,4 +1,4 @@
-// Menús AutoCAD R12: menús desplegables (POP), menú de pantalla lateral (SCREEN), cargador .MNU y macros
+// Menús clásicos: menús desplegables (POP), menú de pantalla lateral (SCREEN), cargador .MNU y macros
 import { h } from './dom.js';
 import { saveSettings } from '../app.js';
 
@@ -460,7 +460,7 @@ export function parseMNU(text) {
   return res;
 }
 
-// ejecuta una macro de menú estilo AutoCAD (^C, ;, espacio, \ pausa, $S=)
+// ejecuta una macro de menú clásica (^C, ;, espacio, \ pausa, $S=)
 export function createMacroRunner(app) {
   return async function runMacro(macro) {
     if (macro == null) return;
