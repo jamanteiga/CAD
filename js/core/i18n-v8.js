@@ -455,6 +455,7 @@ Derivación (olet) | Derivación (olet) | Branch (olet) | Derivação (olet) | D
 Imagen PNG | Imaxe PNG | PNG image | Imagem PNG | Imatge PNG
 Poligonal | Poligonal | Polygonal | Poligonal | Poligonal
 Modelado 3D | Modelado 3D | 3D Modeling | Modelação 3D | Modelatge 3D
+Hay una versión nueva de WebCAD Libre: guarde y recargue la página (F5) para usarla. | Hai unha versión nova de WebCAD Libre: garde e recargue a páxina (F5) para usala. | A new version of WebCAD Libre is available: save and reload the page (F5) to use it. | Há uma nova versão do WebCAD Libre: guarde e recarregue a página (F5) para a usar. | Hi ha una versió nova de WebCAD Libre: deseu i recarregueu la pàgina (F5) per fer-la servir.
 Ratón 3D | Rato 3D | 3D Mouse | Rato 3D | Ratolí 3D
 Plano de trabajo | Plano de traballo | Work Plane | Plano de trabalho | Pla de treball
 Superior (XY) | Superior (XY) | Top (XY) | Superior (XY) | Superior (XY)

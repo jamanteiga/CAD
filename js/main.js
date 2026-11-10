@@ -193,5 +193,12 @@ app.E = E; app.G = G; // geometría y entidades (consola y pruebas)
 
 // aplicación instalable y sin conexión (no dentro de visores incrustados)
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !app.io.inArtifact() && window.top === window.self) {
-  navigator.serviceWorker.register('sw.js').catch(() => { /* sin service worker */ });
+  // al publicarse una versión nueva, el service worker se actualiza y la página se recarga una vez (si no hay cambios sin guardar)
+  const hadSW = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadSW || window._swReloaded) return; window._swReloaded = true;
+    if (app.docs.some((d) => d.modified)) app.log('Hay una versión nueva de WebCAD Libre: guarde y recargue la página (F5) para usarla.');
+    else location.reload();
+  });
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((r) => r.update()).catch(() => { /* sin service worker */ });
 }
