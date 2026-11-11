@@ -220,8 +220,8 @@ export default async (page, t) => {
   await esc(); await esc();
   await ev(() => { const d = webcad.doc; d.model.length = 0; d.add({ type: 'CIRCLE', c: { x: 50, y: 50 }, r: 3 }); d.add({ type: 'CIRCLE', c: { x: 80, y: 50 }, r: 3 }); webcad.cmd.sel = []; webcad.view.setCur({ cx: 60, cy: 50, s: 4 }); });
   const S = await ev(() => { const r = webcad.view.host.getBoundingClientRect(); return [[40, 40], [62, 40], [62, 60], [40, 60]].map(([x, y]) => { const s = webcad.view.toScreen({ x, y }); return [r.left + s.x, r.top + s.y]; }); });
-  await page.mouse.move(...S[0]); await page.mouse.down(); for (const p of [S[1], S[2], S[3]]) await page.mouse.move(...p, { steps: 6 }); await page.mouse.up();
-  t.eq(await ev(() => webcad.cmd.sel.map((e) => e.c.x)), [50], 'selección por lazo');
+  await page.keyboard.down('Control'); await page.mouse.move(...S[0]); await page.mouse.down(); for (const p of [S[1], S[2], S[3]]) await page.mouse.move(...p, { steps: 6 }); await page.mouse.up(); await page.keyboard.up('Control');
+  t.eq(await ev(() => webcad.cmd.sel.map((e) => e.c.x)), [50], 'selección por lazo (Ctrl + arrastrar)');
   await esc();
   t.eq(errs, [], 'sin errores de página (productividad)');
 

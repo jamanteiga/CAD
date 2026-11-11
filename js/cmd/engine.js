@@ -407,7 +407,8 @@ export class Engine {
   pointerMove(info) {
     const req = this.req;
     const w = this.win;
-    if (w && w.down && (info.ev?.buttons & 1) && this.doc.vars.LASSOMODE !== 0) {
+    // arrastrar con el botón pulsado = rectángulo (ventana o captura según el sentido); Ctrl + arrastrar = lazo
+    if (w && w.down && (info.ev?.buttons & 1) && this.doc.vars.LASSOMODE !== 0 && (info.ctrl || info.ev?.ctrlKey || w.lasso)) {
       const last = w.spath[w.spath.length - 1];
       if (Math.hypot(info.sx - last.x, info.sy - last.y) > 3) { w.spath.push({ x: info.sx, y: info.sy }); w.path.push({ ...info.raw }); }
       if (!w.lasso && Math.hypot(info.sx - w.sx, info.sy - w.sy) > 8) { w.lasso = true; w.crossing = info.sx < w.sx; }
@@ -511,7 +512,8 @@ export class Engine {
   }
   finishWindow(info) {
     const w = this.win; this.win = null;
-    const found = this.withGroups(this.windowSelect(w.p1, info.raw, info.raw.x < w.p1.x));
+    // ventana (izquierda → derecha, objetos enteros dentro) o captura (derecha → izquierda, objetos tocados), según la pantalla
+    const found = this.withGroups(this.windowSelect(w.p1, info.raw, info.sx != null && w.sx != null ? info.sx < w.sx : info.raw.x < w.p1.x));
     const req = this.req;
     if (req && req.kind === 'select') {
       const ok = found.filter((e) => this.selectable(e, req));
